@@ -1,0 +1,72 @@
+body {
+    font-family: Arial;
+    margin: 0px;
+}
+
+#canvas {
+    margin: 10px;
+    font-family: CourierNew;
+}
+
+#menubar {
+    padding: 0px;
+    border: 1px solid black;
+    height: 50px;
+    background: gray;
+    font-weight: bold;
+}
+
+#menu li {
+    color: white;
+    list-style-type: none;
+    padding: 0 10px 0 10px;
+}
+
+#menu > li {
+    display: inline;
+}
+
+.box {
+    background: white;
+    display: table;
+    float: left;
+    margin: 1px 10px 1px 10px;
+    margin: 1px;
+}
+
+.box.selected {
+    border: 1px solid black;
+    background: gold;
+}
+
+.selected .box {
+    background: gold;
+}
+
+.box.float {
+    border: 1px solid black;
+    box-shadow: 3px 5px 3px 2px #000;
+}
+
+.box.arg {
+    border: 1px solid gray;
+    padding: 1px 15px 1px 15px;
+    margin: 1px 10px 1px 1px;
+    color: gray;
+}
+
+.box.text {
+    padding: 1px 5px 1px 5px;
+    margin: 1px 10px 1px 1px;
+    font-weight: bold;
+}
+
+.box-text {
+    float: left;
+    margin: 1px 10px 1px 1px;
+}
+
+.box-body {
+    clear: both;
+    margin: 0 0 0 20px;
+}
