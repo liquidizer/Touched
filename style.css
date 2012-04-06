@@ -30,8 +30,7 @@ body {
     background: white;
     display: table;
     float: left;
-    margin: 1px 10px 1px 10px;
-    margin: 1px;
+    margin: 0px;
 }
 
 .box.selected {
@@ -50,23 +49,23 @@ body {
 
 .box.arg {
     border: 1px solid gray;
-    padding: 1px 15px 1px 15px;
+    padding: 0px 15px 0px 15px;
     margin: 1px 10px 1px 1px;
     color: gray;
 }
 
 .box.text {
-    padding: 1px 5px 1px 5px;
-    margin: 1px 10px 1px 1px;
+    padding: 0px 5px 0px 5px;
+    margin: 0px 10px 0px 1px;
     font-weight: bold;
 }
 
 .box-text {
     float: left;
-    margin: 1px 10px 1px 1px;
+    margin: 0px 10px 0px 1px;
 }
 
 .box-body {
     clear: both;
-    margin: 0 0 0 20px;
+    margin: 1px 0 3px 20px;
 }

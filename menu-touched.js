@@ -1,6 +1,8 @@
 var menu= [
-	   [ 'For-Each', check_istype('cmd'), menu_for_each ],
-	   [ 'Theta', check_istype('cmd'), menu_add_theta ],
+       [ 'Def', check_istype('cmd'), menu_insert_cmd('def') ],
+	   [ 'If-Else', check_istype('cmd'), menu_insert_cmd('if_else') ],
+       [ 'For-Each', check_istype('cmd'), menu_insert_cmd('for_each') ],
+	   [ 'Theta', check_istype('cmd'), menu_insert_cmd('theta') ],
 	   [ 'Rename', check_istype('ident'), menu_edit],
 	   [ 'Number', check_istype('number'), menu_edit],
 	   [ 'Range', check_istype('range'), menu_add_range],
@@ -95,7 +97,7 @@ function menu_edit_setValue(value) {
 	    selection[0].replaceWith(div);
 	    selection[0]=div;
 	} else {
-	    if (type='ident') {
+	    if (type=='ident') {
 		var oldval= selection[0].text();
 		$('.box.text')
 		    .filter( function(index, obj) { 
@@ -141,31 +143,55 @@ function menu_delete() {
     updateAll();
 }
 
-function menu_for_each() {
-    var div= elementArea();
-    div.attr('data-arg-types','ident range');
-    div.append('<div class="box-text">For Each</div>');
-    div.append(dropArea());
-    div.append('<div class="box-text">in</div>');
-    div.append(dropArea());
-    div.append(bodyArea());
-    selection[0].replaceWith(div);
-    if (div.parent().next('.box-body').size()==0)
-	div.parent().after(bodyArea());
-    selectNext(div);
-    updateAll();
-}
 
-function menu_add_theta() {
-    var div= elementArea();
-    div.attr('data-arg-types','number');
-    div.append('<div class="box-text">Theta</div>');
-    div.append(dropArea());
-    selection[0].replaceWith(div);
-    if (div.parent().next('.box-body').size()==0)
-	div.parent().after(bodyArea());
-    selectNext(div);
-    updateAll();
+function menu_insert_cmd(name) {
+    var commands= {
+        def: function() {
+            var div = elementArea();
+            div.attr('data-arg-types', 'ident exp');
+            div.append('<div class="box-text">Def</div>');
+            div.append(dropArea());
+            div.append('<div class="box-text"> &#x2190; </div>');
+            div.append(dropArea());
+            return div;
+        },
+        if_else: function() {
+            var div = elementArea();
+            div.attr('data-arg-types', 'exp');
+            div.append('<div class="box-text">If</div>');
+            div.append(dropArea());
+            div.append(bodyArea());
+            div.append('<div class="box-body"/><div class="box-text">Else</div>');
+            div.append(bodyArea());
+            return div;
+        },
+        for_each: function() {
+            var div = elementArea();
+            div.attr('data-arg-types', 'ident range');
+            div.append('<div class="box-text">For Each</div>');
+            div.append(dropArea());
+            div.append('<div class="box-text">in</div>');
+            div.append(dropArea());
+            div.append(bodyArea());
+            return div;
+        },
+        theta: function() {
+            var div = elementArea();
+            div.attr('data-arg-types', 'number');
+            div.append('<div class="box-text">Theta</div>');
+            div.append(dropArea());
+            return div;
+        }
+    }
+
+    return function() {
+        var div= commands[name]();
+        selection[0].replaceWith(div);
+        if (div.parent().next('.box-body').size()==0)
+        div.parent().after(bodyArea());
+        selectNext(div);
+        updateAll();
+    }
 }
 
 function menu_add_range() {
