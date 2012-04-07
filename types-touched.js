@@ -6,26 +6,20 @@ function inferTypes(obj, types) {
     if (!obj.attr)
 	return;
 
-    var subtypes= obj.attr('data-arg-types');
-    if (subtypes) {
-	subtypes= subtypes.split(' ');
-    }
+    var subtypes= obj.attr('data-arg-types') || '';
+    subtypes= subtypes.split(' ');
 
     obj.children().each( function() { 
 	    inferTypes($(this), subtypes); 
 	});
 
-    while (obj.length>0) {
-	if (obj.hasClass('box')) {
-	    if (obj.hasClass('arg')) {
-		if (types) {
-		    var type= types.shift();
-		    obj.attr('data-type', type);
-		} else {
-		    obj.attr('data-type', 'cmd');
-		}
-	    }
+ 	if (obj.hasClass('box')) {
+	    var type= types.shift() || 'cmd';
+        if (obj.hasClass('arg')) {
+	        obj.attr('data-type', type);
+        } else {
+            var error= (type != obj.attr('data-type'));
+            obj.toggleClass('error', error)
+        }
 	}
-	obj= obj.next();
-    }
 }

@@ -1,8 +1,8 @@
 var menu= [
-       [ 'Def', check_istype('cmd'), menu_insert_cmd('def') ],
-	   [ 'If-Else', check_istype('cmd'), menu_insert_cmd('if_else') ],
-       [ 'For-Each', check_istype('cmd'), menu_insert_cmd('for_each') ],
-	   [ 'Theta', check_istype('cmd'), menu_insert_cmd('theta') ],
+       [ 'Def', check_insert_cmd, menu_insert_cmd('def') ],
+	   [ 'If-Else', check_insert_cmd, menu_insert_cmd('if_else') ],
+       [ 'For-Each', check_insert_cmd, menu_insert_cmd('for_each') ],
+	   [ 'Theta', check_insert_cmd, menu_insert_cmd('theta') ],
 	   [ 'Rename', check_istype('ident'), menu_edit],
 	   [ 'Number', check_istype('number'), menu_edit],
 	   [ 'Range', check_istype('range'), menu_add_range],
@@ -45,6 +45,10 @@ function check_isInBody(obj) {
 
 function check_isobj(obj) {
     return !obj.hasClass('arg');
+}
+
+function check_insert_cmd(obj) {
+    return obj.attr('data-type')=='cmd' && obj.hasClass('arg');
 }
 
 function check_istype(type) {
@@ -158,7 +162,7 @@ function menu_insert_cmd(name) {
         if_else: function() {
             var div = elementArea();
             div.attr('data-arg-types', 'exp');
-            div.append('<div class="box-text">If</div>');
+            div.append('<div class="box-text">If </div>');
             div.append(dropArea());
             div.append(bodyArea());
             div.append('<div class="box-body"/><div class="box-text">Else</div>');
@@ -168,9 +172,9 @@ function menu_insert_cmd(name) {
         for_each: function() {
             var div = elementArea();
             div.attr('data-arg-types', 'ident range');
-            div.append('<div class="box-text">For Each</div>');
+            div.append('<div class="box-text">For Each </div>');
             div.append(dropArea());
-            div.append('<div class="box-text">in</div>');
+            div.append('<div class="box-text"> in </div>');
             div.append(dropArea());
             div.append(bodyArea());
             return div;
@@ -178,7 +182,7 @@ function menu_insert_cmd(name) {
         theta: function() {
             var div = elementArea();
             div.attr('data-arg-types', 'number');
-            div.append('<div class="box-text">Theta</div>');
+            div.append('<div class="box-text">Theta </div>');
             div.append(dropArea());
             return div;
         }
@@ -186,6 +190,7 @@ function menu_insert_cmd(name) {
 
     return function() {
         var div= commands[name]();
+        div.attr('data-type','cmd');
         selection[0].replaceWith(div);
         if (div.parent().next('.box-body').size()==0)
         div.parent().after(bodyArea());
