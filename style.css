@@ -75,3 +75,8 @@ body {
     clear: both;
     margin: 1px 0 3px 20px;
 }
+
+.box-else {
+    clear: both;
+    margin: 0;
+}

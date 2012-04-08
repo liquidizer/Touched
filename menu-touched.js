@@ -3,9 +3,20 @@ var menu= [
 	   [ 'If-Else', check_insert_cmd, menu_insert_cmd('if_else') ],
        [ 'For-Each', check_insert_cmd, menu_insert_cmd('for_each') ],
 	   [ 'Theta', check_insert_cmd, menu_insert_cmd('theta') ],
-	   [ 'Rename', check_istype('ident'), menu_edit],
-	   [ 'Number', check_istype('number'), menu_edit],
-	   [ 'Range', check_istype('range'), menu_add_range],
+	   [ 'Rename', check_istype('ident'), menu_edit('ident')],
+	   [ 'Number', check_istype('exp.number.const'), menu_edit('exp.number.const')],
+       [ '+', check_istype('exp.number.op'), menu_add_op('exp.number.op', '+', 'exp.number exp.number')],
+       [ '-', check_istype('exp.number.op'), menu_add_op('exp.number.op', '-', 'exp.number exp.number')],
+       [ '&#215;', check_istype('exp.number.op'), menu_add_op('exp.number.op', '&#215;', 'exp.number exp.number')],
+       [ '/', check_istype('exp.number.op'), menu_add_op('exp.number.op', '/', 'exp.number exp.number')],
+	   [ 'Range', check_istype('exp.array'), menu_add_range],
+       [ 'True', check_istype('exp.bool.const'), menu_edit('exp.bool.const','True')],
+       [ 'False', check_istype('exp.bool.const'), menu_edit('exp.bool.const','False')],
+       [ '>', check_istype('exp.bool.op'), menu_add_op('exp.bool.op', '>', 'exp.number exp.number')],
+       [ '<', check_istype('exp.bool.op'), menu_add_op('exp.bool.op', '<', 'exp.number exp.number')],
+       [ '&#x2265;', check_istype('exp.bool.op'), menu_add_op('exp.bool.op', '&#x2265;', 'exp.number exp.number')],
+       [ '&#x2264;', check_istype('exp.bool.op'), menu_add_op('exp.bool.op', '&#x2264;', 'exp.number exp.number')],
+       [ '=', check_istype('exp.bool.op'), menu_add_op('exp.bool.op', '=', 'exp.number exp.number')],
 	   [ 'After', check_isInBody, menu_add_after ],
 	   [ 'Before', check_isInBody, menu_add_before ],
 	   [ 'Copy', check_isobj, menu_copy ],
@@ -52,8 +63,9 @@ function check_insert_cmd(obj) {
 }
 
 function check_istype(type) {
+    var pattern= type_pattern(type);
     return function(obj) {
-	return obj.attr('data-type')==type;
+	    return obj.attr('data-type').match(pattern);
     }
 }
 
@@ -67,37 +79,49 @@ function menu_add_before() {
     updateAll();
 }
 
-function menu_edit() {
-    var elt= $('#menu');
-    elt.contents().remove();
+function menu_edit(type, constValue) {
+    return function() {
+        if (constValue) {
+            menu_edit_setValue(constValue, type);
+    	} else {
+            var elt= $('#menu');
+            elt.contents().remove();
+        
+            var input=$('<input type="text"/>');
+            var set_button=$('<input type="button" value="OK"/>');
+        
+            if (!selection[0].hasClass('arg'))
+        	input.attr('value',selection[0].text());
 
-    var input=$('<input type="text"/>');
-    var set_button=$('<input type="button" value="OK"/>');
+            var submit= function() { menu_edit_setValue(input[0].value, type); };
 
-    if (!selection[0].hasClass('arg'))
-	input.attr('value',selection[0].text());
+            input.keypress(function(e){
+                if(e.which == 13) submit();
+            });
 
-    set_button.click(function() {
-	    menu_edit_setValue(input[0].value);
-	    updateAll();
-	});
-
-    elt.append(input);
-    elt.append(set_button);
-    input.focus();
+            set_button.click(submit);
+        
+            elt.append(input);
+            elt.append(set_button);
+            
+            input.focus();
+    	}
+    }
 }
 
-function menu_edit_setValue(value) {
-    if (value.replace(' ','')=='') {
-	menu_delete();
+function menu_edit_setValue(value, type) {
+    value= value.replace(/^ +| +$/g,'');
+    if (value=='') {
+        if (!selection[0].hasClass('arg'))
+	        menu_delete();
+        else
+            updateAll();
     } else {
-	var type= selection[0].attr('data-type');
 	if (selection[0].hasClass('arg')) {
 	    var div= elementArea();
 	    div.attr('data-type', type);
 	    div.addClass('text');
 	    div.addClass('selected');
-	    if (type=='ident') div.attr('original','true');
 	    selection[0].replaceWith(div);
 	    selection[0]=div;
 	} else {
@@ -113,6 +137,7 @@ function menu_edit_setValue(value) {
 	}
 	selection[0].text(value);
 	selectNext(selection[0]);
+    updateAll();
     }
 }
 
@@ -143,7 +168,7 @@ function menu_delete() {
     }
     selection=[];
     if (area)
-	select(area);
+	    select(area);
     updateAll();
 }
 
@@ -161,17 +186,18 @@ function menu_insert_cmd(name) {
         },
         if_else: function() {
             var div = elementArea();
-            div.attr('data-arg-types', 'exp');
+            div.attr('data-arg-types', 'exp.bool');
             div.append('<div class="box-text">If </div>');
             div.append(dropArea());
             div.append(bodyArea());
-            div.append('<div class="box-body"/><div class="box-text">Else</div>');
-            div.append(bodyArea());
+            var div2=$('<div class="box-else"><div class="box-text">Else</div></div>');
+            div2.append(bodyArea());
+            div.append(div2);
             return div;
         },
         for_each: function() {
             var div = elementArea();
-            div.attr('data-arg-types', 'ident range');
+            div.attr('data-arg-types', 'ident exp.array');
             div.append('<div class="box-text">For Each </div>');
             div.append(dropArea());
             div.append('<div class="box-text"> in </div>');
@@ -181,7 +207,7 @@ function menu_insert_cmd(name) {
         },
         theta: function() {
             var div = elementArea();
-            div.attr('data-arg-types', 'number');
+            div.attr('data-arg-types', 'exp.number');
             div.append('<div class="box-text">Theta </div>');
             div.append(dropArea());
             return div;
@@ -201,7 +227,8 @@ function menu_insert_cmd(name) {
 
 function menu_add_range() {
     var div= elementArea();
-    div.attr('data-arg-types','number number');
+    div.attr('data-type','exp.array.range');
+    div.attr('data-arg-types','exp.number exp.number');
     div.append('<div class="box-text">[</div>');
     div.append(dropArea());
     div.append('<div class="box-text">:</div>');
@@ -210,4 +237,22 @@ function menu_add_range() {
     selection[0].replaceWith(div);
     selectNext(div);
     updateAll();
+}
+
+function menu_add_op(type, symbol, argTypes) {
+    return function() {
+        if (selection[0].hasClass('arg')) {
+            var div= elementArea();
+            div.attr('data-type', type);
+            div.attr('data-arg-types',argTypes);
+            div.append(dropArea());
+            div.append('<div class="box-text">'+symbol+'</div>');
+            div.append(dropArea());
+            selection[0].replaceWith(div);
+            selectNext(div);
+        } else {
+            selection[0].find('.box-text').html(symbol);
+        }
+        updateAll();
+    }
 }

@@ -18,8 +18,21 @@ function inferTypes(obj, types) {
         if (obj.hasClass('arg')) {
 	        obj.attr('data-type', type);
         } else {
-            var error= (type != obj.attr('data-type'));
-            obj.toggleClass('error', error)
+            var obj_type= obj.attr('data-type');
+            if (type!='ident' && obj_type=='ident') {
+                obj_type= 'var-use';
+                obj.attr('data-type', obj_type);
+            }
+            var error= !type.match(type_pattern(obj_type));
+            error= error &&! obj.hasClass('float');
+            obj.toggleClass('error', error);
         }
 	}
+}
+
+function type_pattern(type) {
+    if (type=='var-use') return (/exp.*/);
+    type= type.replace(/([a-z]+)\.(.*)/,'$1(\\.$2)?');
+    type= type.replace(/([a-z]+)\.(.*)/,'$1(\\.$2)?');
+    return new RegExp('^'+type+'$');
 }

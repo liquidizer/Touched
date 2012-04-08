@@ -3,6 +3,7 @@ var selection= [];
 $(init);
 function init() {
     $('#canvas').append(bodyArea());
+    select($('.arg'));
     updateAll();
 }
 
@@ -51,23 +52,25 @@ function unselectAll() {
 }
 
 function selectNext(obj) {
-    var isup= false;
-    while (obj.attr('id')!='canvas') {
-	if (!isup && obj.children().length>0) {
-	    obj= $(obj.children()[0]);
-	} else {
-	    if (obj.next().length>0) {
-		isup= false;
-		obj= obj.next();
-		if (obj.hasClass('arg')) {
-		    select(obj);
-		    return;
-		}
-	    } else {
-		isup= true;
-		obj= obj.parent();
-	    }
-	}
+    var isup = false;
+    while (obj.attr('id') != 'canvas') {
+        if (!isup && obj.children(':first').length > 0) {
+            obj = obj.children(':first');
+        }
+        else {
+            if (obj.next().length > 0) {
+                isup = false;
+                obj = obj.next();
+            }
+            else {
+                isup = true;
+                obj = obj.parent();
+            }
+        }
+        if (obj.hasClass('arg')) {
+            select(obj);
+            return;
+        }
     }
     unselectAll();
 }
@@ -92,11 +95,10 @@ function handleSelectionEvent(event) {
 function handleDragStartEvent(event, ui) {
     var target= $(event.target);
     if (! target.hasClass('float')) {
-	if (target.attr('original')=='true') {
+	if (target.attr('data-type')=='ident') {
 	    var clone= target.clone();
 	    clone.removeClass('selected');
 	    target.before(elementArea(clone));
-	    target.removeAttr('original')
 	} else {
 	    target.before(dropArea());
 	}
