@@ -20,38 +20,41 @@ var menu= [
 	   [ 'After', check_isInBody, menu_add_after ],
 	   [ 'Before', check_isInBody, menu_add_before ],
 	   [ 'Copy', check_isobj, menu_copy ],
+       [ 'Paste', check_canPaste, menu_paste ],
 	   [ 'Delete', check_canDelete, menu_delete ]
 	  ];
+var clipboard= null;
+
 
 function updateMenu() {
     var elt= $('#menu');
     elt.children().remove();
     for (var i in menu) {
-	var show= false
-	    for (var j in selection) {
-		if (menu[i][1](selection[j])) {
-		    show= true;
-		    break;
-		}
-	    }
-	if (show) {
-	    var li= $('<li/>');
-	    li.append(menu[i][0]);
-	    li.click(menu[i][2]);
-	    elt.append(li);
-	}
+        var show = false;
+        $('.selected').each(function(index, obj) {
+            show = show || menu[i][1]($(obj));
+        });
+        if (show) {
+            var li = $('<li/>');
+            li.append(menu[i][0]);
+            li.click(menu[i][2]);
+            elt.append(li);
+        }
     }
 }
 
 function check_canDelete(obj) {
     return check_isobj(obj) ||
-	obj.parent().hasClass('box-body') &&
-	obj.parent().parent().children('.box-body').size()>1;
+	obj.hasClass('cmd') &&
+	obj.parent().children('.box.cmd').size()>1;
+}
+
+function check_canPaste(obj) {
+    return clipboard && obj.hasClass('arg');
 }
 
 function check_isInBody(obj) {
-    return obj.parent().hasClass('box-body') &&
-	!obj.hasClass('arg');
+    return obj.hasClass('cmd') && !obj.hasClass('arg');
 }
 
 function check_isobj(obj) {
@@ -70,12 +73,12 @@ function check_istype(type) {
 }
 
 function menu_add_after() {
-    selection[0].parent().after(bodyArea());
+    $('.selected:last').after(bodyArea());
     updateAll();
 }
 
 function menu_add_before() {
-    selection[0].parent().before(bodyArea());
+    $('.selected:first').before(bodyArea());
     updateAll();
 }
 
@@ -90,8 +93,8 @@ function menu_edit(type, constValue) {
             var input=$('<input type="text"/>');
             var set_button=$('<input type="button" value="OK"/>');
         
-            if (!selection[0].hasClass('arg'))
-        	input.attr('value',selection[0].text());
+            if (!$('.selected').hasClass('arg'))
+        	input.attr('value',$('.selected').text());
 
             var submit= function() { menu_edit_setValue(input[0].value, type); };
 
@@ -110,23 +113,24 @@ function menu_edit(type, constValue) {
 }
 
 function menu_edit_setValue(value, type) {
+    var selection= $('.selected');
     value= value.replace(/^ +| +$/g,'');
     if (value=='') {
-        if (!selection[0].hasClass('arg'))
+        if (!selection.hasClass('arg'))
 	        menu_delete();
         else
             updateAll();
     } else {
-	if (selection[0].hasClass('arg')) {
+	if (selection.hasClass('arg')) {
 	    var div= elementArea();
 	    div.attr('data-type', type);
 	    div.addClass('text');
 	    div.addClass('selected');
-	    selection[0].replaceWith(div);
-	    selection[0]=div;
+	    selection.replaceWith(div);
+	    selection=div;
 	} else {
 	    if (type=='ident') {
-		var oldval= selection[0].text();
+		var oldval= selection.text();
 		$('.box.text')
 		    .filter( function(index, obj) { 
 			    return $(obj).text()==oldval; })
@@ -135,43 +139,30 @@ function menu_edit_setValue(value, type) {
 				 
 	    }
 	}
-	selection[0].text(value);
-	selectNext(selection[0]);
+	selection.text(value);
+	selectNext(selection);
     updateAll();
     }
 }
 
+function menu_paste() {
+    $('.selected').replaceWith(elementArea(clipboard.clone()));
+}
 
 function menu_copy() {
-    var copy= [];
-    for (var i in selection) {
-	copy[i]= selection[i].clone();
-	copy[i].addClass('float');
-	copy[i].removeAttr('original');
-	$('#canvas').append(elementArea(copy[i]));
-    }
-    unselectAll();
-    select(copy[0]);
+    clipboard= $('.selected').clone();
 }
 
 function menu_delete() {
-    for (var i in selection) {
-	if (!selection[i].hasClass('float') &&
-	    !selection[i].hasClass('arg')) {
-	    var area= dropArea();
-	    selection[i].before(area);
-	}
-	if (selection[i].parent().hasClass('box-body'))
-	    selection[i].parent().remove();
-	else
-	    selection[i].remove();
+    var selection = $('.selected');
+    if (!selection.hasClass('float') && !selection.hasClass('arg')) {
+        var area = dropArea();
+        selection.before(area);
     }
-    selection=[];
-    if (area)
-	    select(area);
-    updateAll();
+    selection.remove();
+    if (area) select(area);
+        updateAll();
 }
-
 
 function menu_insert_cmd(name) {
     var commands= {
@@ -217,9 +208,10 @@ function menu_insert_cmd(name) {
     return function() {
         var div= commands[name]();
         div.attr('data-type','cmd');
-        selection[0].replaceWith(div);
-        if (div.parent().next('.box-body').size()==0)
-        div.parent().after(bodyArea());
+        div.addClass('cmd');
+        $('.selected').replaceWith(div);
+        if (div.next('.box.cmd').size()==0)
+            div.after(bodyArea());
         selectNext(div);
         updateAll();
     }
@@ -234,24 +226,25 @@ function menu_add_range() {
     div.append('<div class="box-text">:</div>');
     div.append(dropArea());
     div.append('<div class="box-text">]</div>');
-    selection[0].replaceWith(div);
+    $('.selected').replaceWith(div);
     selectNext(div);
     updateAll();
 }
 
 function menu_add_op(type, symbol, argTypes) {
     return function() {
-        if (selection[0].hasClass('arg')) {
+        var selection= $('.selected');
+        if (selection.hasClass('arg')) {
             var div= elementArea();
             div.attr('data-type', type);
             div.attr('data-arg-types',argTypes);
             div.append(dropArea());
             div.append('<div class="box-text">'+symbol+'</div>');
             div.append(dropArea());
-            selection[0].replaceWith(div);
+            selection.replaceWith(div);
             selectNext(div);
         } else {
-            selection[0].find('.box-text').html(symbol);
+            selection.find('.box-text').html(symbol);
         }
         updateAll();
     }

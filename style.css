@@ -56,25 +56,26 @@ body {
 .box.arg {
     border: 1px solid gray;
     padding: 0px 15px 0px 15px;
-    margin: 1px 1px 1px 1px;
+    margin: 1px 2px 1px 2px;
     color: gray;
 }
 
 .box.text {
-    padding: 0px 5px 0px 5px;
+    padding: 0px 2px 0px 2px;
     margin: 0px 1px 0px 1px;
     font-weight: bold;
 }
 
-.box-text {
-    float: left;
-    margin: 0px 1px 0px 1px;
-}
-
-.box-body {
+.box.cmd {
     clear: both;
     margin: 1px 0 3px 20px;
 }
+
+.box-text {
+    float: left;
+    margin: 0px 2px 0px 2px;
+}
+
 
 .box-else {
     clear: both;

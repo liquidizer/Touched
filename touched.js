@@ -1,9 +1,8 @@
-var selection= [];
-
 $(init);
 function init() {
-    $('#canvas').append(bodyArea());
-    select($('.arg'));
+    var start= bodyArea();
+    $('#canvas').append(start);
+    select(start);
     updateAll();
 }
 
@@ -22,6 +21,12 @@ function elementArea(tmp) {
     return tmp;
 }
 
+function bodyArea() {
+    tmp= dropArea();
+    tmp.addClass('cmd');
+    return tmp;
+}
+
 function dropArea() {
     var tmp= $('<div class="box arg">?</div>');
     tmp.droppable({
@@ -31,24 +36,13 @@ function dropArea() {
     return tmp;
 }
 
-function bodyArea(content) {
-    var tmp=$('<div class="box-body"/>');
-    if (!content) content= dropArea();
-    tmp.append(content);
-    return tmp;
-}
-
 function select(obj) {
     unselectAll();
     obj.addClass('selected');
-    selection=[obj];
 }
 
 function unselectAll() {
-    for (var i in selection) {
-	selection[i].removeClass('selected');
-    }
-    selection=[];
+    $('.selected').removeClass('selected');
 }
 
 function selectNext(obj) {
@@ -78,21 +72,17 @@ function selectNext(obj) {
 function handleSelectionEvent(event) {
     var target= $(event.target);
     while(!target.hasClass('box'))
-	target= target.parent();
-    for (var i in selection) {
-	if (selection[i][0]==target[0]) {
+	    target= target.parent();
+    if (target.hasClass('selected')) {
 	    target.removeClass('selected');
-	    selection.splice(i,1);
-	    updateMenu();
-	    return;
-	}
+	} else {
+        select(target);
     }
-    select(target);
     updateMenu();
     return false;
 }
 
-function handleDragStartEvent(event, ui) {
+function handleDragStartEvent(event) {
     var target= $(event.target);
     if (! target.hasClass('float')) {
 	if (target.attr('data-type')=='ident') {
