@@ -14,6 +14,7 @@ function init() {
     $('body').mousemove(msMove);
     $('body').mouseup(msUp);
     $('body').mousedown(function(evt) { evt.preventDefault(); });
+    $('body').keydown(keyPress);
     var start= bodyArea();
     canvas.append(start);
     select(start.find('.arg'));
@@ -52,23 +53,25 @@ function unselectAll() {
     $('.selected').removeClass('selected');
 }
 
-function selectNext(obj) {
+function selectNext(obj, reverse) {
     var isup = false;
     while (obj.attr('id') != 'canvas') {
-        if (!isup && obj.children(':first').length > 0) {
-            obj = obj.children(':first');
+        var childs= reverse ? obj.children(':last') : obj.children(':first');
+        if (!isup && !obj.hasClass('float') && childs.length > 0) {
+            obj= childs;
         }
         else {
-            if (obj.next().length > 0) {
+            var next= reverse ? obj.prev() : obj.next();
+            if (next.length > 0) {
                 isup = false;
-                obj = obj.next();
+                obj= next;
             }
             else {
                 isup = true;
                 obj = obj.parent();
             }
         }
-        if (obj.hasClass('arg')) {
+        if (reverse ^ !isup && obj.hasClass('box')) {
             select(obj);
             return;
         }
@@ -76,6 +79,28 @@ function selectNext(obj) {
     unselectAll();
 }
 
+
+function keyPress(evt) {
+    if (evt.which==9 || evt.which==40) {
+        evt.preventDefault();
+        var selection= $('.selected');
+        if (selection.size()>0)
+            selectNext(selection);
+        else
+            select($('.box:first'));
+        updateMenu();
+    }
+    else if (evt.which==38) {
+        evt.preventDefault();
+        var selection= $('.selected');
+        if (selection.size()>0)
+            selectNext(selection, true);
+        else
+            select($('.box:last'));
+        updateMenu();
+    }
+
+}
 
 // msDown is called whenever the mouse button is pressed anywhere on the root document.
 function msDown (evt) {
