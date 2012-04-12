@@ -122,7 +122,7 @@ function msMove(evt) {
                         hand.before(dropArea());
                     }
                     hand.addClass('float');
-                    $('canvas').append(hand);
+                    $('#canvas').append(hand);
                     updateAll();
                 }
                 hand.css('pointer-events','none');
