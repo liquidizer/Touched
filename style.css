@@ -9,9 +9,11 @@ body {
 }
 
 #menubar {
+    position: fixed;
     padding: 0px;
     border: 1px solid black;
     height: 50px;
+    width: 100%;
     background: gray;
     font-weight: bold;
 }

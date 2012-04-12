@@ -8,8 +8,6 @@ var startOffset;
 var hasMoved= false;
 var unselect= false;
 
-console.log('START');
-
 $(init);
 function init() {
     var canvas= $('#canvas');
@@ -134,7 +132,6 @@ function msMove(evt) {
             if (hasMoved) {
                 var arg= $(evt.target);
                 if (arg.hasClass('arg') && !arg.parents().is(hand)) {
-                    console.log('DROP');
                     arg.replaceWith(hand);
                     hand.removeClass('float');
                     updateAll();
