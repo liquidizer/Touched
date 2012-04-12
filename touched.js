@@ -14,6 +14,8 @@ function init() {
     $('body').mousemove(msMove);
     $('body').mouseup(msUp);
     $('body').mousedown(function(evt) { evt.preventDefault(); });
+    $('body').attr('ontouchmove','msMove(event)');
+    $('body').attr('ontouchend','msUp(event)');
     $('body').keydown(keyPress);
     var start= bodyArea();
     canvas.append(start);
@@ -28,7 +30,8 @@ function updateAll() {
 
 function elementArea(tmp) {
     if (!tmp) tmp= $('<div class="box"/>');
-    tmp.attr('onmousedown','msDown(evt)');
+    tmp.attr('onmousedown','msDown(event)');
+    tmp.attr('ontouchstart','msDown(event)');
     return tmp;
 }
 
@@ -40,7 +43,8 @@ function bodyArea() {
 
 function dropArea() {
     var tmp= $('<div class="box arg">?</div>');
-    tmp.attr('onmousedown','msDown(evt)');
+    tmp.attr('onmousedown','msDown(event)');
+    tmp.attr('ontouchstart','msDown(event)');
     return tmp;
 }
 
@@ -103,9 +107,10 @@ function keyPress(evt) {
 }
 
 // msDown is called whenever the mouse button is pressed anywhere on the root document.
-function msDown (evt) {
-    evt.preventDefault();
+function msDown (event) {
+    evt= translateTouch(event);
     if (hand==null && evt.target!=null) {
+        event.preventDefault();
         // find signaling object
         var grabbed= $(evt.target);
     	while (!grabbed.hasClass('box')) {
@@ -125,9 +130,10 @@ function msDown (evt) {
     }
 }
 
-function msMove(evt) {
-    evt.preventDefault();
+function msMove(event) {
+    evt= translateTouch(event);
     if (hand) {
+        event.preventDefault();
         var dx= evt.clientX - startPos[0];
         var dy= evt.clientY - startPos[1];
         if (hasMoved || Math.abs(dx)+Math.abs(dy)>20) {
@@ -185,5 +191,19 @@ function msUp (evt) {
         hand= null;
     }
     return false;
+}
+
+// Translate events that come from touch devices
+function translateTouch(evt) {
+    if (evt.touches!=undefined) {
+        var evt2= {};
+    	evt2.clientX= evt.touches[0].clientX;
+    	evt2.clientY= evt.touches[0].clientY;
+    	evt2.target= document.elementFromPoint(evt2.clientX, evt2.clientY);
+    	evt2.isTouch= true;
+    	return evt2;
+    }
+    evt.preventDefault();
+    return evt;
 }
 
