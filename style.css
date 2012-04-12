@@ -27,6 +27,7 @@ body {
 }
 
 .box {
+    position: static;
     background: white;
     display: table;
     float: left;
@@ -43,6 +44,7 @@ body {
 }
 
 .box.float {
+    position: absolute;
     border: 1px solid black;
     box-shadow: 3px 5px 3px 2px #000;
 }
@@ -66,7 +68,7 @@ body {
     font-weight: bold;
 }
 
-.box.cmd {
+.box-body > .box {
     clear: both;
     margin: 1px 0 3px 20px;
 }
