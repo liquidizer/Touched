@@ -16,12 +16,16 @@ body {
     width: 100%;
     background: gray;
     font-weight: bold;
+    z-index: 100;
 }
 
 #menu li {
     color: white;
+    background-color: gray;
     list-style-type: none;
-    padding: 0 10px 0 10px;
+    padding: 1px 10px 1px 10px;
+    margin: 1px;
+    position: relative;
 }
 
 #menu li.disabled {
@@ -30,6 +34,14 @@ body {
 
 #menu > li {
     display: inline;
+}
+
+#menu .popup {
+    position: absolute;
+    background-color: black;
+    margin: 1px;
+    padding: 1px;
+    left: 10px;
 }
 
 .box {
