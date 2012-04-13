@@ -75,7 +75,7 @@ function selectNext(obj, reverse) {
                 obj = obj.parent();
             }
         }
-        if (reverse ^ !isup && obj.hasClass('box')) {
+        if (!isup && obj.hasClass('box')) {
             select(obj);
             return;
         }

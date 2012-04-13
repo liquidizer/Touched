@@ -24,6 +24,10 @@ body {
     padding: 0 10px 0 10px;
 }
 
+#menu li.disabled {
+    color: lightgray;
+}
+
 #menu > li {
     display: inline;
 }
