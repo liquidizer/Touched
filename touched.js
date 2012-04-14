@@ -108,7 +108,7 @@ function keyPress(evt) {
 
 // msDown is called whenever the mouse button is pressed anywhere on the root document.
 function msDown (event) {
-    evt= translateTouch(event);
+    var evt= translateTouch(event);
     if (hand==null && evt.target!=null) {
         event.preventDefault();
         // find signaling object
@@ -119,9 +119,11 @@ function msDown (event) {
 	    }
 	    hand= grabbed;
         unselect= hand.hasClass('selected');
-        select(hand);
-        updateMenu();
-
+        if (!unselect) {
+            select(hand);
+            updateMenu();
+        }
+        
 	    // store mouse position. Will be updated when mouse moves.
         startPos= [evt.clientX, evt.clientY];
 
@@ -131,7 +133,7 @@ function msDown (event) {
 }
 
 function msMove(event) {
-    evt= translateTouch(event);
+    var evt= translateTouch(event);
     if (hand) {
         event.preventDefault();
         var dx= evt.clientX - startPos[0];
@@ -168,6 +170,7 @@ function msMove(event) {
                     updateAll();
                     startPos= [evt.clientX, evt.clientY];
                     hasMoved= false;
+                    unselect= false;
                 }
             }
             if (hasMoved) {
