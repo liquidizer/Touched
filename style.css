@@ -83,7 +83,7 @@ body {
     clear: both;
 }
 .box.Column > .box {
-    margin: 0 0 0 20px;
+    margin: 2px 0 2px 20px;
 }
 .box.Row > .box {
     margin: 0 10px 0 10px;
