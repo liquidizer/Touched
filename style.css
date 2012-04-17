@@ -79,6 +79,16 @@ body {
     color: gray;
 }
 
+.box.Column > div {
+    clear: both;
+}
+.box.Column > .box {
+    margin: 0 0 0 20px;
+}
+.box.Row > .box {
+    margin: 0 10px 0 10px;
+}
+
 .box.text {
     padding: 0px 2px 0px 2px;
     margin: 0px 1px 0px 1px;
