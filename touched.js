@@ -85,7 +85,9 @@ function selectNext(obj, reverse) {
 
 
 function keyPress(evt) {
-    if (evt.which==9 || evt.which==40) {
+    if (evt.which==9 || evt.which==13)
+        if (submitMenu) submitMenu();
+    if (evt.which==9 || evt.which==13|| evt.which==40) {
         evt.preventDefault();
         var selection= $('.selected');
         if (selection.size()>0)
