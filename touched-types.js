@@ -47,6 +47,19 @@ function inferTypes(obj, types, priority) {
 	}
 }
 
+function showTypes() {
+    if ($('.showType').length>0) {
+        $('.showType').remove();
+    } else {
+        $('.box').each( function(i, obj) {
+            var type=$(obj).attr('data-type');
+            if (type) {
+                $(obj).prepend('<span class="showType">'+type+': </span>');
+            }
+        });
+    }
+}
+
 function type_isa(obj, type) {
     if (!obj.attr('data-type')) return false;
     if (type[0]=='>')

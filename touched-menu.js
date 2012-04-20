@@ -15,16 +15,16 @@ var menu= [
            menu_add_op('÷', 'exp.number.op', '@exp.number ÷ @exp.number', 130)
        ]],
        [ 'Bool', check_menuType('exp.bool'), [
-           [ 'True', check_istype('exp.bool.const'), menu_edit('exp.bool.const', 'True')],
-           [ 'False', check_istype('exp.bool.const'), menu_edit('exp.bool.const', 'False')],
-           menu_add_op('>', 'exp.bool.nop.2', '@exp.number &gt; @exp.number', 50),
-           menu_add_op('<', 'exp.bool.nop.2', '@exp.number &lt; @exp.number', 50),
-           menu_add_op('≥', 'exp.bool.nop.2', '@exp.number ≥ @exp.number', 50),
-           menu_add_op('≤', 'exp.bool.nop.2', '@exp.number ≤ @exp.number', 50),
-           menu_add_op('=', 'exp.bool.nop.2', '@exp.number = @exp.number', 50),
-           menu_add_op('⋁ Or', 'exp.bool.bop.2', '@exp.bool ⋁ @exp.bool', 20),
-           menu_add_op('∧ And', 'exp.bool.bop.2', '@exp.bool ∧ @exp.bool', 30),
-           menu_add_op('¬ Not', 'exp.bool.bop.1', '¬@exp.bool', 40)
+           menu_add_op('True', 'exp.bool.const', 'True'),
+           menu_add_op('False', 'exp.bool.const', 'False'),
+           menu_add_op('>', 'exp.bool.n2', '@exp.number &gt; @exp.number', 50),
+           menu_add_op('<', 'exp.bool.n2', '@exp.number &lt; @exp.number', 50),
+           menu_add_op('≥', 'exp.bool.n2', '@exp.number ≥ @exp.number', 50),
+           menu_add_op('≤', 'exp.bool.n2', '@exp.number ≤ @exp.number', 50),
+           menu_add_op('=', 'exp.bool.e2', '@exp = @exp', 50),
+           menu_add_op('⋁ Or', 'exp.bool.b2', '@exp.bool ⋁ @exp.bool', 20),
+           menu_add_op('∧ And', 'exp.bool.b2', '@exp.bool ∧ @exp.bool', 30),
+           menu_add_op('¬ Not', 'exp.bool.b1', '¬@exp.bool', 40)
        ]],
        [ 'List', check_menuType('exp.list'), [
            menu_add_op('Row', 'exp.list.list', '[@exp]'),
@@ -33,13 +33,19 @@ var menu= [
            menu_add_op('⊕ Concat', 'exp.list.func.2', '@exp.list ⊕ @exp.list') 
        ]],
        [ 'f(#)', check_menuType('exp.number.func'), [
-           menu_add_op('Min', 'exp.number.func.2','min(@exp.number, @exp.number)'),
-           menu_add_op('Max', 'exp.number.func.2', 'max(@exp.number, @exp.number)'),
-           menu_add_op('Abs', 'exp.number.func.1', 'abs(@exp.number)'),
-           menu_add_op('Exp', 'exp.number.func.1', 'exp(@exp.number)'),
-           menu_add_op('Log', 'exp.number.func.1', 'log(@exp.number)'),
-           menu_add_op('Sqrt', 'exp.number.func.1', '√(@exp.number)'),
-           menu_add_op('Pow', 'exp.number.func.2', 'pow(@exp.number, @exp.number)')
+           menu_add_op('Abs', 'exp.number.func.n1', 'abs(@exp.number)'),
+           menu_add_op('Min', 'exp.number.func.n2','min(@exp.number, @exp.number)'),
+           menu_add_op('Max', 'exp.number.func.n2', 'max(@exp.number, @exp.number)'),
+           menu_add_op('Exp', 'exp.number.func.n1', 'exp(@exp.number)'),
+           menu_add_op('Log', 'exp.number.func.n1', 'log(@exp.number)'),
+           menu_add_op('Sqrt', 'exp.number.func.n1', '√(@exp.number)'),
+           menu_add_op('Pow', 'exp.number.func.n2', 'pow(@exp.number, @exp.number)'),
+           menu_add_op('Length', 'exp.number.func.l1', 'length(@exp.list)'),
+           menu_add_op('Sum', 'exp.number.func.l1', 'sum(@exp.list)')
+       ]],
+       [ '.Methods', check_menuType('exp.meth'), [
+           menu_add_op('[] Element', 'exp.meth.elt','@exp [@exp.number]'),
+           menu_add_op('.Field', 'exp.meth.field','@exp . @text')
        ]],
        [ 'Before', check_isInBody, menu_add_before ],
 	   [ 'After', check_isInBody, menu_add_after ],
@@ -99,16 +105,21 @@ function makeMenuEntry(name, submenu, state) {
 function showVars(li) {
     var popup= li.find('>.popup');
     if (popup.length==0) {
+        var has={};
         popup= $('<ul class="popup"/>');
         $('.box').filter(function() {
             return $(this).attr('data-type')=='ident';
         }).each(function() {
-            var subli= $('<li/>');
-            subli.text($(this).text());
-            subli.click(function() {
-                menu_edit_setValue($(this).text(),'var-use');
-            });
-            popup.append(subli);
+            var varName= $(this).text();
+            if (!has[varName]) {
+                has[varName]= true;
+                var subli= $('<li/>');
+                subli.text(varName);
+                subli.click(function() {
+                    menu_edit_setValue(varName,'var-use');
+                });
+                popup.append(subli);
+            }
         });
         li.append(popup);
     } else {
@@ -156,7 +167,7 @@ function check_hasVars(type) {
     }
 }
 
-function check_menuType(type) {
+function check_menuType(type, inlineType) {
     return function(obj) {
         var objType= obj.attr('data-type');
         var isSup= type_isSuper(type, objType);
@@ -164,7 +175,7 @@ function check_menuType(type) {
         var isObj= !obj.hasClass('arg');
         return {
             show: isObj && isSup || !isObj && isSub,
-            inline: isSup,
+            inline: isSup
         };
     }
 }
@@ -278,7 +289,7 @@ function menu_insert_cmd(name) {
             div.attr('data-arg-types', 'ident exp');
             div.append('<div class="box-text">Def</div>');
             div.append(dropArea());
-            div.append('<div class="box-text"> &#x2190; </div>');
+            div.append('<div class="box-text"> ← </div>');
             div.append(dropArea());
             return div;
         },
@@ -298,7 +309,7 @@ function menu_insert_cmd(name) {
             div.attr('data-arg-types', 'ident exp.list cmd');
             div.append('<div class="box-text">Loop </div>');
             div.append(dropArea());
-            div.append('<div class="box-text"> in </div>');
+            div.append('<div class="box-text"> ← </div>');
             div.append(dropArea());
             div.append(bodyArea());
             return div;
@@ -346,7 +357,7 @@ function menu_add_op(name, type, pattern, priority) {
                 if (type=='exp.list.list')
                     div.append(oldArgs);
             } else {
-                div.append('<div class="box-text op">'+args[i]+'</div>');
+                div.append('<div class="box-text">'+args[i]+'</div>');
             }
         }
         if (type=='exp.list.list')
@@ -355,7 +366,7 @@ function menu_add_op(name, type, pattern, priority) {
         div.attr('data-name', name);
         div.attr('data-arg-types',argTypes);
         div.attr('data-priority', priority);
-        var proceed= selection.hasClass('arg');
+        var proceed= pattern.match(/@/) && selection.hasClass('arg');
         selection.replaceWith(div);
         if (proceed) selectNext(div); else select(div);
         updateAll();

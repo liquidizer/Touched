@@ -41,6 +41,15 @@ body {
     margin: 1px;
     padding: 1px;
     left: 10px;
+    width: 100px;
+}
+
+.showType {
+    float: left;
+    vertical-align:top;
+    font-size: 8pt;
+    color: black;
+    background-color: lime;
 }
 
 .box {

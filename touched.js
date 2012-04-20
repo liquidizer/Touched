@@ -105,7 +105,9 @@ function keyPress(evt) {
             select($('.box:last'));
         updateMenu();
     }
-
+    else if(evt.which==89) {
+        showTypes();
+    }
 }
 
 // msDown is called whenever the mouse button is pressed anywhere on the root document.
