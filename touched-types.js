@@ -37,9 +37,13 @@ function inferTypes(obj, types, priority) {
 	        obj.attr('data-type', type);
         } else {
             var obj_type= obj.attr('data-type');
-            if (type!='ident' && obj_type=='ident') {
-                obj_type= 'var-use';
-                obj.attr('data-type', obj_type);
+            if (type!='ident') {
+                if (obj_type=='ident') {
+                    obj_type= 'var-use';
+                    obj.attr('data-type', obj_type);
+                } 
+            } else if (obj_type=='exp.meth.elt') {
+                type= obj_type;                    
             }
             var error= !type_isSuper(type, obj_type);
             obj.toggleClass('error', error);
