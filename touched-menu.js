@@ -96,25 +96,25 @@ function expandTemplate(template, item) {
 	    item.append(dropArea(sec.attr('type'), sec.attr('name')));
 	} else if (sec.is('GROUP')) {
 	    var div= $('<div/>');
-	    if (!!sec.attr('class'))
-		div.addClass(sec.attr('class'));
+	    div.addClass(sec.attr('class'));
+	    div.attr('data-repeat', sec.attr('repeat'));
 	    item.append(div);
 	    expandTemplate(sec, div);
 	} else {
 	    var text= sec.text().replace(/^\s+|\s+$/g,'');
-	    if (!!text) {
-		var box=$('<div class="box-text">');
-		box.text(text);
-		item.append(box);
-	    }
+	    if (!!text) item.append(textArea(text));
 	}
     });
 }
 
+function getContainer(obj) {
+    if (obj.hasClass('arg')) return obj;
+    return obj.parent();
+}
+
 function check_canDelete(obj) {
-    return !obj.hasClass('arg')
-	|| obj.attr('data-type')=='cmd' && obj.parent().children('.box').size()>1
-    || obj.parent().attr('data-type')=='exp.list.list';
+    return obj.hasClass('box') || 
+	getContainer(obj).parent().attr('data-repeat')=='*';
 }
 
 function check_canPaste(obj) {
@@ -122,16 +122,12 @@ function check_canPaste(obj) {
 }
 
 function check_isInBody(obj) {
-    return !obj.hasClass('arg') && obj.parent().hasClass('box-body') ||
-            type_isa(obj.parent(), '>exp.list.list');
+    var o= getContainer(obj);
+    return o.hasClass('arg') && o.parent().attr('data-repeat')=='*';
 }
 
 function check_canCopy(obj) {
     return !obj.hasClass('arg');
-}
-
-function check_insert_cmd(obj) {
-    return obj.attr('data-type')=='cmd' && obj.hasClass('arg');
 }
 
 function check_menuType(type, inlineType) {
@@ -148,16 +144,20 @@ function check_menuType(type, inlineType) {
 }
 
 function menu_add_after() {
-    var div= dropArea();
-    $('.selected:last').after(div);
-    select(div);
+    var selection= $('.selected:last');
+    if (!selection.hasClass('arg')) selection=selection.parent();
+    selection.after(dropArea(selection.attr('data-type'), 
+			     selection.attr('data-name')));
+    select(selection.next());
     updateAll();
 }
 
 function menu_add_before() {
-    var div= dropArea();
-    $('.selected:first').before(div);
-    select(div);
+    var selection= $('.selected:first');
+    if (!selection.hasClass('arg')) selection=selection.parent();
+    selection.before(dropArea(selection.attr('data-type'), 
+			      selection.attr('data-name')));
+    select(selection.prev());
     updateAll();
 }
 
@@ -241,6 +241,7 @@ function menu_copy() {
 function menu_delete() {
     menu_copy();
     var selection = $('.selected');
+    selectNext(selection)
     var parent= selection.parent();
     releaseBox(selection);
     if (parent.hasClass('arg')) {

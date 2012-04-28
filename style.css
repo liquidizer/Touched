@@ -99,3 +99,8 @@ body {
     float: left;
     margin: 0px 2px 0px 2px;
 }
+
+.box-body > .arg {
+    clear: both;
+    margin: 2px 1px 2px 20px;
+}

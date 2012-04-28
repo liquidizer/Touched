@@ -6,17 +6,16 @@
     </group>
   </item>
 
-  <item name="XML/Tag" type="xml.node">
-    &lt;<arg type="text" name="tag" class="arg-bold"/>&gt;
-    <group name="Attributes" repeat="*">
-      <arg type="xml.attr" name="attrib"/>
-    </group>
-    <group name="Children" repreat="*" class="box-body">
-      <arg type="xml.node" name="node"/>
+  <item name="XML/Tag" type="xml.node.elt">
+    &lt;
+    <arg type="text" name="tag" class="arg-bold"/>
+    &gt;
+    <group name="Children" repeat="*" class="box-body">
+      <arg type="xml.node" name="child"/>
     </group>
   </item>
 
-  <item name="XML/Attribute" type="xml.attr">
+  <item name="XML/Attribute" type="xml.node.attr">
     <arg type="text" name="attrib"/>
     =<arg type="exp.string" name="value"/>
   </item>

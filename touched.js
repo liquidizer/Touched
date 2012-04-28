@@ -30,15 +30,20 @@ function updateAll() {
     updateMenu();
 }
 
-function elementArea(tmp) {
-    if (!tmp) tmp= $('<div class="box"/>');
+function elementArea() {
+    return $('<div class="box element"/>');
+}
+
+function textArea(text) {
+    var tmp=$('<div class="box-text">');
+    tmp.text(text);
     tmp.attr('onmousedown','msDown(event)');
     tmp.attr('ontouchstart','msDown(event)');
     return tmp;
 }
 
 function dropArea(type, name) {
-    var tmp= $('<div class="box arg">?</div>');
+    var tmp= $('<div class="box arg"/>');
     tmp.attr('data-name', name);
     tmp.attr('data-type', type);
     tmp.attr('onmousedown','msDown(event)');
@@ -157,7 +162,7 @@ function msMove(event) {
         var dy= evt.clientY - startPos[1];
         if (hasMoved || Math.abs(dx)+Math.abs(dy)>20) {
             if (!hasMoved) {
-                while (!hand.hasClass('box') || hand.hasClass('arg')) {
+                while (!hand.hasClass('element')) {
                     if (hand.attr('id')=='canvas') return;
                     hand = hand.parent();
                 }
