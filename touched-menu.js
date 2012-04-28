@@ -44,6 +44,17 @@ function updateMenu() {
     var bar= $('#menu');
     bar.children().remove();
     fillMenu(grammarMenu, bar);
+    var selection=$('.selected');
+    if (selection.length>0) {
+	for (var i in editMenu) {
+	    if (editMenu[i][1](selection)) {
+		var li= $('<li/>');
+		li.text(editMenu[i][0]);
+		li.click(editMenu[i][2]);
+		bar.append(li);
+	    }
+	}
+    }
 }
 
 function fillMenu(menu, parent) {
@@ -72,17 +83,32 @@ function menuEntry(name, submenu) {
 function insertItem(template) {
     var selection= $('.selected');
     var item= elementArea();
-    selection.replaceWith(item);
+    expandTemplate(template, item);
+    insertBox(selection, item);
+    selectNext(item);
+    updateMenu();
+}
+
+function expandTemplate(template, item) {
     template.contents().each(function(i, sec) {
-	if (sec.nodeName=='ARG')
-	    item.append(dropArea());
-	else {
-	    var text= $(sec).text().replace(/^\s+|\s+$/g,'');
-	    if (!!text)
-		item.append('<div class="box-text">'+text+'</div>');
+	sec= $(sec);
+	if (sec.is('ARG')) {
+	    item.append(dropArea(sec.attr('type'), sec.attr('name')));
+	} else if (sec.is('GROUP')) {
+	    var div= $('<div/>');
+	    if (!!sec.attr('class'))
+		div.addClass(sec.attr('class'));
+	    item.append(div);
+	    expandTemplate(sec, div);
+	} else {
+	    var text= sec.text().replace(/^\s+|\s+$/g,'');
+	    if (!!text) {
+		var box=$('<div class="box-text">');
+		box.text(text);
+		item.append(box);
+	    }
 	}
     });
-    updateMenu();
 }
 
 function check_canDelete(obj) {
@@ -92,7 +118,7 @@ function check_canDelete(obj) {
 }
 
 function check_canPaste(obj) {
-    return clipboard && obj.hasClass('arg');
+    return clipboard && obj.hasClass('arg') && obj.hasClass('box');
 }
 
 function check_isInBody(obj) {
@@ -201,24 +227,25 @@ function menu_edit_setValue(type, value) {
 }
 
 function menu_paste() {
-    $('.selected').replaceWith(clipboard.clone());
+    var clone= clipboard.clone();
+    insertBox($('.selected'), clone);
+    select(clone);
     updateAll();
 }
 
 function menu_copy() {
     clipboard= $('.selected').clone();
-    clipboard.removeClass('float');
     if (clipboard.hasClass('arg')) clipboard= null;
 }
 
 function menu_delete() {
     menu_copy();
     var selection = $('.selected');
-    if (!selection.hasClass('float') && !selection.hasClass('arg')) {
-        var area = dropArea();
-        selection.before(area);
+    var parent= selection.parent();
+    releaseBox(selection);
+    if (parent.hasClass('arg')) {
+	select(parent);
     }
-    if (area) select(area); else selectNext(selection);
-    selection.remove();
     updateAll();
 }
+

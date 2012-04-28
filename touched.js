@@ -17,15 +17,16 @@ function init() {
     $('body').attr('ontouchmove','msMove(event)');
     $('body').attr('ontouchend','msUp(event)');
     $('body').keydown(keyPress);
-    var start= bodyArea();
+    var start= $('<div class="box-body"/>');
+    start.append(dropArea('xml','start'));
     canvas.append(start);
-    select(start.find('.arg'));
+    select(canvas.find('.arg'));
     initMenu();
     updateAll();
 }
 
 function updateAll() {
-    updateTypes();
+    //updateTypes();
     updateMenu();
 }
 
@@ -36,17 +37,29 @@ function elementArea(tmp) {
     return tmp;
 }
 
-function bodyArea() {
-    var div= $('<div class="box-body"/>');
-    div.append(dropArea());
-    return div;
-}
-
-function dropArea() {
+function dropArea(type, name) {
     var tmp= $('<div class="box arg">?</div>');
+    tmp.attr('data-name', name);
+    tmp.attr('data-type', type);
     tmp.attr('onmousedown','msDown(event)');
     tmp.attr('ontouchstart','msDown(event)');
+    tmp.text(name);
     return tmp;
+}
+
+function releaseBox(box) {
+    var parent= box.parent();
+    if (parent.hasClass('arg')) {
+	parent.addClass('box');
+	parent.text(parent.attr('data-name'));
+    }
+    box.remove();
+}
+
+function insertBox(arg, item) {
+    arg.removeClass('box');
+    item.removeClass('float');
+    arg.contents().replaceWith(item);
 }
 
 function select(obj) {
@@ -83,7 +96,6 @@ function selectNext(obj, reverse) {
     }
     unselectAll();
 }
-
 
 function keyPress(evt) {
     if (evt.which==9 || evt.which==13)
@@ -157,7 +169,7 @@ function msMove(event) {
                         hand.before(clone);
                     }
                     else {
-                        hand.before(dropArea());
+			releaseBox(hand);
                     }
                     hand.addClass('float');
                     $('#canvas').append(hand);
@@ -169,9 +181,8 @@ function msMove(event) {
 
             if (hasMoved) {
                 var arg= $(evt.target);
-                if (arg.hasClass('arg') && !arg.parents().is(hand)) {
-                    arg.replaceWith(hand);
-                    hand.removeClass('float');
+                if (arg.hasClass('box') && arg.hasClass('arg') && !arg.parents().is(hand)) {
+		    insertBox(arg, hand);
                     updateAll();
                     startPos= [evt.clientX, evt.clientY];
                     hasMoved= false;

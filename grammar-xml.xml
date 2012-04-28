@@ -1,15 +1,18 @@
 <grammar>
   <item name="XML/Document" type="xml.doc" new="Generic XML Document">
-    <arg type="xml.node" name="root-node"/>
+    &lt;?xml version='1.0'?&gt;
+    <group name="Root" repeat="1">
+      <arg type="xml.node" name="root-node"/>
+    </group>
   </item>
 
   <item name="XML/Tag" type="xml.node">
-    <arg type="text" name="tag" class="arg-bold"/>
+    &lt;<arg type="text" name="tag" class="arg-bold"/>&gt;
     <group name="Attributes" repeat="*">
       <arg type="xml.attr" name="attrib"/>
     </group>
-    <group name="Children" repreat="*">
-      <arg type="xml.node" name="node" class="arg-body"/>
+    <group name="Children" repreat="*" class="box-body">
+      <arg type="xml.node" name="node"/>
     </group>
   </item>
 
