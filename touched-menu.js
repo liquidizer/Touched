@@ -1,10 +1,11 @@
-var menu= [
+var grammarMenu= {};
+var editMenu= [
         [ 'Before', check_isInBody, menu_add_before ],
         [ 'After', check_isInBody, menu_add_after ],
         [ 'Copy', check_canCopy, menu_copy ],
         [ 'Paste', check_canPaste, menu_paste ],
         [ 'Cut', check_canDelete, menu_delete ]
-    ];
+];
 
 var clipboard= null;
 var submitMenu= null;
@@ -16,32 +17,73 @@ function initMenu() {
 
 // load a grammar file
 function loadGrammarFile(url) {
-    console.log('retrieving: '+url);
   var request= new XMLHttpRequest();
   request.onreadystatechange= function() {
-      if (request.readyState==4) {
-          initGrammar($(request.responseText));
-          var parser= new DOMParser();
-          var content= parser.parseFromString(request.responseText,'text/xml');
-          initGrammar(content);
-      }
+      if (request.readyState==4) initGrammar($(request.responseText));
   };
   request.open("GET", encodeURI(url), true);
   request.send(null);
 }
 
 function initGrammar(content) {
-    $(content).find('element').each(function (x) {
-        console.log('name='+$(x).attr('name'));
+    $(content).find('item').each(function (i, item) {
+	var name= $(item).attr('name').match(/[^\/]+/g);
+	var curMenu= grammarMenu;
+	while (name[0]) {
+	    var sec= name.shift();
+	    if (!curMenu[sec]) curMenu[sec]= {};
+	    curMenu= curMenu[sec]
+	}
+	curMenu.template= $(item);
     });
+    updateMenu();
 }
 
 function updateMenu() {
     submitMenu= undefined;
-    var elt= $('#menu');
-    elt.children().remove();
+    var bar= $('#menu');
+    bar.children().remove();
+    fillMenu(grammarMenu, bar);
 }
 
+function fillMenu(menu, parent) {
+    for (var name in menu) {
+	parent.append(menuEntry(name, menu[name]));
+    }
+}
+
+function menuEntry(name, submenu) {
+    var li= $('<li/>');
+    li.text(name);
+    li.click(function() {
+	var pop= li.find('.popup');
+	if (pop.length>0) pop.remove();
+	else {
+	    if (submenu.template) insertItem(submenu.template)
+	    else
+		fillMenu(submenu,
+			 li.append('<ul/>').find(':last').addClass('popup'));
+	}
+	return false;
+    });
+    return li;
+}
+
+function insertItem(template) {
+    var selection= $('.selected');
+    var item= elementArea();
+    selection.replaceWith(item);
+    template.contents().each(function(i, sec) {
+	if (sec.nodeName=='ARG')
+	    item.append(dropArea());
+	else {
+	    var text= $(sec).text().replace(/^\s+|\s+$/g,'');
+	    if (!!text)
+		item.append('<div class="box-text">'+text+'</div>');
+	}
+    });
+    updateMenu();
+}
 
 function check_canDelete(obj) {
     return !obj.hasClass('arg')

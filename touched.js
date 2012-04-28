@@ -21,7 +21,7 @@ function init() {
     canvas.append(start);
     select(start.find('.arg'));
     initMenu();
- //   updateAll();
+    updateAll();
 }
 
 function updateAll() {
