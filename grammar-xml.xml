@@ -1,0 +1,20 @@
+<grammar>
+  <element name="XML/Document" type="xml.doc" new="Generic XML Document">
+    <arg type="xml.node" name="root-node"/>
+  </element>
+
+  <element name="XML/Tag" type="xml.node">
+    <arg type="text" name="tag" class="arg-bold"/>
+    <group name="Attributes" repeat="*">
+      <arg type="xml.attr" name="attrib"/>
+    </group>
+    <group name="Children" repreat="*">
+      <arg type="xml.node" name="node" class="arg-body"/>
+    </group>
+  </element>
+
+  <element name="XML/Attribute" type="xml.attr">
+    <arg type="text" name="attrib"/>
+    =<arg type="exp.string" name="value"/>
+  </element>
+</grammar>

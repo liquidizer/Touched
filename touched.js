@@ -20,7 +20,8 @@ function init() {
     var start= bodyArea();
     canvas.append(start);
     select(start.find('.arg'));
-    updateAll();
+    initMenu();
+ //   updateAll();
 }
 
 function updateAll() {

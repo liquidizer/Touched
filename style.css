@@ -88,34 +88,13 @@ body {
     color: gray;
 }
 
-.box.Column > div {
-    clear: both;
-}
-.box.Column > .box {
-    margin: 2px 0 2px 20px;
-}
-.box.Row > .box {
-    margin: 0 10px 0 10px;
-}
-
 .box.text {
     padding: 0px 2px 0px 2px;
     margin: 0px 1px 0px 1px;
     font-weight: bold;
 }
 
-.box-body > .box {
-    clear: both;
-    margin: 1px 0 3px 20px;
-}
-
 .box-text {
     float: left;
     margin: 0px 2px 0px 2px;
-}
-
-
-.box-else {
-    clear: both;
-    margin: 0;
 }
