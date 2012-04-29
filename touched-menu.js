@@ -1,10 +1,11 @@
 var grammarMenu= {};
 var editMenu= [
-        [ 'Before', check_isInBody, menu_add_before ],
-        [ 'After', check_isInBody, menu_add_after ],
-        [ 'Copy', check_canCopy, menu_copy ],
-        [ 'Paste', check_canPaste, menu_paste ],
-        [ 'Cut', check_canDelete, menu_delete ]
+    [ 'Text', check_canText, menu_edit('text') ],
+    [ 'Before', check_isInBody, menu_add_before ],
+    [ 'After', check_isInBody, menu_add_after ],
+    [ 'Copy', check_canCopy, menu_copy ],
+    [ 'Paste', check_canPaste, menu_paste ],
+    [ 'Cut', check_canDelete, menu_delete ]
 ];
 
 var clipboard= null;
@@ -35,6 +36,7 @@ function initGrammar(content) {
 	    curMenu= curMenu[sec]
 	}
 	curMenu.template= $(item);
+	curMenu._type= $(item).attr('type');
     });
     updateMenu();
 }
@@ -43,8 +45,9 @@ function updateMenu() {
     submitMenu= undefined;
     var bar= $('#menu');
     bar.children().remove();
-    fillMenu(grammarMenu, bar);
     var selection=$('.selected');
+    if (selection.is('.arg'))
+	fillMenu(selection.attr('data-type'), grammarMenu, bar);
     if (selection.length>0) {
 	for (var i in editMenu) {
 	    if (editMenu[i][1](selection)) {
@@ -57,13 +60,17 @@ function updateMenu() {
     }
 }
 
-function fillMenu(menu, parent) {
+function fillMenu(type, menu, parent) {
     for (var name in menu) {
-	parent.append(menuEntry(name, menu[name]));
+	var submenu= menu[name];
+	if (!submenu._type 
+	    || type_isSuper(type, submenu._type)) {
+	    parent.append(menuEntry(type, name, submenu));
+	}
     }
 }
 
-function menuEntry(name, submenu) {
+function menuEntry(type, name, submenu) {
     var li= $('<li/>');
     li.text(name);
     li.click(function() {
@@ -72,7 +79,7 @@ function menuEntry(name, submenu) {
 	else {
 	    if (submenu.template) insertItem(submenu.template)
 	    else
-		fillMenu(submenu,
+		fillMenu(type, submenu,
 			 li.append('<ul/>').find(':last').addClass('popup'));
 	}
 	return false;
@@ -82,11 +89,11 @@ function menuEntry(name, submenu) {
 
 function insertItem(template) {
     var selection= $('.selected');
-    var item= elementArea();
+    var item= elementArea(template.attr('type'));
     expandTemplate(template, item);
     insertBox(selection, item);
     selectNext(item);
-    updateMenu();
+    updateAll();
 }
 
 function expandTemplate(template, item) {
@@ -130,17 +137,8 @@ function check_canCopy(obj) {
     return !obj.hasClass('arg');
 }
 
-function check_menuType(type, inlineType) {
-    return function(obj) {
-        var objType= obj.attr('data-type');
-        var isSup= type_isSuper(type, objType);
-        var isSub= type_isSuper(objType, type);
-        var isObj= !obj.hasClass('arg');
-        return {
-            show: isObj && isSup || !isObj && isSub,
-            inline: isSup
-        };
-    }
+function check_canText(obj) {
+    return obj.hasClass('arg') || obj.attr('data-type')=='text';
 }
 
 function menu_add_after() {
@@ -196,33 +194,23 @@ function menu_edit(type, constValue) {
 
 function menu_edit_setValue(type, value) {
     var selection= $('.selected');
-    value= value.replace(/^ +| +$/g,'');
+    value= value.replace(/^\s+|\s+$/g,'');
     if (value=='') {
         if (!selection.hasClass('arg'))
-	        menu_delete();
+	    menu_delete();
         else
             updateAll();
     } else {
 	if (selection.hasClass('arg')) {
-	    var div= elementArea();
+	    var div= textArea();
+	    div.addClass('box');
 	    div.attr('data-type', type);
-	    div.addClass('text');
-	    div.addClass('selected');
-	    selection.replaceWith(div);
-	    selection=div;
-	} else {
-	    if (type=='ident') {
-		var oldval= selection.text();
-		$('.box.text')
-		    .filter( function(index, obj) { 
-			    return $(obj).text()==oldval; })
-		    .each( function(index, obj) {
-			    $(obj).text(value); });
-				 
-	    }
+	    insertBox(selection, div);
+	    selection= div;
 	}
 	selection.text(value);
-    updateMenu();
+	select(selection);
+	updateMenu();
     }
 }
 

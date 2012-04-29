@@ -17,28 +17,33 @@ function init() {
     $('body').attr('ontouchmove','msMove(event)');
     $('body').attr('ontouchend','msUp(event)');
     $('body').keydown(keyPress);
-    var start= $('<div class="box-body"/>');
-    start.append(dropArea('xml','start'));
-    canvas.append(start);
+    canvas.append(dropArea('xml.doc','start'));
     select(canvas.find('.arg'));
     initMenu();
     updateAll();
 }
 
 function updateAll() {
-    //updateTypes();
+    updateTypes();
     updateMenu();
 }
 
-function elementArea() {
-    return $('<div class="box element"/>');
+function makeClickable(obj) {
+    obj.attr('onmousedown','msDown(event)');
+    obj.attr('ontouchstart','msDown(event)');
+}
+
+function elementArea(type) {
+    var elt= $('<div class="box element"/>');
+    elt.attr('data-type', type);
+    makeClickable(elt);
+    return elt;
 }
 
 function textArea(text) {
     var tmp=$('<div class="box-text">');
     tmp.text(text);
-    tmp.attr('onmousedown','msDown(event)');
-    tmp.attr('ontouchstart','msDown(event)');
+    makeClickable(tmp);
     return tmp;
 }
 
@@ -46,8 +51,7 @@ function dropArea(type, name) {
     var tmp= $('<div class="box arg"/>');
     tmp.attr('data-name', name);
     tmp.attr('data-type', type);
-    tmp.attr('onmousedown','msDown(event)');
-    tmp.attr('ontouchstart','msDown(event)');
+    makeClickable(tmp);
     tmp.text(name);
     return tmp;
 }
@@ -123,7 +127,7 @@ function keyPress(evt) {
             select($('.box:last'));
         updateMenu();
     }
-    else if(evt.which==89) {
+    else if(evt.which==89 && submitMenu==null) {
         showTypes();
     }
 }
@@ -146,7 +150,7 @@ function msDown (event) {
             updateMenu();
         }
         
-	    // store mouse position. Will be updated when mouse moves.
+	// store mouse position. Will be updated when mouse moves.
         startPos= [evt.clientX, evt.clientY];
 
         hasMoved= false;
@@ -180,7 +184,7 @@ function msMove(event) {
                     $('#canvas').append(hand);
                     updateAll();
                 }
-                hand.css('pointer-events','none');
+		hand.addClass('dragged');
                 hasMoved= true;
             }
 
@@ -207,7 +211,7 @@ function msMove(event) {
 function msUp (evt) {
     evt.preventDefault();
     if (hand) {
-        hand.css('pointer-events', 'all');
+        hand.removeClass('dragged');
         if (unselect && !hasMoved) {
             hand.removeClass('selected');
             updateMenu();

@@ -1,19 +1,27 @@
 function updateTypes() {
-    inferTypes($('#canvas'),['cmd']);
+    inferChildren($('#canvas'));
 }
 
-function inferTypes(obj, types, priority) {
-    if (!obj.attr)
-	return;
+function inferChildren(obj, type) {
+    obj.children().each(function(i, child) {
+	if ($(child).is('.arg'))
+	    inferArgTypes($(child));
+	else
+	    inferTypes($(child), type); 
+    });
+}
 
+function inferArgTypes(obj) {
+    var type= obj.attr('data-type');
+    inferChildren(obj, type);
+}
+
+function inferTypes(obj, type, priority) {
     var mypriority= obj.attr('data-priority');
-    var subtypes= obj.attr('data-arg-types') || 'cmd';
-    subtypes= subtypes.split(' ');
+    var mytype= obj.attr('data-type');
 
-    obj.children().each( function() { 
-	    inferTypes($(this), subtypes, mypriority); 
-	});
-
+    inferChildren(obj, type);
+/*
     if (priority) {
         if (mypriority && mypriority<priority) {
             if (!(obj.prev().hasClass('paren') &&
@@ -29,35 +37,22 @@ function inferTypes(obj, types, priority) {
             }
         }
     }
-
- 	if (obj.hasClass('box') &&! obj.hasClass('float')) {
-	    var type= types[0];
-        if (types[1]) types.shift(); 
-        if (obj.hasClass('arg')) {
-	        obj.attr('data-type', type);
-        } else {
-            var obj_type= obj.attr('data-type');
-            if (type!='ident') {
-                if (obj_type=='ident') {
-                    obj_type= 'var-use';
-                    obj.attr('data-type', obj_type);
-                } 
-            } else if (obj_type=='exp.meth.elt') {
-                type= obj_type;                    
-            }
-            var error= !type_isSuper(type, obj_type);
-            obj.toggleClass('error', error);
-        }
-	}
+*/
+    var error= false;
+    if (type && mytype) {
+	error= !type_isSuper(type, mytype);
+    }
+    obj.toggleClass('error', error);
 }
 
 function showTypes() {
     if ($('.showType').length>0) {
         $('.showType').remove();
     } else {
-        $('.box').each( function(i, obj) {
+        $('.element,.arg').each( function(i, obj) {
             var type=$(obj).attr('data-type');
-            if (type) {
+	    if ($(obj).is('arg')) type= '<'+type; else type='>'+type;
+            if (!!type) {
                 $(obj).prepend('<span class="showType">'+type+': </span>');
             }
         });
@@ -74,13 +69,19 @@ function type_isa(obj, type) {
 
 // checks if sup is a generalization of sub
 function type_isSuper(sup, sub) {
-    if (sub=='var-use') return type_isSuper('exp',sup);
-    var supc= sup.split('.');
-    var subc= sub.split('.');
-    while (true) {
-        if (supc.length==0) return true;
-        if (subc.length==0) return false;
-        if (subc.shift()!=supc.shift()) return false;
+    var supl= sup.split('|');
+    if (supl.length>1) {
+	for (var i in supl) 
+	    if (type_isSuper(supl[i], sub)) return true;
+	return false;
+    } else {
+	var supc= sup.split('.');
+	var subc= sub.split('.');
+	while (true) {
+            if (supc.length==0) return true;
+            if (subc.length==0) return false;
+            if (subc.shift()!=supc.shift()) return false;
+	}
     }
 }
 

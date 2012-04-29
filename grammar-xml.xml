@@ -2,7 +2,7 @@
   <item name="XML/Document" type="xml.doc" new="Generic XML Document">
     &lt;?xml version='1.0'?&gt;
     <group name="Root" repeat="1">
-      <arg type="xml.node" name="root-node"/>
+      <arg type="xml.node.elt" name="root-node"/>
     </group>
   </item>
 
@@ -11,12 +11,12 @@
     <arg type="text" name="tag" class="arg-bold"/>
     &gt;
     <group name="Children" repeat="*" class="box-body">
-      <arg type="xml.node" name="child"/>
+      <arg type="xml.node|text" name="child"/>
     </group>
   </item>
 
   <item name="XML/Attribute" type="xml.node.attr">
     <arg type="text" name="attrib"/>
-    =<arg type="exp.string" name="value"/>
+    =<arg type="text" name="value"/>
   </item>
 </grammar>
