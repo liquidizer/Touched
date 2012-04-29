@@ -26,21 +26,24 @@ function loadGrammarFile(url) {
   request.send(null);
 }
 
+// Interpret a loaded grammar definition
 function initGrammar(content) {
     $(content).find('item').each(function (i, item) {
 	var name= $(item).attr('name').match(/[^\/]+/g);
+	var type= $(item).attr('type');
 	var curMenu= grammarMenu;
 	while (name[0]) {
 	    var sec= name.shift();
 	    if (!curMenu[sec]) curMenu[sec]= {};
 	    curMenu= curMenu[sec]
+	    curMenu._type= type_unify(type, curMenu._type || type);
 	}
 	curMenu.template= $(item);
-	curMenu._type= $(item).attr('type');
     });
     updateMenu();
 }
 
+// update the shown menu with respect to the current selection
 function updateMenu() {
     submitMenu= undefined;
     var bar= $('#menu');
@@ -60,16 +63,29 @@ function updateMenu() {
     }
 }
 
+// fill a ol list with list items from a menu structure
 function fillMenu(type, menu, parent) {
+    var submenus=[];
     for (var name in menu) {
-	var submenu= menu[name];
-	if (!submenu._type 
-	    || type_isSuper(type, submenu._type)) {
-	    parent.append(menuEntry(type, name, submenu));
+	if (!name.match(/^_/)) {
+	    var submenu= menu[name];
+	    if (!submenu._type 
+		|| type_isSuper(type, submenu._type)
+		|| !type.template && type_isSuper(submenu._type, type)) {
+		submenus.push(submenu);
+		var entry= menuEntry(type, name, submenu);
+		parent.append(entry);
+	    }
 	}
+    }
+    // expand menu if only one entry fits the current selection
+    if (submenus.length==1 && ! submenus[0].template) {
+	parent.find(':last').remove();
+	fillMenu(type, submenus[0], parent);
     }
 }
 
+// create a list item to inserted into menu list
 function menuEntry(type, name, submenu) {
     var li= $('<li/>');
     li.text(name);
@@ -87,6 +103,7 @@ function menuEntry(type, name, submenu) {
     return li;
 }
 
+// insert an item from the grammar template at the current selection
 function insertItem(template) {
     var selection= $('.selected');
     var item= elementArea(template.attr('type'));
@@ -96,6 +113,7 @@ function insertItem(template) {
     updateAll();
 }
 
+// translate a grammar template into html representation
 function expandTemplate(template, item) {
     template.contents().each(function(i, sec) {
 	sec= $(sec);
@@ -120,7 +138,7 @@ function getContainer(obj) {
 }
 
 function check_canDelete(obj) {
-    return obj.hasClass('box') || 
+    return obj.hasClass('element') || 
 	getContainer(obj).parent().attr('data-repeat')=='*';
 }
 
@@ -138,7 +156,7 @@ function check_canCopy(obj) {
 }
 
 function check_canText(obj) {
-    return obj.hasClass('arg') || obj.attr('data-type')=='text';
+    return type_isa(obj, 'text');
 }
 
 function menu_add_after() {
@@ -159,6 +177,7 @@ function menu_add_before() {
     updateAll();
 }
 
+// show a text input control for setting the selected text item
 function menu_edit(type, constValue) {
     return function() {
         var selection= $('.selected');
@@ -192,6 +211,7 @@ function menu_edit(type, constValue) {
     }
 }
 
+// set the value of the selected text element
 function menu_edit_setValue(type, value) {
     var selection= $('.selected');
     value= value.replace(/^\s+|\s+$/g,'');

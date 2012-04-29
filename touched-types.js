@@ -21,23 +21,6 @@ function inferTypes(obj, type, priority) {
     var mytype= obj.attr('data-type');
 
     inferChildren(obj, type);
-/*
-    if (priority) {
-        if (mypriority && mypriority<priority) {
-            if (!(obj.prev().hasClass('paren') &&
-                  obj.next().hasClass('paren'))) {
-                obj.before('<div class="box-text paren">(</div>');
-                obj.after('<div class="box-text paren">)</div>');
-            }
-        } else {
-            if (obj.next().hasClass('paren')
-                && obj.prev().hasClass('paren')) {
-                obj.next().remove();
-                obj.prev().remove();
-            }
-        }
-    }
-*/
     var error= false;
     if (type && mytype) {
 	error= !type_isSuper(type, mytype);
@@ -45,20 +28,7 @@ function inferTypes(obj, type, priority) {
     obj.toggleClass('error', error);
 }
 
-function showTypes() {
-    if ($('.showType').length>0) {
-        $('.showType').remove();
-    } else {
-        $('.element,.arg').each( function(i, obj) {
-            var type=$(obj).attr('data-type');
-	    if ($(obj).is('arg')) type= '<'+type; else type='>'+type;
-            if (!!type) {
-                $(obj).prepend('<span class="showType">'+type+': </span>');
-            }
-        });
-    }
-}
-
+// check if obj is an object of type
 function type_isa(obj, type) {
     if (!obj.attr('data-type')) return false;
     if (type[0]=='>')
@@ -85,4 +55,17 @@ function type_isSuper(sup, sub) {
     }
 }
 
-
+// unify two types
+function type_unify(type1, type2) {
+    var type='';
+    var list1= type1.split('.');
+    var list2= type2.split('.');
+    while (true) {
+	if (list1.length==0 || list1[0]!=list2[0])
+	    return type;
+	if (type.length>0) type= type+'.';
+	type=type+list1[0];
+	list1.shift();
+	list2.shift();
+    }
+}
