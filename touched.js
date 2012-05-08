@@ -7,6 +7,7 @@ var startPos;
 var startOffset;
 var hasMoved= false;
 var unselect= false;
+var typetext ='';
 
 $(init);
 function init() {
@@ -26,6 +27,46 @@ function init() {
 function updateAll() {
     updateTypes();
     updateMenu();
+    typetext ='';
+    //console.log('Chaos result document goes here!');
+    var root=$('#canvas').children();
+    //console.log(root);
+    //var x= extractInfo(root);
+    //console.log("x is :");
+    //console.log(x);
+}
+
+function extractInfo(node) {
+    console.log(node);
+    var ele = $(node);
+    if (ele.hasClass('element')) {
+        var element= {};
+        ele.children('.arg').each(function(i, child) {
+            var name= $(child).attr('data-name');
+            element[name]= extractInfo(child);
+        });
+        ele.children('.group').each(function(i, child) {
+            var name= $(child).attr('data-name');
+            element[name]= extractInfo(child);
+        });
+        return element;
+    }
+    else if (ele.hasClass('arg')) {
+        var child= ele.children();
+        if (child.hasClass('element'))
+            return extractInfo(child);
+        else
+            return child.text();
+    }
+    else if (ele.hasClass('group')) {
+        return ele.children('.arg').map(function(index, child) {
+            return extractInfo($(child));
+        });
+    } 
+    else {
+        console.log("invalid element");
+        console.log(node);
+    }
 }
 
 function makeClickable(obj) {
@@ -107,25 +148,79 @@ function selectNext(obj, reverse) {
 }
 
 function keyPress(evt) {
+    console.log(evt.which);
+    if (evt.ctrlKey) {
+        if (evt.which == 67) 
+            //run code for CTRL+C 
+            menu_copy();      
+        if (evt.which == 86) 
+            //run code for CTRL+V
+            menu_paste();        
+        if (evt.which == 88)
+            //run code for CTRL+X
+            menu_delete();  
+    }
+    else if (evt.keyCode > 64 && evt.keyCode < 91 && !submitMenu) {
+        var type = String.fromCharCode(evt.keyCode);
+        var menu = $($('#menu').find('li:not(.disabled)'));
+        typetext = typetext + type;
+        var chosen= [];
+        for (var i = 0; i < menu.length; i++) {
+            var item= $(menu[i]);
+            if (typetext == item.text().substring(0, typetext.length).toUpperCase()) {
+                item.html('<span class="menuSelect">' + item.text().substring(0,  typetext.length) + '</span>' + item.text().substring( typetext.length, item.text().length));
+                chosen.push(item);
+            }
+            else {
+                item.text(menu[i].textContent);
+                item.addClass('disabled');
+            }
+        }
+        if (chosen.length == 0) {
+            updateAll();
+        }
+        else if(chosen.length == 1) {
+            evt.preventDefault();
+            chosen[0].click();
+        }
+    }
+    if(evt.keyCode ==8){
+        //backspace
+        var menu = $($('#menu').find('li:not(.disabled)'));
+        for (var i = 0; i < menu.length; i++) 
+            $(menu[i]).text(menu[i].textContent);    
+        updateAll();
+    }
+    if(evt.keyCode == 46)
+       //delete
+       $('.selected').remove();
     if (evt.which==9 || evt.which==13)
+        // TAB or RETURN
         if (submitMenu) submitMenu();
     if (evt.which==9 || evt.which==13|| evt.which==40) {
+        // TAB, RETURN, KEY_DOWN
+        typetext = '';
         evt.preventDefault();
         var selection= $('.selected');
         if (selection.size()>0)
             selectNext(selection);
         else
             select($('.box:first'));
-        updateMenu();
+        updateAll();
     }
     else if (evt.which==38) {
+        // KEY_UP
         evt.preventDefault();
         var selection= $('.selected');
         if (selection.size()>0)
             selectNext(selection, true);
         else
             select($('.box:last'));
-        updateMenu();
+        updateAll();
+    }
+    else if (evt.which==27) {
+        // ESCAPE
+        updateAll();
     }
 }
 

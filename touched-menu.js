@@ -121,7 +121,9 @@ function expandTemplate(template, item) {
 	    item.append(dropArea(sec.attr('type'), sec.attr('name')));
 	} else if (sec.is('GROUP')) {
 	    var div= $('<div/>');
+        div.addClass('group');
 	    div.addClass(sec.attr('class'));
+        div.attr('data-name', sec.attr('name'));
 	    div.attr('data-repeat', sec.attr('repeat'));
 	    item.append(div);
 	    expandTemplate(sec, div);
@@ -230,7 +232,7 @@ function menu_edit_setValue(type, value) {
 	}
 	selection.text(value);
 	select(selection);
-	updateMenu();
+	updateAll();
     }
 }
 
