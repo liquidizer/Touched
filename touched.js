@@ -14,7 +14,10 @@ function init() {
     var canvas= $('#canvas');
     $('body').mousemove(msMove);
     $('body').mouseup(msUp);
-    $('body').mousedown(function(evt) { evt.preventDefault(); });
+    $('body').mousedown(function(evt) { 
+        if (evt.target.nodeName!="INPUT")
+            evt.preventDefault(); 
+        });
     $('body').attr('ontouchmove','msMove(event)');
     $('body').attr('ontouchend','msUp(event)');
     $('body').keydown(keyPress);
@@ -147,53 +150,55 @@ function selectNext(obj, reverse) {
     unselectAll();
 }
 
+//keyboard control
 function keyPress(evt) {
     console.log(evt.which);
-    if (evt.ctrlKey) {
-        if (evt.which == 67) 
-            //run code for CTRL+C 
-            menu_copy();      
-        if (evt.which == 86) 
-            //run code for CTRL+V
-            menu_paste();        
-        if (evt.which == 88)
-            //run code for CTRL+X
-            menu_delete();  
-    }
-    else if (evt.keyCode > 64 && evt.keyCode < 91 && !submitMenu) {
-        var type = String.fromCharCode(evt.keyCode);
-        var menu = $($('#menu').find('li:not(.disabled)'));
-        typetext = typetext + type;
-        var chosen= [];
-        for (var i = 0; i < menu.length; i++) {
-            var item= $(menu[i]);
-            if (typetext == item.text().substring(0, typetext.length).toUpperCase()) {
-                item.html('<span class="menuSelect">' + item.text().substring(0,  typetext.length) + '</span>' + item.text().substring( typetext.length, item.text().length));
-                chosen.push(item);
+    if (!submitMenu) {
+        if (evt.ctrlKey) {
+            if (evt.which == 67) 
+                //run code for CTRL+C 
+                menu_copy();      
+            if (evt.which == 86) 
+                //run code for CTRL+V
+                menu_paste();        
+            if (evt.which == 88)    
+              //run code for CTRL+X
+                menu_delete();
+        }
+        else if (evt.keyCode > 64 && evt.keyCode < 91) {
+            var type = String.fromCharCode(evt.keyCode);
+            var menu = $($('#menu').find('li:not(.disabled)'));
+            typetext = typetext + type;
+            var chosen= [];
+            for (var i = 0; i < menu.length; i++) {
+                var item= $(menu[i]);
+                if (typetext == item.text().substring(0, typetext.length).toUpperCase()) {
+                    item.html('<span class="menuSelect">' + item.text().substring(0,  typetext.length) + '</span>' + item.text().substring( typetext.length, item.text().length));
+                    chosen.push(item);
+                }
+                else {
+                    item.text(menu[i].textContent);
+                    item.addClass('disabled');
+                }
             }
-            else {
-                item.text(menu[i].textContent);
-                item.addClass('disabled');
+            if (chosen.length == 0) {
+                updateAll();
+            }
+            else if(chosen.length == 1) {
+                evt.preventDefault();
+                chosen[0].click();
             }
         }
-        if (chosen.length == 0) {
+        if(evt.keyCode ==8){
+            //backspace
+            var menu = $($('#menu').find('li:not(.disabled)'));
+            for (var i = 0; i < menu.length; i++) 
+                $(menu[i]).text(menu[i].textContent);    
             updateAll();
         }
-        else if(chosen.length == 1) {
-            evt.preventDefault();
-            chosen[0].click();
-        }
+        if(evt.keyCode == 46)
+           menu_delete();
     }
-    if(evt.keyCode ==8){
-        //backspace
-        var menu = $($('#menu').find('li:not(.disabled)'));
-        for (var i = 0; i < menu.length; i++) 
-            $(menu[i]).text(menu[i].textContent);    
-        updateAll();
-    }
-    if(evt.keyCode == 46)
-       //delete
-       $('.selected').remove();
     if (evt.which==9 || evt.which==13)
         // TAB or RETURN
         if (submitMenu) submitMenu();

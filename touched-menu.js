@@ -192,10 +192,11 @@ function menu_edit(type, constValue) {
     	} else {
             var elt= $('#menu');
             elt.contents().remove();
-        
-            var input=$('<input/>');
+            //add id to input
+            var input=$('<input id="input"/>');
             if (type=='exp.number.const') input.attr('type','number');
-            var set_button=$('<input type="button" value="OK"/>');
+            //add id to button
+            var set_button=$('<input type="button" id="okbutt" value="OK"/>');
             var cancel_button=$('<input type="button" value="Cancel"/>');
         
             if (!selection.hasClass('arg'))
@@ -237,26 +238,34 @@ function menu_edit_setValue(type, value) {
 }
 
 function menu_paste() {
-    var clone= clipboard.clone();
-    insertBox($('.selected'), clone);
-    select(clone);
-    updateAll();
+    var selection= $('.selected');
+    if (check_canPaste(selection)) {
+        var clone= clipboard.clone();
+        insertBox(selection, clone);
+        select(clone);
+        updateAll();
+    }
 }
 
 function menu_copy() {
-    clipboard= $('.selected').clone();
-    if (clipboard.hasClass('arg')) clipboard= null;
+    var selection= $('.selected');
+    if (check_canCopy(selection)) {
+        clipboard= selection.clone();
+        if (clipboard.hasClass('arg')) clipboard= null;
+    }
 }
 
 function menu_delete() {
     menu_copy();
     var selection = $('.selected');
-    selectNext(selection)
-    var parent= selection.parent();
-    releaseBox(selection);
-    if (parent.hasClass('arg')) {
-	select(parent);
+    if(check_canDelete(selection)) {
+        selectNext(selection)
+        var parent= selection.parent();
+        releaseBox(selection);
+        if (parent.hasClass('arg')) {
+    	    select(parent);
+        }
+        updateAll();
     }
-    updateAll();
 }
 
