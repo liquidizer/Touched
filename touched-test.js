@@ -8,7 +8,6 @@ function init() {
 
 
 function runTest(name) {
-    console.log(name);
     $('#testChoice').hide();
     var data= $('tests test[name="'+name+'"]');
     var testData = $(data).text();
@@ -16,9 +15,8 @@ function runTest(name) {
     stepThroughTest(array, 0);
 }
 
-function stepThroughTest(array, num) {
+function stepThroughTest(array, num) { 
     if (num < array.length - 1) {
-        // execute data[index]
         var res = eval("(" + array[num] + "})");
         var e = jQuery.Event("keydown");
         e.keyCode = res.keyCode;
@@ -34,9 +32,11 @@ function stepThroughTest(array, num) {
             }
         }
         $(res.target).trigger(e);
+        if(res.target != '#input')
         setTimeout(function() {
             stepThroughTest(array, num + 1)
         }, 200);
+        else stepThroughTest(array, num+1);
     }
 }
 
