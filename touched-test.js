@@ -6,7 +6,6 @@ function init() {
 });
 }
 
-
 function runTest(name) {
     $('#testChoice').hide();
     var data= $('tests test[name="'+name+'"]');
@@ -15,7 +14,7 @@ function runTest(name) {
     stepThroughTest(array, 0);
 }
 
-function stepThroughTest(array, num) { 
+function stepThroughTest(array, num) {
     if (num < array.length - 1) {
         var res = eval("(" + array[num] + "})");
         var e = jQuery.Event("keydown");
@@ -32,11 +31,10 @@ function stepThroughTest(array, num) {
             }
         }
         $(res.target).trigger(e);
-        if(res.target != '#input')
-        setTimeout(function() {
+        if (res.target != '#input') setTimeout(function() {
             stepThroughTest(array, num + 1)
         }, 200);
-        else stepThroughTest(array, num+1);
+        else stepThroughTest(array, num + 1);
     }
 }
 
@@ -44,20 +42,12 @@ var record;
 function recordTest() {
     record="";
     $('#testChoice').hide();
-    console.log('this function is only called once');
-    // replace with new keypress handler that records and the calls the original  
     $('body').keydown(function(evt) {
-        //console.log('this function is called with every keypress.');
-        //console.log(evt.target.nodeName);
         var target= evt.target.nodeName;
         if ($(evt.target).attr('id'))
             target= '#'+$(evt.target).attr('id');
-        //console.log(evt.ctrlKey);
-        //record events
-        //var oldValue=$('#testrecord').val(); 
         var eventStr= '{target:"'+target+'", keyCode:'+evt.which+', isCtrl:'+evt.ctrlKey+', isShift:'+evt.shiftKey+'}<br/>';
         record= record+eventStr;
-        //$('#testrecord').val(oldValue+eventStr);
     });
     var finish= $('<input type="button" value="STOP"/>');
     $('body').append(finish);

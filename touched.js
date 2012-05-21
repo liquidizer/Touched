@@ -32,23 +32,20 @@ function updateAll() {
     updateMenu();
     typetext ='';
     //console.log('Chaos result document goes here!');
+    /*
     var root=$('#canvas').children();
-    //console.log(root);
-    //var x= extractInfo(root);
-    //console.log("x is :");
-    //console.log(x);
+    var x= extractInfo(root);
+    console.log("x is :");
+    console.log(x);
+    */
 }
 
 function extractInfo(node) {
-    console.log(node);
+    //console.log(node);
     var ele = $(node);
     if (ele.hasClass('element')) {
         var element= {};
-        ele.children('.arg').each(function(i, child) {
-            var name= $(child).attr('data-name');
-            element[name]= extractInfo(child);
-        });
-        ele.children('.group').each(function(i, child) {
+        ele.children('.arg, .group').each(function(i, child) {
             var name= $(child).attr('data-name');
             element[name]= extractInfo(child);
         });
@@ -124,27 +121,57 @@ function unselectAll() {
     $('.selected').removeClass('selected');
 }
 
-function selectNext(obj, reverse) {
+// Move the selection along one of the following axes:
+// 0: up
+// 1: down
+// 2: left
+// 3: right
+function selectNext(obj, axis) {
+    console.log(axis);
+    if (axis == 1) var reverse = false;
+    else reverse = true;
+    var leftrightkey;
+    if (axis == 2 || axis == 3) leftrightkey = true;
     var isup = false;
+    var topoffset = $('.selected').offset().top;
     while (obj.attr('id') != 'canvas') {
-        var childs= reverse ? obj.children(':last') : obj.children(':first');
+        if (!leftrightkey) var childs = reverse ? obj.children(':last') : obj.children(':first');
+        else if (axis == 2) childs = obj.children(':first');
+        else childs = obj.children(':last');
         if (!isup && !obj.hasClass('float') && childs.length > 0) {
-            obj= childs;
+            obj = childs;
         }
         else {
-            var next= reverse ? obj.prev() : obj.next();
+            if (!leftrightkey) var next = reverse ? obj.prev() : obj.next();
+            else if (axis == 2) next = obj.prev();
+            else next = obj.next();
             if (next.length > 0) {
                 isup = false;
-                obj= next;
+                obj = next;
             }
             else {
                 isup = true;
                 obj = obj.parent();
             }
         }
-        if (!isup && obj.hasClass('box')) {
-            select(obj);
-            return;
+        if (!leftrightkey) {
+            if (!obj.hasClass('element') || ($(obj).attr('data-type')) == 'xml.node.attr') {
+                if (!isup && obj.hasClass('box') && Math.abs(topoffset - $(obj).offset().top) > 2) {
+                    select(obj);
+                    return;
+                }
+            }
+        }
+        else {
+            //find the parent class of obj      
+            if (!isup && obj.hasClass('box')) {
+                select(obj);
+                return;
+            }
+            if (obj.parent().hasClass('box')) {
+                select(obj.parent());
+                return;
+            }
         }
     }
     unselectAll();
@@ -190,10 +217,6 @@ function keyPress(evt) {
             }
         }
         if(evt.keyCode ==8){
-            //backspace
-            var menu = $($('#menu').find('li:not(.disabled)'));
-            for (var i = 0; i < menu.length; i++) 
-                $(menu[i]).text(menu[i].textContent);    
             updateAll();
         }
         if(evt.keyCode == 46)
@@ -208,7 +231,7 @@ function keyPress(evt) {
         evt.preventDefault();
         var selection= $('.selected');
         if (selection.size()>0)
-            selectNext(selection);
+            selectNext(selection,1);
         else
             select($('.box:first'));
         updateAll();
@@ -218,7 +241,30 @@ function keyPress(evt) {
         evt.preventDefault();
         var selection= $('.selected');
         if (selection.size()>0)
-            selectNext(selection, true);
+            //selectNext(selection, true, evt.which);
+            selectNext(selection, 0);
+        else
+            select($('.box:last'));
+        updateAll();
+    }
+    else if(evt.which==37){        
+        //KEY_LEFT
+        evt.preventDefault();
+        var selection= $('.selected');
+        if (selection.size()>0)
+            //selectNext(selection, true, evt.which);
+            selectNext(selection, 2);
+        else
+            select($('.box:last'));
+        updateAll();
+    }
+    else if(evt.which ==39){
+        //KEY_RIGHT
+        evt.preventDefault();
+        var selection= $('.selected');
+        if (selection.size()>0)
+            //selectNext(selection, true, evt.which);
+            selectNext(selection, 3);
         else
             select($('.box:last'));
         updateAll();
