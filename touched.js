@@ -126,9 +126,10 @@ function unselectAll() {
 // 1: down
 // 2: left
 // 3: right
+// 4: select the next selectable value
 function selectNext(obj, axis) {
-    console.log(axis);
-    if (axis == 1) var reverse = false;
+    //console.log(axis);
+    if (axis == 1 || axis==4) var reverse = false;
     else reverse = true;
     var leftrightkey;
     if (axis == 2 || axis == 3) leftrightkey = true;
@@ -137,7 +138,7 @@ function selectNext(obj, axis) {
     while (obj.attr('id') != 'canvas') {
         if (!leftrightkey) var childs = reverse ? obj.children(':last') : obj.children(':first');
         else if (axis == 2) childs = obj.children(':first');
-        else childs = obj.children(':last');
+        else childs = obj.children(':last');        
         if (!isup && !obj.hasClass('float') && childs.length > 0) {
             obj = childs;
         }
@@ -155,19 +156,27 @@ function selectNext(obj, axis) {
             }
         }
         if (!leftrightkey) {
-            if (!obj.hasClass('element') || ($(obj).attr('data-type')) == 'xml.node.attr') {
+            if(axis==4){
+                if (!isup && obj.hasClass('box')){
+                    select(obj);
+                    return;
+                }
+            }
+            else if (!obj.hasClass('element') || ($(obj).attr('data-type')) == 'xml.node.attr') {             
+                var isNewLine= obj.parent().hasClass('box-body');
+                console.log(isNewLine);
                 if (!isup && obj.hasClass('box') && Math.abs(topoffset - $(obj).offset().top) > 2) {
                     select(obj);
                     return;
                 }
             }
         }
-        else {
-            //find the parent class of obj      
+        else {   
             if (!isup && obj.hasClass('box')) {
                 select(obj);
                 return;
             }
+            //find the parent class of obj   
             if (obj.parent().hasClass('box')) {
                 select(obj.parent());
                 return;
@@ -179,7 +188,7 @@ function selectNext(obj, axis) {
 
 //keyboard control
 function keyPress(evt) {
-    console.log(evt.which);
+    //console.log(evt.which);
     if (!submitMenu) {
         if (evt.ctrlKey) {
             if (evt.which == 67) 

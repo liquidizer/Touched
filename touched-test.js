@@ -23,7 +23,7 @@ function stepThroughTest(array, num) {
         e.ctrlKey = res.isCtrl;
         e.shiftKey = res.isShift;
         if (res.target == '#input') {
-            if (res.keyCode > 64 && res.keyCode < 91) {
+            if (res.keyCode > 47 && res.keyCode < 91) {
                 var oldvalue = $('#input').attr('value');
                 var newvalue = String.fromCharCode(res.keyCode);
                 if (!e.shiftKey) newvalue = newvalue.toLowerCase();

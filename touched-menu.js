@@ -1,8 +1,8 @@
 var grammarMenu= {};
 var editMenu= [
     [ 'Text', check_canText, menu_edit('text') ],
-    [ 'Before', check_isInBody, menu_add_before ],
-    [ 'After', check_isInBody, menu_add_after ],
+    [ 'Before', check_canRepeat, menu_add_before ],
+    [ 'After', check_canRepeat, menu_add_after ],
     [ 'Copy', check_canCopy, menu_copy ],
     [ 'Paste', check_canPaste, menu_paste ],
     [ 'Cut', check_canDelete, menu_delete ]
@@ -105,11 +105,14 @@ function menuEntry(type, name, submenu) {
 
 // insert an item from the grammar template at the current selection
 function insertItem(template) {
-    var selection= $('.selected');
-    var item= elementArea(template.attr('type'));
+    var selection = $('.selected');
+    var item = elementArea(template.attr('type'));
     expandTemplate(template, item);
+    // if check_canRepeat and there is no next neigbor then:
+    if (check_canRepeat(selection) && selection.next('.box').length == 0)
+       selection.after(dropArea(selection.attr('data-type'), selection.attr('data-name')));
     insertBox(selection, item);
-    selectNext(item);
+    selectNext(item, 4);
     updateAll();
 }
 
@@ -148,7 +151,7 @@ function check_canPaste(obj) {
     return clipboard && obj.hasClass('arg') && obj.hasClass('box');
 }
 
-function check_isInBody(obj) {
+function check_canRepeat(obj) {
     var o= getContainer(obj);
     return o.hasClass('arg') && o.parent().attr('data-repeat')=='*';
 }
@@ -259,7 +262,7 @@ function menu_delete() {
     menu_copy();
     var selection = $('.selected');
     if(check_canDelete(selection)) {
-        selectNext(selection)
+        selectNext(selection,4)
         var parent= selection.parent();
         releaseBox(selection);
         if (parent.hasClass('arg')) {
