@@ -21,7 +21,7 @@ function init() {
     $('body').attr('ontouchmove','msMove(event)');
     $('body').attr('ontouchend','msUp(event)');
     $('body').keydown(keyPress);
-    canvas.append(dropArea('xml.doc','start'));
+    canvas.append(dropArea('exp.list|xml.doc','start'));
     select(canvas.find('.arg'));
     initMenu();
     updateAll();

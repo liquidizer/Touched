@@ -14,6 +14,7 @@ var submitMenu= null;
 // initialize menu entries
 function initMenu() {
     loadGrammarFile('grammar-xml.xml');
+    loadGrammarFile('grammar-formula.xml');
 }
 
 // load a grammar file
@@ -41,6 +42,7 @@ function initGrammar(content) {
 	curMenu.template= $(item);
     });
     updateMenu();
+    console.log(content)
 }
 
 // update the shown menu with respect to the current selection
