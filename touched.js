@@ -134,10 +134,23 @@ function selectNext(obj, axis) {
     var leftright =axis == 2 || axis == 3 ;
     var updown = axis ==0 || axis==1;
     var selectnext = axis ==4;
-    
-    var isup = false;
-    var topoffset = $('.selected').offset().top;
-    var height =  $('.selected').height();    
+    var isup = false;    
+    if(obj.size()>0){
+        var topoffset = obj.offset().top;
+        var height = obj.height();
+    }
+    else {
+        if (reverse) {
+            obj = $('.box:last').parent();
+            height = 1000000;
+            topoffset = 100000000;
+        }
+        else{
+            obj = $('.box:first');
+            height =0;
+            topoffset=0;
+        }
+    }
     while (obj.attr('id') != 'canvas') {
         var childs = reverse ? obj.children(':last') : obj.children(':first');       
         if (!isup && !obj.hasClass('float') && childs.length > 0) {
@@ -243,10 +256,7 @@ function keyPress(evt) {
         typetext = '';
         evt.preventDefault();
         var selection= $('.selected');
-        if (selection.size()>0)
-            selectNext(selection,1);
-        else
-            select($('.box:first'));
+        selectNext(selection,1);
         updateAll();
     }
     else if(evt.which==9 || evt.which ==13){
@@ -264,10 +274,7 @@ function keyPress(evt) {
         // KEY_UP
         evt.preventDefault();
         var selection= $('.selected');
-        if (selection.size()>0)
-            selectNext(selection, 0);
-        else
-            select($('.box:last'));
+        selectNext(selection, 0);
         updateAll();
     }
     else if(evt.which==37){        
