@@ -147,6 +147,7 @@ function getContainer(obj) {
 
 function check_canDelete(obj) {
     return obj.parent().hasClass('arg') || 
+    obj.hasClass('float') ||
 	getContainer(obj).parent().attr('data-repeat')=='*';
 }
 

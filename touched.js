@@ -128,35 +128,67 @@ function unselectAll() {
 // 2: left
 // 3: right
 // 4: select the next selectable value
+// 5: select the previous selectable value
 function selectNext(obj, axis) {
     //console.log(axis);
-    var reverse = axis == 0 || axis ==3;
+    var reverse = axis == 0 || axis ==3 || axis== 5;
     var leftright =axis == 2 || axis == 3 ;
     var updown = axis ==0 || axis==1;
-    var selectnext = axis ==4;
-    var isup = false;    
+    var selectnext = axis ==4 || axis==5;
+    var isup = false;
+    var isactive=false;
+    
     if(obj.size()>0){
         var topoffset = obj.offset().top;
         var height = obj.height();
     }
     else {
-        if (reverse) {
-            obj = $('.box:last').parent();
-            height = 1000000;
-            topoffset = 100000000;
-        }
-        else{
-            obj = $('.box:first');
-            height =0;
-            topoffset=0;
-        }
+        // no current selection
+        isactive=true;
+        obj = $('.box:first');
+        height =0;
+        topoffset = reverse ? 100000000 : 0;
     }
     while (obj.attr('id') != 'canvas') {
+        // check if current element should be selected
+        if (isactive && obj.hasClass('box')) {
+            if (selectnext) {
+                if (!isup) {
+                    select(obj);
+                    return;
+                }
+            }
+            if (updown && !isup) {
+                // DOWN
+                var isNewLine= obj.find('.box-body').length ==0;
+                if (!reverse  && isNewLine && obj.offset().top > topoffset +height) {
+                    select(obj);
+                    return;
+                }
+                // UP
+                if (reverse  && isNewLine && obj.offset().top < topoffset) {
+                    select(obj);
+                    return;
+                }
+            }
+            if (leftright && !isup) {
+                select(obj);
+                return;          
+                //find the parent class of obj   
+                if (obj.parent().hasClass('box') && $('.selected').get(0) != obj.parent().get(0)) {
+                    select(obj.parent());
+                    return;
+                }
+            }
+        }
+        isactive= true;
+        // proceed to next element
         var childs = reverse ? obj.children(':last') : obj.children(':first');       
         if (!isup && !obj.hasClass('float') && childs.length > 0) {
             obj = childs;
+            isup= false;
         }
-        else {
+        else { 
             var next = reverse ? obj.prev() : obj.next();   
             if (next.length > 0) {
                 isup = false;
@@ -165,36 +197,6 @@ function selectNext(obj, axis) {
             else {
                 isup = true;
                 obj = obj.parent();
-            }
-        }
-        if (selectnext) {
-            if (!isup && obj.hasClass('box')) {
-                select(obj);
-                return;
-            }
-        }
-        var isNewLine= obj.children('.box-body').length ==0;
-        if (updown) {
-            //down
-            if (axis == 1 && !isup && obj.hasClass('box') && isNewLine && obj.offset().top > topoffset +height) {
-                select(obj);
-                return;
-            }
-            //UP
-            if (axis == 0 && !isup && obj.hasClass('box') && isNewLine && obj.offset().top < topoffset) {
-                select(obj);
-                return;
-            }
-        }
-        if(leftright) {   
-            if (!isup && obj.hasClass('box')) {
-                select(obj);
-                return;
-            }
-            //find the parent class of obj   
-            if (!isup && obj.parent().hasClass('box') && $('.selected').get(0)!=obj.parent().get(0)) {
-                select(obj.parent());
-                return;
             }
         }
     }
@@ -206,7 +208,7 @@ function keyPress(evt) {
     //console.log(evt.which);
     if (!submitMenu) {
         if (evt.ctrlKey) {
-            if (evt.which == 67) 
+            if (evt.which == 67)
                 //run code for CTRL+C 
                 menu_copy();      
             if (evt.which == 86) 
@@ -264,10 +266,7 @@ function keyPress(evt) {
         typetext = '';
         evt.preventDefault();
         var selection= $('.selected');
-        if (selection.size()>0)
-            selectNext(selection,4);
-        else
-            select($('.box:first'));
+        selectNext(selection, evt.shiftKey ? 5 : 4);
         updateAll();
     }
     else if (evt.which==38) {
