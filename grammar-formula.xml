@@ -2,7 +2,7 @@
   <item name="Formula/Formula List" type="exp.list" new="Formula List">
     Formula List:
     <group name="Root" repeat="*" class="box-body">
-      <arg type="exp.formula" name="formula"/>
+      <arg type="exp.formula|number" name="formula"/>
     </group>
   </item>
 
@@ -17,4 +17,17 @@
     ×
     <arg type="exp.formula|number" name="right"/>
   </item>
+
+  <item name="Formula/Functions/Sin" type="exp.formula">
+    sin(<arg type="exp.formula|number" name="arg"/>)
+  </item>
+
+  <item name="Formula/Functions/Cos" type="exp.formula">
+    cos(<arg type="exp.formula|number" name="arg"/>)
+  </item>
+
+  <item name="Formula/Functions/Tan" type="exp.formula">
+    tan(<arg type="exp.formula|number" name="arg"/>)
+  </item>
+
 </grammar>

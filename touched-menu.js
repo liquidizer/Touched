@@ -1,6 +1,7 @@
 var grammarMenu= {};
 var editMenu= [
-    [ 'Text', check_canText, menu_edit('text') ],
+    [ 'Text', check_isType('text'), menu_edit('text') ],
+    [ 'Number', check_isType('number'), menu_edit('number') ],
     [ 'Before', check_canRepeat, menu_add_before ],
     [ 'After', check_canRepeat, menu_add_after ],
     [ 'Copy', check_canCopy, menu_copy ],
@@ -42,7 +43,7 @@ function initGrammar(content) {
 	curMenu.template= $(item);
     });
     updateMenu();
-    console.log(content)
+    //console.log(content)
 }
 
 // update the shown menu with respect to the current selection
@@ -145,7 +146,7 @@ function getContainer(obj) {
 }
 
 function check_canDelete(obj) {
-    return obj.hasClass('element') || 
+    return obj.parent().hasClass('arg') || 
 	getContainer(obj).parent().attr('data-repeat')=='*';
 }
 
@@ -162,8 +163,10 @@ function check_canCopy(obj) {
     return !obj.hasClass('arg');
 }
 
-function check_canText(obj) {
-    return type_isa(obj, 'text');
+function check_isType(type) {
+    return function(obj) {
+        return type_isa(obj, type);
+    };
 }
 
 function menu_add_after() {
@@ -225,7 +228,7 @@ function menu_edit_setValue(type, value) {
     value= value.replace(/^\s+|\s+$/g,'');
     if (value=='') {
         if (!selection.hasClass('arg'))
-	    menu_delete();
+	        menu_delete();
         else
             updateAll();
     } else {

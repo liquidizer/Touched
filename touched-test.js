@@ -23,8 +23,10 @@ function stepThroughTest(array, num) {
         e.ctrlKey = res.isCtrl;
         e.shiftKey = res.isShift;
         if (res.target == '#input') {
-            if (res.keyCode > 47 && res.keyCode < 91) {
-                var oldvalue = $('#input').attr('value');
+            var oldvalue = $('#input').attr('value');
+            if (res.keyCode == 8) {
+                $('#input').attr('value', oldvalue.replace(/.$/,''));
+            } else {
                 var newvalue = String.fromCharCode(res.keyCode);
                 if (!e.shiftKey) newvalue = newvalue.toLowerCase();
                 $('#input').attr('value', oldvalue + newvalue);

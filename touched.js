@@ -21,7 +21,8 @@ function init() {
     $('body').attr('ontouchmove','msMove(event)');
     $('body').attr('ontouchend','msUp(event)');
     $('body').keydown(keyPress);
-    canvas.append(dropArea('exp.list|xml.doc','start'));
+    //canvas.append(dropArea('exp.list|xml.doc','start'));
+    canvas.append(dropArea('xml.doc','start'));
     select(canvas.find('.arg'));
     initMenu();
     updateAll();
@@ -100,8 +101,8 @@ function dropArea(type, name) {
 function releaseBox(box) {
     var parent= box.parent();
     if (parent.hasClass('arg')) {
-	parent.addClass('box');
-	parent.text(parent.attr('data-name'));
+        parent.addClass('box');
+        parent.text(parent.attr('data-name'));
     }
     box.remove();
 }
@@ -129,23 +130,21 @@ function unselectAll() {
 // 4: select the next selectable value
 function selectNext(obj, axis) {
     //console.log(axis);
-    if (axis == 1 || axis==4) var reverse = false;
-    else reverse = true;
-    var leftrightkey;
-    if (axis == 2 || axis == 3) leftrightkey = true;
+    var reverse = axis == 0 || axis ==3;
+    var leftright =axis == 2 || axis == 3 ;
+    var updown = axis ==0 || axis==1;
+    var selectnext = axis ==4;
+    
     var isup = false;
     var topoffset = $('.selected').offset().top;
+    var height =  $('.selected').height();    
     while (obj.attr('id') != 'canvas') {
-        if (!leftrightkey) var childs = reverse ? obj.children(':last') : obj.children(':first');
-        else if (axis == 2) childs = obj.children(':first');
-        else childs = obj.children(':last');        
+        var childs = reverse ? obj.children(':last') : obj.children(':first');       
         if (!isup && !obj.hasClass('float') && childs.length > 0) {
             obj = childs;
         }
         else {
-            if (!leftrightkey) var next = reverse ? obj.prev() : obj.next();
-            else if (axis == 2) next = obj.prev();
-            else next = obj.next();
+            var next = reverse ? obj.prev() : obj.next();   
             if (next.length > 0) {
                 isup = false;
                 obj = next;
@@ -155,29 +154,32 @@ function selectNext(obj, axis) {
                 obj = obj.parent();
             }
         }
-        if (!leftrightkey) {
-            if(axis==4){
-                if (!isup && obj.hasClass('box')){
-                    select(obj);
-                    return;
-                }
-            }
-            else if (!obj.hasClass('element') || ($(obj).attr('data-type')) == 'xml.node.attr') {             
-                var isNewLine= obj.parent().hasClass('box-body');
-                console.log(isNewLine);
-                if (!isup && obj.hasClass('box') && Math.abs(topoffset - $(obj).offset().top) > 2) {
-                    select(obj);
-                    return;
-                }
+        if (selectnext) {
+            if (!isup && obj.hasClass('box')) {
+                select(obj);
+                return;
             }
         }
-        else {   
+        var isNewLine= obj.children('.box-body').length ==0;
+        if (updown) {
+            //down
+            if (axis == 1 && !isup && obj.hasClass('box') && isNewLine && obj.offset().top > topoffset +height) {
+                select(obj);
+                return;
+            }
+            //UP
+            if (axis == 0 && !isup && obj.hasClass('box') && isNewLine && obj.offset().top < topoffset) {
+                select(obj);
+                return;
+            }
+        }
+        if(leftright) {   
             if (!isup && obj.hasClass('box')) {
                 select(obj);
                 return;
             }
             //find the parent class of obj   
-            if (obj.parent().hasClass('box')) {
+            if (!isup && obj.parent().hasClass('box') && $('.selected').get(0)!=obj.parent().get(0)) {
                 select(obj.parent());
                 return;
             }
@@ -204,6 +206,7 @@ function keyPress(evt) {
         else if (evt.keyCode > 64 && evt.keyCode < 91) {
             var type = String.fromCharCode(evt.keyCode);
             var menu = $($('#menu').find('li:not(.disabled)'));
+            if(menu.find('li').length !=0) menu = menu.find('li');
             typetext = typetext + type;
             var chosen= [];
             for (var i = 0; i < menu.length; i++) {
@@ -223,6 +226,7 @@ function keyPress(evt) {
             else if(chosen.length == 1) {
                 evt.preventDefault();
                 chosen[0].click();
+                typetext = '';
             }
         }
         if(evt.keyCode ==8){
@@ -234,8 +238,8 @@ function keyPress(evt) {
     if (evt.which==9 || evt.which==13)
         // TAB or RETURN
         if (submitMenu) submitMenu();
-    if (evt.which==9 || evt.which==13|| evt.which==40) {
-        // TAB, RETURN, KEY_DOWN
+    if (evt.which==40) {
+        //KEY_DOWN
         typetext = '';
         evt.preventDefault();
         var selection= $('.selected');
@@ -245,12 +249,22 @@ function keyPress(evt) {
             select($('.box:first'));
         updateAll();
     }
+    else if(evt.which==9 || evt.which ==13){
+        // TAB, Enter
+        typetext = '';
+        evt.preventDefault();
+        var selection= $('.selected');
+        if (selection.size()>0)
+            selectNext(selection,4);
+        else
+            select($('.box:first'));
+        updateAll();
+    }
     else if (evt.which==38) {
         // KEY_UP
         evt.preventDefault();
         var selection= $('.selected');
         if (selection.size()>0)
-            //selectNext(selection, true, evt.which);
             selectNext(selection, 0);
         else
             select($('.box:last'));
@@ -261,10 +275,7 @@ function keyPress(evt) {
         evt.preventDefault();
         var selection= $('.selected');
         if (selection.size()>0)
-            //selectNext(selection, true, evt.which);
             selectNext(selection, 2);
-        else
-            select($('.box:last'));
         updateAll();
     }
     else if(evt.which ==39){
@@ -272,10 +283,7 @@ function keyPress(evt) {
         evt.preventDefault();
         var selection= $('.selected');
         if (selection.size()>0)
-            //selectNext(selection, true, evt.which);
             selectNext(selection, 3);
-        else
-            select($('.box:last'));
         updateAll();
     }
     else if (evt.which==27) {
@@ -291,18 +299,18 @@ function msDown (event) {
         event.preventDefault();
         // find signaling object
         var grabbed= $(evt.target);
-    	while (!grabbed.hasClass('box')) {
+        while (!grabbed.hasClass('box')) {
             if (grabbed.attr('id')=='canvas') return;
-	        grabbed= grabbed.parent();
-	    }
-	    hand= grabbed;
+                grabbed= grabbed.parent();
+            }
+            hand= grabbed;
         unselect= hand.hasClass('selected');
         if (!unselect) {
             select(hand);
             updateMenu();
         }
         
-	// store mouse position. Will be updated when mouse moves.
+        // store mouse position. Will be updated when mouse moves.
         startPos= [evt.clientX, evt.clientY];
 
         hasMoved= false;
@@ -330,20 +338,20 @@ function msMove(event) {
                         hand.before(clone);
                     }
                     else {
-			releaseBox(hand);
+                        releaseBox(hand);
                     }
                     hand.addClass('float');
                     $('#canvas').append(hand);
                     updateAll();
                 }
-		hand.addClass('dragged');
+                hand.addClass('dragged');
                 hasMoved= true;
             }
 
             if (hasMoved) {
                 var arg= $(evt.target);
                 if (arg.hasClass('box') && arg.hasClass('arg') && !arg.parents().is(hand)) {
-		    insertBox(arg, hand);
+                    insertBox(arg, hand);
                     updateAll();
                     startPos= [evt.clientX, evt.clientY];
                     hasMoved= false;
@@ -377,13 +385,12 @@ function msUp (evt) {
 function translateTouch(evt) {
     if (evt.touches!=undefined) {
         var evt2= {};
-    	evt2.clientX= evt.touches[0].clientX;
-    	evt2.clientY= evt.touches[0].clientY;
-    	evt2.target= document.elementFromPoint(evt2.clientX, evt2.clientY);
-    	evt2.isTouch= true;
-    	return evt2;
+        evt2.clientX= evt.touches[0].clientX;
+        evt2.clientY= evt.touches[0].clientY;
+        evt2.target= document.elementFromPoint(evt2.clientX, evt2.clientY);
+        evt2.isTouch= true;
+        return evt2;
     }
     evt.preventDefault();
     return evt;
 }
-
