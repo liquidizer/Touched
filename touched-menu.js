@@ -16,6 +16,7 @@ var submitMenu= null;
 function initMenu() {
     loadGrammarFile('grammar-xml.xml');
     loadGrammarFile('grammar-formula.xml');
+    loadGrammarFile('grammar-d3.xml');
 }
 
 // load a grammar file

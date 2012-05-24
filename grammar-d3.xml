@@ -1,0 +1,61 @@
+<grammar>
+  <item name="D3/Script" type="d3.script" new="D3 Visualisation">
+    D3
+    <group name="Root" repeat="*" class="box-body">
+      <arg type="d3.cmd" name="command"/>
+    </group>
+  </item>
+
+  <item name="D3/Select" type="d3.cmd.select">
+    .select(<arg type="text" name="selection"/>)
+    <group name="Methods" repeat="*" class="box-body">
+      <arg type="d3.selection|d3.cmd.select" name="command1"/>
+    </group>
+  </item>
+  
+  <item name = "D3/SelectAll" type="d3.cmd.select">
+    .selectAll(<arg type="text" name="selection"/>)
+    <group name="Methods" repeat="*" class="box-body">
+      <arg type="d3.selection|d3.cmd.select" name="command2"/>
+    </group>
+  </item>
+  
+  <item name="D3/Range" type="d3.cmd.range">
+    .range(<arg type="text|number" name="length"/>)
+    <group name="Methods" repeat="*" class="box-body">
+      <arg type="d3.range" name="command"/>
+    </group>
+  </item>
+  
+  <item name = "D3/Map" type="d3.range.map">
+    .map()
+  </item>
+  
+  <item name="D3/Data" type="d3.selection.data">
+    .data(d3.load(<arg type="text|file" name="tag"/>))
+  </item>
+
+  <item name="D3/Append" type="d3.selection.append">
+    .append(<arg type="text|svg.shape" name="tag"/>)
+  </item>
+
+  <item name="D3/Attr" type="d3.selection.attr">
+    .attr(<arg type="text" name="attrib"/>, <arg type="text" name="value"/>)
+  </item>
+  
+  <item name="SVG/Shape/Circle" type="svg.shape.circle">
+    circle
+  </item>
+
+  <item name="SVG/Shape/Rect" type="svg.shape.rect">
+    rect
+  </item>
+  
+  <item name="D3/Text" type="d3.selection.text">
+    .text(<arg type='text|function' name = 'text'/>)
+  </item>
+  
+  <item name = "function" type = 'function'>
+    function(<arg type = 'text' name ='para'/>)
+  </item>
+</grammar>
