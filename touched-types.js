@@ -41,9 +41,14 @@ function type_isa(obj, type) {
 function type_isSuper(sup, sub) {
     //console.log (sup + ' <- ' + sub +'?');
     var supl= sup.split('|');
+    var subl= sub.split('|');
     if (supl.length>1) {
 	for (var i in supl) 
 	    if (type_isSuper(supl[i], sub)) return true;
+	return false;
+    } else if (subl.length>1) {
+	for (var i in subl) 
+	    if (type_isSuper(sup, subl[i])) return true;
 	return false;
     } else {
 	var supc= sup.split('.');
