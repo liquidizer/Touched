@@ -131,7 +131,7 @@ function unselectAll() {
 // 5: select the previous selectable value
 function selectNext(obj, axis) {
     //console.log(axis);
-    var reverse = axis == 0 || axis ==3 || axis== 5;
+    var reverse = axis == 0 || axis ==2 || axis== 5;
     var leftright =axis == 2 || axis == 3 ;
     var updown = axis ==0 || axis==1;
     var selectnext = axis ==4 || axis==5;
@@ -171,7 +171,7 @@ function selectNext(obj, axis) {
                     return;
                 }
             }
-            if (leftright && !isup) {
+            if (leftright && !isup && obj.find('.box').length==0) {
                 select(obj);
                 return;          
                 //find the parent class of obj   
@@ -183,11 +183,9 @@ function selectNext(obj, axis) {
         }
         isactive= true;
         // proceed to next element
-        var childs = reverse ? obj.children(':last') : obj.children(':first');       
-        if (!isup && !obj.hasClass('float') && childs.length > 0) {
+        var childs = reverse ? obj.children(':last') : obj.children(':first');  
+        if (!isup && !obj.hasClass('float') && childs.length > 0) 
             obj = childs;
-            isup= false;
-        }
         else { 
             var next = reverse ? obj.prev() : obj.next();   
             if (next.length > 0) {
