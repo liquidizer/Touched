@@ -113,7 +113,7 @@ function insertItem(template) {
     var item = elementArea(template.attr('type'));
     expandTemplate(template, item);
     // if check_canRepeat and there is no next neigbor then:
-    if (check_canRepeat(selection) && selection.next('.box').length == 0)
+    if (check_canRepeat(selection) && selection.next('.arg').length == 0)
        selection.after(dropArea(selection.attr('data-type'), selection.attr('data-name')));
     insertBox(selection, item);
     selectNext(item, 4);

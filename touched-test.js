@@ -8,6 +8,7 @@ function init() {
 
 function runTest(name) {
     $('#testChoice').hide();
+    $('#rund3').hide();
     var data= $('tests test[name="'+name+'"]');
     var testData = $(data).text();
     var array = testData.split("}");

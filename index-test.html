@@ -1,17 +1,23 @@
 <html>
   <meta charset="UTF-8"/>
+
   <link type="text/css" href="style.css" rel="stylesheet"/>
   <script type="text/javascript" src="jquery.min.js"></script>
   <script type="text/javascript" src="touched.js"></script>
   <script type="text/javascript" src="touched-types.js"></script>
   <script type="text/javascript" src="touched-menu.js"></script>
   <script type="text/javascript" src="touched-test.js"></script>
+  <script type="text/javascript" src="d3.v2.js"></script>
+  <script type="text/javascript" src="d3.test.js"></script>
   <body>
     <div id="menubar">
       <ul id="menu"/>
     </div>
     <div style="height:50px">Touched Editor</div>
     <div id="canvas">
+    </div>
+    <div id="rund3">
+        <input type='button' onclick='getPlot()' value='run d3'/>
     </div>
     <div id="testChoice">    
         <input type='button' onclick='recordTest()' value='record a new test case'/>
@@ -20,7 +26,7 @@
   </body>
   <tests style="display:none">
     <test name="create SVG">
-   {target:"BODY", keyCode:68, isCtrl:false, isShift:false}
+{target:"BODY", keyCode:68, isCtrl:false, isShift:false}
 {target:"BODY", keyCode:84, isCtrl:false, isShift:false}
 {target:"BODY", keyCode:84, isCtrl:false, isShift:false}
 {target:"#input", keyCode:83, isCtrl:false, isShift:false}

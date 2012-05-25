@@ -1,6 +1,6 @@
 <grammar>
   <item name="D3/Script" type="d3.script" new="D3 Visualisation">
-    D3
+    d3
     <group name="Root" repeat="*" class="box-body">
       <arg type="d3.cmd" name="command"/>
     </group>
@@ -52,10 +52,10 @@
   </item>
   
   <item name="D3/Text" type="d3.selection.text">
-    .text(<arg type='text|function' name = 'text'/>)
+    .text(<arg type='function' name = 'text'/>)
   </item>
   
   <item name = "function" type = 'function'>
-    function(<arg type = 'text' name ='para'/>)
+    (index, data) → <arg type = 'exp.formula' name ='para'/>
   </item>
 </grammar>

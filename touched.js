@@ -20,10 +20,8 @@ function init() {
         });
     $('body').attr('ontouchmove','msMove(event)');
     $('body').attr('ontouchend','msUp(event)');
-    $('body').keydown(keyPress);
-    //canvas.append(dropArea('exp.list|xml.doc','start'));
-    //canvas.append(dropArea('xml.doc','start'));
-    canvas.append(dropArea('d3.script','start'));
+    $('html').keydown(keyPress);
+    canvas.append(dropArea('d3.script|xml.doc|exp.list','start'));
     select(canvas.find('.arg'));
     initMenu();
     updateAll();
