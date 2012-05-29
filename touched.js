@@ -40,35 +40,6 @@ function updateAll() {
     */
 }
 
-function extractInfo(node) {
-    //console.log(node);
-    var ele = $(node);
-    if (ele.hasClass('element')) {
-        var element= {};
-        ele.children('.arg, .group').each(function(i, child) {
-            var name= $(child).attr('data-name');
-            element[name]= extractInfo(child);
-        });
-        return element;
-    }
-    else if (ele.hasClass('arg')) {
-        var child= ele.children();
-        if (child.hasClass('element'))
-            return extractInfo(child);
-        else
-            return child.text();
-    }
-    else if (ele.hasClass('group')) {
-        return ele.children('.arg').map(function(index, child) {
-            return extractInfo($(child));
-        });
-    } 
-    else {
-        console.log("invalid element");
-        console.log(node);
-    }
-}
-
 function makeClickable(obj) {
     obj.attr('onmousedown','msDown(event)');
     obj.attr('ontouchstart','msDown(event)');

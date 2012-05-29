@@ -1,34 +1,64 @@
+var filename ="";
+
+function extractInfo(node) {
+    //console.log(node);
+    var ele = $(node);
+    if (ele.hasClass('element')) {
+        var element= {};
+        ele.children('.arg, .group').each(function(i, child) {
+            var name= $(child).attr('data-name');
+            element[name]= extractInfo(child);
+        });
+        return element;
+    }
+    else if (ele.hasClass('arg')) {
+        var child= ele.children();
+        if (child.hasClass('element'))
+            return extractInfo(child);
+        else
+            return child.text();
+    }
+    else if (ele.hasClass('group')) {
+        return ele.children('.arg').map(function(index, child) {
+            return extractInfo($(child));
+        });
+    } 
+    else {
+        console.log("invalid element");
+        console.log(node);
+    }
+}
+
+
 function getPlot() {
     $('#testChoice').hide();
-    $('#rund3').hide();
     $("#canvas").append("<div id ='dataview'/>");
     var root = $('#canvas').children();
-    var x = extractInfo(root);
-    console.log("x is :");
-    console.log(x); 
-    d3.json("v.json", function(jsondata) {
+    var obj = extractInfo(root);
+    //get information from x here:
+    //getInfo(obj);
+    getInfo(obj.Root);
+    d3.json(filename, function(jsondata) {
         plotData(d3.select("#dataview"), jsondata);
     });
 }
-
-var getKeys = function(obj) {
-        var keys = [];
-        if (obj instanceof Object) for (var key in obj) {
-            keys.push(key);
+    
+function getInfo(obj) {
+    console.log(obj);
+    for (var i = 0; i < obj.length; i++) {
+        for (var propertyname in obj[i]) {
+            console.log(propertyname);
+            if (typeof(obj[i][propertyname]) == 'object') getInfo(obj[i][propertyname]);
+            else {
+                console.log(propertyname + "-> " + obj[i][propertyname]);
+                if (propertyname == 'filename') filename = obj[i][propertyname];
+            }
         }
-        return keys;
-    };
+    }
+}
     
 function plotData(root, data) {   
-    root.data(getKeys(data))
-        .each(function(d) {
-        console.log(d);
-        console.log(data);
-        if ((data[d] instanceof Array) && d=="value") 
-           plot(getData(data[d]));
-        else if(!(data[d] instanceof Array))
-           plotData(root, data[d]);
-    })
+    plot(getData(data));
 }
 
 function getData(value) { 
@@ -99,7 +129,7 @@ svg.append("g")
 
 svg.append("g")
     .attr("class", "y axis")
-    .call(yAxis);
+    .call(yAxis); 
 
 if (data[0] instanceof Array)
  var svg2= svg.selectAll(".line")
@@ -130,12 +160,19 @@ svg3.data(data[j])
 }
 else{
 svg3.data(data)
-    .enter().append("circle")
-    .attr("class", "dot")
-    .attr("cx", line.x())
-    .attr("cy", line.y())
-    .attr("r", 3.5) 
+    .enter()
+    //.append("circle")
+    //.attr("class", "dot")
+    .append("rect")
+    .attr("class", "cell")
+    //.attr("cx", line.x())
+    //.attr("cy", line.y())
+    //.attr("r", 3.5) 
+    .attr("x", line.x())
+    .attr("y", line.y())
+    .attr("width", 3.5)
+    .attr("height", 5)
     .append("svg:title").text(
-        function(d){return "model time: "+ d.y;})
+        function(d){return "value: "+ d.y;})
     }
 }

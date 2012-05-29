@@ -45,6 +45,7 @@ var record;
 function recordTest() {
     record="";
     $('#testChoice').hide();
+    $('#rund3').hide();
     $('body').keydown(function(evt) {
         var target= evt.target.nodeName;
         if ($(evt.target).attr('id'))

@@ -9,34 +9,16 @@
   <item name="D3/Select" type="d3.cmd.select">
     .select(<arg type="text" name="selection"/>)
     <group name="Methods" repeat="*" class="box-body">
-      <arg type="d3.selection|d3.cmd.select" name="command1"/>
+      <arg type="d3.selection|d3.cmd.select" name="command"/>
     </group>
-  </item>
-  
-  <item name = "D3/SelectAll" type="d3.cmd.select">
-    .selectAll(<arg type="text" name="selection"/>)
-    <group name="Methods" repeat="*" class="box-body">
-      <arg type="d3.selection|d3.cmd.select" name="command2"/>
-    </group>
-  </item>
-  
-  <item name="D3/Range" type="d3.cmd.range">
-    .range(<arg type="text|number" name="length"/>)
-    <group name="Methods" repeat="*" class="box-body">
-      <arg type="d3.range" name="command"/>
-    </group>
-  </item>
-  
-  <item name = "D3/Map" type="d3.range.map">
-    .map()
   </item>
   
   <item name="D3/Data" type="d3.selection.data">
-    .data(d3.load(<arg type="text|file" name="tag"/>))
+    .data(d3.load(<arg type="text|file" name="filename"/>))
   </item>
 
   <item name="D3/Append" type="d3.selection.append">
-    .append(<arg type="text|svg.shape" name="tag"/>)
+    .append(<arg type="text|svg.shape" name="Appendtag"/>)
   </item>
 
   <item name="D3/Attr" type="d3.selection.attr">
