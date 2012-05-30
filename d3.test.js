@@ -1,22 +1,66 @@
 var filename ="";
+var appendTag = "circle";
+var startrow = 0;
+var endrow= 0;
+var startcol =0;
+var endcol=0;
+
+function getPlot() {
+    $('#testChoice').hide();
+    $("#canvas").append("<div id ='dataview'/>");
+    var root = $('#canvas').children();
+    var obj = extractInfo(root);
+    //get information from x here:
+    for (var name in obj) {
+        getInfo(obj[name]);
+    }
+    /*
+    d3.json(filename, function(jsondata) {
+        console.log(jsondata);
+        plotData(d3.select("#dataview"), jsondata);
+    });*/
+    d3.text(filename, function(data){
+        var parsedCSV = d3.csv.parseRows(data);
+        //console.log(parsedCSV);
+        if (endrow == 0) endrow = parsedCSV.length;
+        if (endcol == 0) endcol = parsedCSV[0].length;
+        if (startcol == 0) startcol = 1;
+        if (startrow == 0) startrow = 1;
+        var plotArr=[];
+        // get the array user wants to plot from the index:
+        var index =0;
+        for(var i = startrow-1; i < endrow; i++){
+           var arr = parsedCSV[i];
+           plotArr[index] = arr.slice(startcol-1, endcol);
+           index++;
+        }
+        plotData(d3.select("#dataview"), plotArr);
+    });
+}
 
 function extractInfo(node) {
     //console.log(node);
     var ele = $(node);
     if (ele.hasClass('element')) {
-        var element= {};
-        ele.children('.arg, .group').each(function(i, child) {
-            var name= $(child).attr('data-name');
-            element[name]= extractInfo(child);
-        });
-        return element;
+        if (ele.children('.arg, .group').length != 0) {
+            var element = {};
+            ele.children('.arg, .group').each(function(i, child) {
+                var name = $(child).attr('data-name');
+                //console.log("name " + name);
+                element[name] = extractInfo(child);
+            });
+            return element;
+        }
+        else return ele.text();
     }
     else if (ele.hasClass('arg')) {
         var child= ele.children();
         if (child.hasClass('element'))
             return extractInfo(child);
-        else
+        else{
+            //console.log('text ' + child.text());
             return child.text();
+        }
     }
     else if (ele.hasClass('group')) {
         return ele.children('.arg').map(function(index, child) {
@@ -29,30 +73,26 @@ function extractInfo(node) {
     }
 }
 
-
-function getPlot() {
-    $('#testChoice').hide();
-    $("#canvas").append("<div id ='dataview'/>");
-    var root = $('#canvas').children();
-    var obj = extractInfo(root);
-    //get information from x here:
-    //getInfo(obj);
-    getInfo(obj.Root);
-    d3.json(filename, function(jsondata) {
-        plotData(d3.select("#dataview"), jsondata);
-    });
-}
-    
 function getInfo(obj) {
-    console.log(obj);
+    //console.log(obj);
     for (var i = 0; i < obj.length; i++) {
-        for (var propertyname in obj[i]) {
-            console.log(propertyname);
-            if (typeof(obj[i][propertyname]) == 'object') getInfo(obj[i][propertyname]);
-            else {
-                console.log(propertyname + "-> " + obj[i][propertyname]);
-                if (propertyname == 'filename') filename = obj[i][propertyname];
+        if (typeof(obj[i]) == 'object') {
+            for (var propertyname in obj[i]) {
+                //console.log(propertyname);
+                if (typeof(obj[i][propertyname]) == 'object') getInfo(obj[i][propertyname]);
+                else {
+                    console.log(propertyname + "-> " + obj[i][propertyname]);
+                    if (propertyname == 'filename') filename = obj[i][propertyname];
+                    if (propertyname == 'startrow') startrow = obj[i][propertyname];
+                    if (propertyname == 'endrow') endrow = obj[i][propertyname];
+                    if (propertyname == 'startcolumn') startcol = obj[i][propertyname];
+                    if (propertyname == 'endcolumn') endcol = obj[i][propertyname];
+                    if (propertyname == 'Appendtag') appendTag = obj[i][propertyname];
+                }
             }
+        }
+        else{
+            console.log(obj[i]);
         }
     }
 }
@@ -144,6 +184,7 @@ else
     .style("stroke-width", 2) 
     .style("fill", 'none') 
     .style("stroke",  function(d, i) {return color(i);}); 
+
 
 var svg3 = svg.selectAll(".dot");
 if(data[0] instanceof Array){

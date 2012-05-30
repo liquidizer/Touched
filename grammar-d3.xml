@@ -1,27 +1,37 @@
 <grammar>
-  <item name="D3/Script" type="d3.script" new="D3 Visualisation">
-    d3
-    <group name="Root" repeat="*" class="box-body">
+  <item name="D3/Script" type="d3.script" new="D3 Visualisation">  
+    <group name="Data" repeat="*" class="box-body">
       <arg type="d3.cmd" name="command"/>
+    </group>    
+    <group name="Plot" repeat="*" class="box-body">
+      <arg type="d3.plot" name="plot"/>
     </group>
   </item>
 
-  <item name="D3/Select" type="d3.cmd.select">
-    .select(<arg type="text" name="selection"/>)
-    <group name="Methods" repeat="*" class="box-body">
-      <arg type="d3.selection|d3.cmd.select" name="command"/>
+  <item name="D3/Data" type="d3.cmd.select">
+    Data: <arg type="text|file" name="filename"/>
+    <group name="Data" repeat="*" class="box-body">
+      <arg type="d3.data" name="command"/>
     </group>
   </item>
   
-  <item name="D3/Data" type="d3.selection.data">
-    .data(d3.load(<arg type="text|file" name="filename"/>))
+  <item name="D3/Row" type="d3.data">
+    Row: <arg type="text" name="startrow"/> → <arg type="text" name="endrow"/>
+  </item>
+  
+  <item name="D3/Column" type="d3.data">
+    Column: <arg type="text" name="startcolumn"/> → <arg type="text" name="endcolumn"/>
+  </item>  
+  
+  <item name="D3/Transpose" type="d3.data.transpose">
+    transpose
+  </item>  
+
+  <item name="D3/Append" type="d3.plot.append">
+    .append(<arg type="svg.shape" name="Appendtag"/>)
   </item>
 
-  <item name="D3/Append" type="d3.selection.append">
-    .append(<arg type="text|svg.shape" name="Appendtag"/>)
-  </item>
-
-  <item name="D3/Attr" type="d3.selection.attr">
+  <item name="D3/Attr" type="d3.plot.attr">
     .attr(<arg type="text" name="attrib"/>, <arg type="text" name="value"/>)
   </item>
   
@@ -32,12 +42,5 @@
   <item name="SVG/Shape/Rect" type="svg.shape.rect">
     rect
   </item>
-  
-  <item name="D3/Text" type="d3.selection.text">
-    .text(<arg type='function' name = 'text'/>)
-  </item>
-  
-  <item name = "function" type = 'function'>
-    (index, data) → <arg type = 'exp.formula' name ='para'/>
-  </item>
+ 
 </grammar>
