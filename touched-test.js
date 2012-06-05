@@ -8,7 +8,7 @@ function init() {
 
 function runTest(name) {
     $('#testChoice').hide();
-    $('#rund3').hide();
+   
     var data= $('tests test[name="'+name+'"]');
     var testData = $(data).text();
     var array = testData.split("}");
@@ -27,7 +27,10 @@ function stepThroughTest(array, num) {
             var oldvalue = $('#input').attr('value');
             if (res.keyCode == 8) {
                 $('#input').attr('value', oldvalue.replace(/.$/,''));
-            } else {
+            }
+            else if(res.keyCode == 190)
+                $('#input').attr('value', oldvalue+'.'); 
+            else {
                 var newvalue = String.fromCharCode(res.keyCode);
                 if (!e.shiftKey) newvalue = newvalue.toLowerCase();
                 $('#input').attr('value', oldvalue + newvalue);

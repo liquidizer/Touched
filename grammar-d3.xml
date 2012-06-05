@@ -2,10 +2,8 @@
   <item name="D3/Script" type="d3.script" new="D3 Visualisation">  
     <group name="Data" repeat="*" class="box-body">
       <arg type="d3.cmd" name="command"/>
+      <!--<arg type="number|range" name="command"/>-->
     </group>    
-    <group name="Plot" repeat="*" class="box-body">
-      <arg type="d3.plot" name="plot"/>
-    </group>
   </item>
 
   <item name="D3/Data" type="d3.cmd.select">
@@ -15,12 +13,24 @@
     </group>
   </item>
   
-  <item name="D3/Row" type="d3.data">
-    Row: <arg type="text" name="startrow"/> → <arg type="text" name="endrow"/>
+  <item name="Range" type="range">
+    <arg type="number" name="start"/> → <arg type="number" name="end"/>
   </item>
   
-  <item name="D3/Column" type="d3.data">
-    Column: <arg type="text" name="startcolumn"/> → <arg type="text" name="endcolumn"/>
+  <item name="D3/Filter/Row" type="d3.data.keeprow">
+    Keep Row: <arg type="number|range" name="rows"/>
+  </item>
+  
+  <item name="D3/Filter/Column" type="d3.data.keepcolumn">
+    Keep Column: <arg type="number|range" name="columns"/>
+  </item>  
+  
+  <item name="D3/Filter/RemoveRow" type="d3.data.removerow">
+    Remove Rows: <arg type="number|range" name="rows"/>
+  </item>
+  
+  <item name="D3/Filter/RemoveColumn" type="d3.data.removecolumn">
+    Remove Columns: <arg type="number|range" name="columns"/>
   </item>  
   
   <item name="D3/Transpose" type="d3.data.transpose">

@@ -2,6 +2,8 @@ var grammarMenu= {};
 var editMenu= [
     [ 'Text', check_isType('text'), menu_edit('text') ],
     [ 'Number', check_isType('number'), menu_edit('number') ],
+    [ '+1', check_isType('number',true), menu_add('number',1) ],
+    [ '-1', check_isType('number',true), menu_add('number',-1) ],
     [ 'Before', check_canRepeat, menu_add_before ],
     [ 'After', check_canRepeat, menu_add_after ],
     [ 'Copy', check_canCopy, menu_copy ],
@@ -165,9 +167,9 @@ function check_canCopy(obj) {
     return !obj.hasClass('arg');
 }
 
-function check_isType(type) {
+function check_isType(type, isobj) {
     return function(obj) {
-        return type_isa(obj, type);
+        return type_isa(obj, type) && (!isobj || !obj.hasClass('arg'));
     };
 }
 
@@ -189,6 +191,14 @@ function menu_add_before() {
     updateAll();
 }
 
+function menu_add(type, increment) {
+    return menu_edit(type, increment);
+    // TODO: Replace
+    //var selection= $('.selected');
+    //var value= parseFloat(selection.text())+increment;
+    //return menu_edit_setValue(value.toString(), type);
+}
+
 // show a text input control for setting the selected text item
 function menu_edit(type, constValue) {
     return function() {
@@ -198,7 +208,7 @@ function menu_edit(type, constValue) {
             if (typeof(constValue)=='number')
                 if (!selection.hasClass('arg'))
                     value= parseFloat(selection.text())+constValue;
-            menu_edit_setValue(value.toString(), type);
+            menu_edit_setValue(type, value.toString() );
     	} else {
             var elt= $('#menu');
             elt.contents().remove();

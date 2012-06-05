@@ -1,102 +1,134 @@
-var filename ="";
-var appendTag = "circle";
-var startrow = 0;
-var endrow= 0;
-var startcol =0;
-var endcol=0;
-
 function getPlot() {
     $('#testChoice').hide();
     $("#canvas").append("<div id ='dataview'/>");
     var root = $('#canvas').children();
-    var obj = extractInfo(root);
-    //get information from x here:
-    for (var name in obj) {
-        getInfo(obj[name]);
-    }
-    /*
-    d3.json(filename, function(jsondata) {
-        console.log(jsondata);
-        plotData(d3.select("#dataview"), jsondata);
-    });*/
+    
+    var filename = getFilename(root);
+    //console.log(filename);
+    //get data
+    
     d3.text(filename, function(data){
         var parsedCSV = d3.csv.parseRows(data);
-        //console.log(parsedCSV);
-        if (endrow == 0) endrow = parsedCSV.length;
-        if (endcol == 0) endcol = parsedCSV[0].length;
-        if (startcol == 0) startcol = 1;
-        if (startrow == 0) startrow = 1;
-        var plotArr=[];
-        // get the array user wants to plot from the index:
-        var index =0;
-        for(var i = startrow-1; i < endrow; i++){
-           var arr = parsedCSV[i];
-           plotArr[index] = arr.slice(startcol-1, endcol);
-           index++;
-        }
-        plotData(d3.select("#dataview"), plotArr);
+        console.log(parsedCSV);     
+        var cmdList = extractCommands(root);
+        //console.log(cmdList);    
+        process(cmdList, parsedCSV, function(processedData) {
+            // all data is loaded and processed....
+            //console.log('back');
+            console.log(processedData);
+            plotData(d3.select("#dataview"), processedData);
+        });
     });
 }
 
-function extractInfo(node) {
-    //console.log(node);
-    var ele = $(node);
-    if (ele.hasClass('element')) {
-        if (ele.children('.arg, .group').length != 0) {
-            var element = {};
-            ele.children('.arg, .group').each(function(i, child) {
-                var name = $(child).attr('data-name');
-                //console.log("name " + name);
-                element[name] = extractInfo(child);
-            });
-            return element;
-        }
-        else return ele.text();
+function process(cmdList, parsedCSV, callback) {
+    if (cmdList.length==0) {
+        callback(parsedCSV);
+        return;
     }
-    else if (ele.hasClass('arg')) {
-        var child= ele.children();
-        if (child.hasClass('element'))
-            return extractInfo(child);
-        else{
-            //console.log('text ' + child.text());
-            return child.text();
+    var command = cmdList.shift();    
+    if (command[0] == 'd3.data.keeprow') {
+        if (command.length == 3) parsedCSV = parsedCSV.slice(command[1] - 1, command[2]);
+        else if (command.length == 2) parsedCSV = parsedCSV.slice(command[1] - 1,command[1]);
+    }
+    else if (command[0] == 'd3.data.keepcolumn') {   
+        for (var i = 0; i < parsedCSV.length; i++) {
+            if (command.length == 3) parsedCSV[i] = parsedCSV[i].slice(command[1] - 1, command[2]);
+            if (command.length == 2) parsedCSV[i] = parsedCSV[i].slice(command[1] - 1, command[1]);
         }
     }
-    else if (ele.hasClass('group')) {
-        return ele.children('.arg').map(function(index, child) {
-            return extractInfo($(child));
-        });
-    } 
-    else {
-        console.log("invalid element");
-        console.log(node);
-    }
-}
-
-function getInfo(obj) {
-    //console.log(obj);
-    for (var i = 0; i < obj.length; i++) {
-        if (typeof(obj[i]) == 'object') {
-            for (var propertyname in obj[i]) {
-                //console.log(propertyname);
-                if (typeof(obj[i][propertyname]) == 'object') getInfo(obj[i][propertyname]);
-                else {
-                    console.log(propertyname + "-> " + obj[i][propertyname]);
-                    if (propertyname == 'filename') filename = obj[i][propertyname];
-                    if (propertyname == 'startrow') startrow = obj[i][propertyname];
-                    if (propertyname == 'endrow') endrow = obj[i][propertyname];
-                    if (propertyname == 'startcolumn') startcol = obj[i][propertyname];
-                    if (propertyname == 'endcolumn') endcol = obj[i][propertyname];
-                    if (propertyname == 'Appendtag') appendTag = obj[i][propertyname];
-                }
+    else if (command[0] == 'd3.data.transpose') {
+        var w = parsedCSV.length,
+            h = parsedCSV[0].length;
+        var i, j, t = [];
+        for (i = 0; i < h; i++) {
+            // Insert a new row (array)
+            t[i] = [];
+            // Loop through every item per item in outer array (width)
+            for (j = 0; j < w; j++) {
+                // Save transposed data.
+                t[i][j] = parsedCSV[j][i];
             }
         }
-        else{
-            console.log(obj[i]);
+        parsedCSV = t;
+    }
+    else if(command[0] == 'd3.data.removerow'){
+        if (command.length == 3) parsedCSV.splice(command[1] - 1, command[2] - command[1] + 1);        
+        else if (command.length == 2) parsedCSV.splice(command[1] - 1, 1);
+    }
+    else if (command[0] == 'd3.data.removecolumn') {
+        for (var i = 0; i < parsedCSV.length; i++) {
+            if (command.length == 3) parsedCSV[i].splice(command[1] - 1, command[2] - command[1] + 1);
+            if (command.length == 2) parsedCSV[i].splice(command[1] - 1, 1);
         }
     }
+    process(cmdList, parsedCSV, callback);
 }
-    
+
+function getFilename(node){
+     var ele = $(node);
+     var name = $(ele).attr('data-name');
+     if (name == 'filename') return ele.text();    
+     else {
+         var filename
+         ele.children().each(function(index, child) {
+             filename = filename || getFilename(child);
+         });
+         return filename;
+     }
+     return undefined;
+}
+
+function extractCommands(node) {
+    var list=[];
+    var ele = $(node);
+    var type = $(ele).attr('data-type');
+    //console.log(type);
+    if(type == 'd3.data.keeprow' || type == 'd3.data.keepcolumn' || type =='d3.data.removerow' || type == 'd3.data.removecolumn'){
+        var rangeele = $(ele).find('[data-type= range]');
+        if (rangeele.length != 0) {
+            var start = extractCommands($(rangeele).find('[data-name= start]'));
+            var end = extractCommands($(rangeele).find('[data-name= end]'));
+            var partiallist = [];
+            partiallist.push(type);
+            partiallist.push(start[0]);
+            partiallist.push(end[0]);
+            list.push(partiallist);
+        }
+        else{
+            var num = extractCommands($(ele).find('[data-type= number]'));
+            var partiallist = [];
+            partiallist.push(type);           
+            partiallist.push(num[0]);
+            list.push(partiallist);
+        }
+    }
+    else if(type == 'd3.data.transpose'){
+            var partiallist = [];
+            partiallist.push(type);
+            list.push(partiallist);
+    }
+    /*
+    if(type=='range'){
+        var start= extractCommands($(ele).find('[data-name= start]'));
+        var end= extractCommands($(ele).find('[data-name= end]'));      
+        var partiallist = [];
+        partiallist.push(start[0]);
+        partiallist.push(end[0]);
+        list.push(partiallist);
+    }*/
+    else if(type=='number'){
+        list= [parseFloat(ele.text())];
+    }
+    else {
+        ele.children().each(function(index, child) {
+            list= list.concat(extractCommands($(child)));
+            //console.log(data);
+        });
+    } 
+    return list;   
+}
+
 function plotData(root, data) {   
     plot(getData(data));
 }
