@@ -18,8 +18,10 @@ function init() {
         if (evt.target.nodeName!="INPUT")
             evt.preventDefault(); 
         });
-    $('body').attr('ontouchmove','msMove(event)');
-    $('body').attr('ontouchend','msUp(event)');
+    canvas.attr('ontouchmove','msMove(event)');
+    canvas.attr('ontouchend','msUp(event)');
+    canvas.attr('onmousedown','msDown(event)');
+    canvas.attr('ontouchstart','msDown(event)');
     $('html').keydown(keyPress);
     canvas.append(dropArea('d3.script|xml.doc|exp.list','start'));
     select(canvas.find('.arg'));
@@ -31,31 +33,17 @@ function updateAll() {
     updateTypes();
     updateMenu();
     typetext ='';
-    //console.log('Chaos result document goes here!');
-    /*
-    var root=$('#canvas').children();
-    var x= extractInfo(root);
-    console.log("x is :");
-    console.log(x);
-    */
-}
-
-function makeClickable(obj) {
-    obj.attr('onmousedown','msDown(event)');
-    obj.attr('ontouchstart','msDown(event)');
 }
 
 function elementArea(type) {
     var elt= $('<div class="box element"/>');
     elt.attr('data-type', type);
-    makeClickable(elt);
     return elt;
 }
 
 function textArea(text) {
     var tmp=$('<div class="box-text">');
     tmp.text(text);
-    makeClickable(tmp);
     return tmp;
 }
 
@@ -63,7 +51,6 @@ function dropArea(type, name) {
     var tmp= $('<div class="box arg"/>');
     tmp.attr('data-name', name);
     tmp.attr('data-type', type);
-    makeClickable(tmp);
     tmp.text(name);
     return tmp;
 }
