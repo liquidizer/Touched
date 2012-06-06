@@ -193,10 +193,6 @@ function menu_add_before() {
 
 function menu_add(type, increment) {
     return menu_edit(type, increment);
-    // TODO: Replace
-    //var selection= $('.selected');
-    //var value= parseFloat(selection.text())+increment;
-    //return menu_edit_setValue(value.toString(), type);
 }
 
 // show a text input control for setting the selected text item

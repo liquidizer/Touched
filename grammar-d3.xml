@@ -1,15 +1,16 @@
 <grammar>
   <item name="D3/Script" type="d3.script" new="D3 Visualisation">  
+    D3 command List
     <group name="Data" repeat="*" class="box-body">
       <arg type="d3.cmd" name="command"/>
       <!--<arg type="number|range" name="command"/>-->
     </group>    
   </item>
 
-  <item name="D3/Data" type="d3.cmd.select">
+  <item name="D3/Data" type="d3.data.csv">
     Data: <arg type="text|file" name="filename"/>
     <group name="Data" repeat="*" class="box-body">
-      <arg type="d3.data" name="command"/>
+      <arg type="d3.filter" name="command"/>
     </group>
   </item>
   
@@ -17,40 +18,44 @@
     <arg type="number" name="start"/> → <arg type="number" name="end"/>
   </item>
   
-  <item name="D3/Filter/Row" type="d3.data.keeprow">
+  <item name="D3/Filter/Row" type="d3.filter.keeprow">
     Keep Row: <arg type="number|range" name="rows"/>
   </item>
   
-  <item name="D3/Filter/Column" type="d3.data.keepcolumn">
+  <item name="D3/Filter/Column" type="d3.filter.keepcolumn">
     Keep Column: <arg type="number|range" name="columns"/>
   </item>  
   
-  <item name="D3/Filter/RemoveRow" type="d3.data.removerow">
+  <item name="D3/Filter/RemoveRow" type="d3.filter.removerow">
     Remove Rows: <arg type="number|range" name="rows"/>
   </item>
   
-  <item name="D3/Filter/RemoveColumn" type="d3.data.removecolumn">
+  <item name="D3/Filter/RemoveColumn" type="d3.filter.removecolumn">
     Remove Columns: <arg type="number|range" name="columns"/>
   </item>  
   
-  <item name="D3/Transpose" type="d3.data.transpose">
+  <item name="D3/Transpose" type="d3.filter.transpose">
     transpose
   </item>  
 
-  <item name="D3/Append" type="d3.plot.append">
-    .append(<arg type="svg.shape" name="Appendtag"/>)
-  </item>
-
-  <item name="D3/Attr" type="d3.plot.attr">
-    .attr(<arg type="text" name="attrib"/>, <arg type="text" name="value"/>)
+  <item name="D3/Plot/LineChart" type="d3.cmd.plot.line">
+    Plot <arg type="d3.data" name="data"/>
+    <group name="options" repeat="*" class="box-body">
+        <arg type="d3.plot-option" name="option"/>
+    </group>
   </item>
   
-  <item name="SVG/Shape/Circle" type="svg.shape.circle">
+  <item name="D3/PlotOption/Circle" type="d3.plot-option.circle">
     circle
   </item>
 
-  <item name="SVG/Shape/Rect" type="svg.shape.rect">
-    rect
+  <item name="D3/PlotOption/Size" type="d3.plot-option.size">
+    Size: <arg type="number" name="width"/> x <arg type="number" name="height"/>
   </item>
- 
+
+  <item name="D3/Plot/Table" type="d3.cmd.plot.table">
+    Table <arg type="d3.data" name="data"/>
+  </item>
+  
+
 </grammar>
