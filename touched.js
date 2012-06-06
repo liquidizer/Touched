@@ -259,12 +259,15 @@ function msDown (event) {
     if (hand==null && evt.target!=null) {
         event.preventDefault();
         // find signaling object
+        var active= false;
         var grabbed= $(evt.target);
-        while (!grabbed.hasClass('box')) {
+        while(true) {
             if (grabbed.attr('id')=='canvas') return;
-                grabbed= grabbed.parent();
-            }
-            hand= grabbed;
+            active = active || grabbed.is('.box-text, .box.arg, .selected');
+            if (active && grabbed.hasClass('box')) break;
+            grabbed= grabbed.parent();
+        }
+        hand= grabbed;
         unselect= hand.hasClass('selected');
         if (!unselect) {
             select(hand);
