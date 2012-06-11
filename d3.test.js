@@ -18,7 +18,8 @@ function getPlot() {
             var result = {
                 data: parsedCSV,
                 size: [300, 200],
-                plotOption: ""
+                plotOption: "",
+                xAxis:""
             };
             //console.log(element[i]);
             var cmdList = extractCommands(element[i]);
@@ -30,9 +31,9 @@ function getPlot() {
                 //console.log(processedData.data);
                 //console.log(processedData.plotOption);
                 if(processedData.plotOption=='d3.cmd.plot.line')
-                plotData(d3.select("#dataview"), processedData.data, processedData.size);
+                   plotData(d3.select("#dataview"), processedData);
                 if(processedData.plotOption=='d3.cmd.plot.table')
-                tabulate(d3.select("#dataview"), processedData.data);
+                   tabulate(d3.select("#dataview"), processedData);
             });
         }
     });
@@ -55,19 +56,7 @@ function process(cmdList, result, callback) {
         }
     }
     else if (command[0] == 'd3.filter.transpose') {
-        var w = result.data.length,
-            h = result.data[0].length;
-        var i, j, t = [];
-        for (i = 0; i < h; i++) {
-            // Insert a new row (array)
-            t[i] = [];
-            // Loop through every item per item in outer array (width)
-            for (j = 0; j < w; j++) {
-                // Save transposed data.
-                t[i][j] = result.data[j][i];
-            }
-        }
-        result.data = t;
+        result.data = transpose(result);
     }
     else if(command[0] == 'd3.filter.removerow'){
         if (command.length == 3) result.data.splice(command[1] - 1, command[2] - command[1] + 1);        
@@ -86,7 +75,35 @@ function process(cmdList, result, callback) {
     else if(command[0] == 'd3.cmd.plot.line' || command[0]=='d3.cmd.plot.table'){
         result.plotOption = command[0];
     }
+    else if(command[0] == 'd3.plot-option.XAxis'){
+        result.xAxis = result.data[command[1]-1];
+        result.data.splice(command[1]-1,1);
+    }
+    else if (command[0] == 'd3.filter.sort') {
+        //console.log(result.data);
+        //sort  
+        result.data = transpose(result);
+        result.data.sort(function(a,b){return a[command[1]-1]-b[command[1]-1];});
+        result.data = transpose(result);
+        //console.log(result.data);
+    }
     process(cmdList, result, callback);
+}
+
+function transpose(result) {
+    var w = result.data.length,
+        h = result.data[0].length;
+    var i, j, t = [];
+    for (i = 0; i < h; i++) {
+        // Insert a new row (array)
+        t[i] = [];
+        // Loop through every item per item in outer array (width)
+        for (j = 0; j < w; j++) {
+            // Save transposed data.
+            t[i][j] = result.data[j][i];
+        }
+    }
+    return t;
 }
 
 function getFilename(node){
@@ -164,6 +181,13 @@ function extractFilters(node) {
         partiallist.push(height[0]);
         list.push(partiallist);
     }
+    else if(type == 'd3.plot-option.XAxis'|| type == 'd3.filter.sort'){
+        var column = extractFilters($(ele).find('[data-name = "column"]'));
+        var partiallist = [];
+        partiallist.push(type);
+        partiallist.push(column[0]);
+        list.push(partiallist);
+    }
     else {
         ele.children().each(function(index, child) {
             list= list.concat(extractFilters($(child)));
@@ -173,16 +197,24 @@ function extractFilters(node) {
     return list;   
 }
 
-function plotData(root, data, size) {   
-    plot(root,getData(data), size);
+function plotData(root, processeddata) {
+    var data = processeddata.data,
+    size = processeddata.size;
+    //console.log(processeddata.xAxis);
+    var dataPlot = getData(data,processeddata.xAxis);
+    //console.log(dataPlot);
+    plot(root,dataPlot, size);
 }
 
-function getData(value) { 
- return d3.range(value.length).map(function(i) {
-     if(value[i] instanceof Array)
-        return getData(value[i]);
-     else
-        return {x: i, y: value[i]};
+function getData(value, xAxis) {
+    return d3.range(value.length).map(function(i) {
+        if (value[i] instanceof Array) return getData(value[i], xAxis);
+        else {
+            if(!xAxis)
+              return {x: i,y: parseFloat(value[i])};
+            else 
+              return {x : parseFloat(xAxis[i]), y: parseFloat(value[i])};
+        }
     });
 }
 
@@ -193,10 +225,24 @@ function getxMax(data){
         else return d.x;});
 }
 
+function getxMin(data){
+    return d3.min(data, function(d) {
+        if(d instanceof Array)
+           return getxMin(d);
+        else return d.x;});
+}
+
 function getyMax(data){
     return d3.max(data, function(d) {
         if(d instanceof Array)
           return getyMax(d);
+        else return d.y;});
+}
+
+function getyMin(data){
+    return d3.min(data, function(d) {
+        if(d instanceof Array)
+          return getyMin(d);
         else return d.y;});
 }
 
@@ -206,14 +252,16 @@ function plot(root,data, size){
     height = size[1] - margin.top - margin.bottom,
     color = d3.scale.category20(),
     xMax = getxMax(data),   
-    yMax = getyMax(data); 
+    yMax = getyMax(data), 
+    xMin = getxMin(data),
+    yMin=  getyMin(data);
     
 var x = d3.scale.linear()
-    .domain([0, xMax])
+    .domain([xMin, xMax])
     .range([0, width]);
 
 var y = d3.scale.linear()
-    .domain([0, yMax])
+    .domain([yMin, yMax])
     .range([height, 0]);
 
 var xAxis = d3.svg.axis()
@@ -292,13 +340,13 @@ svg3.data(data)
     }
 }
 
-function tabulate(root,data){
+function tabulate(root,processeddata){
     //console.log(data);   
     root.append("table")
       .style("border-collapse", "collapse")
       .style("border", "2px black solid")
       .selectAll("tr")
-      .data(data)
+      .data(processeddata.data)
       .enter()
       .append("tr")
       .selectAll("td")
