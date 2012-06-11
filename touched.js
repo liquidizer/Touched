@@ -2,11 +2,17 @@
 // hand is a reference to the object currently beeing dragged.
 var hand= null;
 
+// undo buffer
+var undoBuffer= [];
+var redoBuffer= [];
+
 // The screen coordinates of the last drag update.
 var startPos;
 var startOffset;
 var hasMoved= false;
 var unselect= false;
+
+// typed text for keyboard control
 var typetext ='';
 
 $(init);
@@ -49,6 +55,9 @@ function textArea(text) {
 
 function dropArea(type, name) {
     var tmp= $('<div class="box arg"/>');
+    var id=0;
+    while ($('#box-'+id).length>0) id++;
+    tmp.attr('id','box-'+id);
     tmp.attr('data-name', name);
     tmp.attr('data-type', type);
     tmp.text(name);
@@ -62,12 +71,51 @@ function releaseBox(box) {
         parent.text(parent.attr('data-name'));
     }
     box.remove();
+    var safeBox= box.clone();
+    var safeId= parent.attr('id');
+    touched_undo(function() {
+        insertBox($('#'+safeId), safeBox, true);
+        select(safeBox);
+    });
 }
 
-function insertBox(arg, item) {
+function insertBox(arg, item, keepIds) {
+    console.log('insert into '+arg.attr('id'));
     arg.removeClass('box');
     item.removeClass('float');
     arg.contents().replaceWith(item);
+    if (!keepIds) {
+        var id=1;
+        item.find('.box,.group').andSelf().each(
+            function(i, d) {
+                while ($('#box-'+id).length>0) id++;
+                $(d).attr('id', 'box-'+id); 
+            });
+    }
+    touched_undo(function() {
+        releaseBox($('#'+item.attr('id')));
+    });
+}
+
+function touched_undo(cmd) {
+    if (cmd===true) {
+        var undoCmd= undoBuffer.pop();
+        var safeBuffer= undoBuffer;
+        undoBuffer= redoBuffer;
+        if (undoCmd) undoCmd();
+        redoBuffer= undoBuffer;
+        undoBuffer= safeBuffer;
+        updateAll();
+    } else if (cmd===false) {
+        var undoCmd= redoBuffer.pop();
+        var safeBuffer= redoBuffer;
+        if (undoCmd) undoCmd();
+        redoBuffer= safeBuffer;
+        updateAll();
+    } else {
+        undoBuffer.push(cmd);
+        redoBuffer=[];
+    }
 }
 
 function select(obj) {
@@ -172,6 +220,12 @@ function keyPress(evt) {
             if (evt.which == 88)    
               //run code for CTRL+X
                 menu_delete();
+            if (evt.which == 89)    
+              //run code for CTRL+Y
+                touched_undo(false);
+            if (evt.which == 90)    
+              //run code for CTRL+Z
+                touched_undo(true);
         }
         else if (evt.keyCode > 64 && evt.keyCode < 91) {
             var type = String.fromCharCode(evt.keyCode);
@@ -263,7 +317,7 @@ function msDown (event) {
         var grabbed= $(evt.target);
         while(true) {
             if (grabbed.attr('id')=='canvas') return;
-            active = active || grabbed.is('.box-text, .box.arg, .selected');
+            active = active || grabbed.is('.box-text, .box.arg, .selected, .float');
             if (active && grabbed.hasClass('box')) break;
             grabbed= grabbed.parent();
         }
