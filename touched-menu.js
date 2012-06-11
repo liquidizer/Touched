@@ -16,6 +16,7 @@ var submitMenu= null;
 
 // initialize menu entries
 function initMenu() {
+    loaded= {};
     loadGrammarFile('grammar-xml.xml');
     loadGrammarFile('grammar-formula.xml');
     loadGrammarFile('grammar-d3.xml');
@@ -23,27 +24,32 @@ function initMenu() {
 
 // load a grammar file
 function loadGrammarFile(url) {
-  var request= new XMLHttpRequest();
-  request.onreadystatechange= function() {
-      if (request.readyState==4) initGrammar($(request.responseText));
-  };
-  request.open("GET", encodeURI(url), true);
-  request.send(null);
+    if (loaded[url]) return;
+    loaded[url] = true;
+    var request = new XMLHttpRequest();
+    request.onreadystatechange = function() {
+        if (request.readyState == 4) initGrammar($(request.responseText));
+    };
+    request.open("GET", encodeURI(url), true);
+    request.send(null);
 }
 
 // Interpret a loaded grammar definition
 function initGrammar(content) {
+    $(content).find('require').each(function (i, item) {
+        loadGrammarFile($(item).attr('src'));
+    });
     $(content).find('item').each(function (i, item) {
-	var name= $(item).attr('name').match(/[^\/]+/g);
-	var type= $(item).attr('type');
-	var curMenu= grammarMenu;
-	while (name[0]) {
-	    var sec= name.shift();
-	    if (!curMenu[sec]) curMenu[sec]= {};
-	    curMenu= curMenu[sec]
-	    curMenu._type= type_unify(type, curMenu._type || type);
-	}
-	curMenu.template= $(item);
+    	var name= $(item).attr('name').match(/[^\/]+/g);
+    	var type= $(item).attr('type');
+    	var curMenu= grammarMenu;
+    	while (name[0]) {
+    	    var sec= name.shift();
+    	    if (!curMenu[sec]) curMenu[sec]= {};
+    	    curMenu= curMenu[sec]
+    	    curMenu._type= type_unify(type, curMenu._type || type);
+    	}
+    	curMenu.template= $(item);
     });
     updateMenu();
     //console.log(content)
