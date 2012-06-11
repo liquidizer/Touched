@@ -68,6 +68,12 @@ function insertBox(arg, item) {
     arg.removeClass('box');
     item.removeClass('float');
     arg.contents().replaceWith(item);
+    var id=1;
+    item.find('.box').andSelf().each(
+        function(i, d) {
+            while ($('#box-'+id).length>0) id++;
+            $(d).attr('id', 'box-'+id); 
+        });
 }
 
 function select(obj) {
@@ -263,7 +269,7 @@ function msDown (event) {
         var grabbed= $(evt.target);
         while(true) {
             if (grabbed.attr('id')=='canvas') return;
-            active = active || grabbed.is('.box-text, .box.arg, .selected');
+            active = active || grabbed.is('.box-text, .box.arg, .selected, .float');
             if (active && grabbed.hasClass('box')) break;
             grabbed= grabbed.parent();
         }

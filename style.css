@@ -94,6 +94,12 @@ body {
     box-shadow: 0px 0px 3px 2px red;
 }
 
+.runtime-error {
+    border: 2px solid orange;
+    margin: 3px;
+    box-shadow: 0px 0px 3px 2px orange;
+}
+
 .box.arg {
     border: 1px solid gray;
     padding: 0px 15px 0px 15px;
@@ -101,15 +107,13 @@ body {
     color: gray;
 }
 
-.box.text {
-    padding: 0px 2px 0px 2px;
-    margin: 0px 1px 0px 1px;
-    font-weight: bold;
-}
-
 .box-text {
     float: left;
     margin: 0px 2px 0px 2px;
+}
+
+.box.box-text {
+    font-weight: bold;
 }
 
 .box-body > .arg {
