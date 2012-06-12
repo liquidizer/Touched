@@ -28,16 +28,19 @@ function loadGrammarFile(url) {
     loaded[url] = true;
     var request = new XMLHttpRequest();
     request.onreadystatechange = function() {
-        if (request.readyState == 4) initGrammar($(request.responseText));
+        if (request.readyState == 4) initGrammar($(request.responseText), url);
     };
     request.open("GET", encodeURI(url), true);
     request.send(null);
 }
 
 // Interpret a loaded grammar definition
-function initGrammar(content) {
+function initGrammar(content, url) {
     $(content).find('require').each(function (i, item) {
-        loadGrammarFile($(item).attr('src'));
+        var file= $(item).attr('src');
+        if (!file.match(/(^|\/)\//))
+            file= url.replace(/\/[^/]*$/, '/'+file);
+        loadGrammarFile(file);
     });
     $(content).find('item').each(function (i, item) {
     	var name= $(item).attr('name').match(/[^\/]+/g);
