@@ -1,6 +1,7 @@
 <grammar>
   <item name="D3/Script" type="d3.script" new="D3 Visualisation">  
     D3 command List
+       
     <group name="Data" repeat="*" class="box-body">
       <arg type="d3.cmd" name="command"/>
       <!--<arg type="number|range" name="command"/>-->
@@ -38,6 +39,10 @@
     transpose
   </item>  
 
+  <item name="D3/Sort" type="d3.filter.sort">
+    Sort by Column: <arg type="number" name="column"/>
+  </item>  
+
   <item name="D3/Plot/LineChart" type="d3.cmd.plot.line">
     Plot <arg type="d3.data" name="data"/>
     <group name="options" repeat="*" class="box-body">
@@ -45,16 +50,24 @@
     </group>
   </item>
   
-  <item name="D3/PlotOption/Circle" type="d3.plot-option.circle">
+  <!--item name="D3/PlotOption/Circle" type="d3.plot-option.circle">
     circle
-  </item>
+  </item-->
 
   <item name="D3/PlotOption/Size" type="d3.plot-option.size">
     Size: <arg type="number" name="width"/> x <arg type="number" name="height"/>
   </item>
 
+  <item name="D3/PlotOption/XAxis" type="d3.plot-option.XAxis">
+    XAxis: <arg type="number" name="column"/> 
+  </item>
+  
   <item name="D3/Plot/Table" type="d3.cmd.plot.table">
     Table <arg type="d3.data" name="data"/>
+  </item>
+  
+  <item name="D3/Caption" type="d3.cmd.caption">
+    Caption <arg type="text" name="Caption"/>
   </item>
   
 
