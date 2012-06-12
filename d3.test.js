@@ -2,34 +2,33 @@ function getPlot() {
     $('#testChoice').hide();
     $("#canvas").append("<div id ='dataview'/>");
     var root = $('#canvas').children();
-    if (!d3.select("#dataview").select("table").empty()) d3.select("#dataview").selectAll("table").remove();
-    if (!d3.select("#dataview").select("svg").empty()) d3.select("#dataview").selectAll("svg").remove();
+    d3.select("#dataview").selectAll('svg, table, h1').remove();
     var filename = getFilename(root);
     //console.log(filename);
     //get data  
     d3.text(filename, function(data){
         var parsedCSV = d3.csv.parseRows(data);
         //console.log(parsedCSV); 
-        
-        //console.log(root);
+        var deepcopy = jQuery.extend(true, [], parsedCSV);
         var element = root.find('[data-type= "d3.cmd"]');
         //console.log(element);        
         for (var i = 0; i < element.length; i++) {
+            console.log(deepcopy);
+            //var result= new Object();
             var result = {
-                data: parsedCSV,
+                data: deepcopy,
                 size: [300, 200],
                 plotOption: "",
-                xAxis:""
+                xAxis:"",
+                Caption:""
             };
-            //console.log(element[i]);
-            var cmdList = extractCommands(element[i]);
-            
-            //console.log(cmdList);    
+            console.log(i);
+            var cmdList = extractCommands(element[i]);         
+            console.log(cmdList);    
             process(cmdList, result, function(processedData) {
-                // all data is loaded and processed....
-                //console.log('back');
-                //console.log(processedData.data);
-                //console.log(processedData.plotOption);
+                // all data is loaded and processed....              
+                if(processedData.Caption)
+                   addCaption(d3.select("#dataview"), processedData.Caption);
                 if(processedData.plotOption=='d3.cmd.plot.line')
                    plotData(d3.select("#dataview"), processedData);
                 if(processedData.plotOption=='d3.cmd.plot.table')
@@ -87,6 +86,9 @@ function process(cmdList, result, callback) {
         result.data = transpose(result);
         //console.log(result.data);
     }
+    else if(command[0] == 'd3.cmd.caption'){
+        result.Caption = command[1];
+    }
     process(cmdList, result, callback);
 }
 
@@ -131,6 +133,13 @@ function extractCommands(element) {
          resList.push(partiallist);
          //return resList;
     }
+    else if (type == 'd3.cmd.caption'){
+         var partiallist = [];
+         partiallist.push(type);
+         var titlele= ele.find('[data-name= "Caption"]')
+         partiallist.push(titlele.text());
+         resList.push(partiallist);
+    }
     else {
         ele.children().each(function(index, child) {
             resList=resList.concat(extractCommands($(child)));
@@ -146,7 +155,7 @@ function extractFilters(node) {
     var type = $(ele).attr('data-type');
     //if(type) console.log(type);
     if(type == 'd3.filter.keeprow' || type == 'd3.filter.keepcolumn' || type =='d3.filter.removerow' || type == 'd3.filter.removecolumn'){
-        var rangeele = $(ele).find('[data-type= range]');
+        var rangeele = $(ele).find('[data-type= "range"]');
         if (rangeele.length != 0) {
             var start = extractFilters($(rangeele).find('[data-name= "start"]'));
             var end = extractFilters($(rangeele).find('[data-name= "end"]'));
@@ -197,13 +206,17 @@ function extractFilters(node) {
     return list;   
 }
 
+function addCaption(root, title){
+    root.append('h1').text(title);
+}
+
 function plotData(root, processeddata) {
     var data = processeddata.data,
     size = processeddata.size;
     //console.log(processeddata.xAxis);
     var dataPlot = getData(data,processeddata.xAxis);
     //console.log(dataPlot);
-    plot(root,dataPlot, size);
+    plot(root,dataPlot,size, processeddata.Caption);
 }
 
 function getData(value, xAxis) {
@@ -246,7 +259,8 @@ function getyMin(data){
         else return d.y;});
 }
 
-function plot(root,data, size){    
+function plot(root,data, size, caption){    
+    
     var margin = {top: 10, right: 10, bottom: 20, left: 40},
     width = size[0] - margin.left - margin.right,
     height = size[1] - margin.top - margin.bottom,
@@ -283,6 +297,10 @@ var svg = root
     .attr("height", height + margin.top + margin.bottom)
     .append("g")
     .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+    
+svg.append("text")
+    .attr("class", "title")
+    .text(caption);
 
 svg.append("g")
     .attr("class", "x axis")
