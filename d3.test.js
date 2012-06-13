@@ -2,41 +2,43 @@ function getPlot() {
     $('#testChoice').hide();
     $("#canvas").append("<div id ='dataview'/>");
     var root = $('#canvas').children();
-    d3.select("#dataview").selectAll('svg, table, h1').remove();
-    var filename = getFilename(root);
-    //console.log(filename);
-    //get data  
-    d3.text(filename, function(data){
-        var parsedCSV = d3.csv.parseRows(data);
-        //console.log(parsedCSV); 
-        var deepcopy = jQuery.extend(true, [], parsedCSV);
-        var element = root.find('[data-type= "d3.cmd"]');
-        //console.log(element);        
-        for (var i = 0; i < element.length; i++) {
-            console.log(deepcopy);
-            //var result= new Object();
+    d3.select("#dataview").selectAll('div').remove();
+    
+    var element = root.find('[data-type= "d3.cmd"]');
+    for (var i = 0; i < element.length; i++) {
+        var filename = getFilename(element[i]);
+        //get data  
+        processfile(filename, element[i], d3.select('#dataview').append('div'));
+    }
+}
+
+function processfile(filename, element, root){
+        d3.text(filename, function(data) {
+            var parsedCSV = [];
+            if (data) parsedCSV = d3.csv.parseRows(data);        
             var result = {
-                data: deepcopy,
+                data: parsedCSV,
                 size: [300, 200],
                 plotOption: "",
-                xAxis:"",
-                Caption:""
-            };
-            console.log(i);
-            var cmdList = extractCommands(element[i]);         
-            console.log(cmdList);    
+                xAxis: "",
+                Caption: ""
+            };  
+            console.log(filename);
+            var cmdList = extractCommands(element);
+            console.log(cmdList);
             process(cmdList, result, function(processedData) {
                 // all data is loaded and processed....              
-                if(processedData.Caption)
-                   addCaption(d3.select("#dataview"), processedData.Caption);
-                if(processedData.plotOption=='d3.cmd.plot.line')
-                   plotData(d3.select("#dataview"), processedData);
-                if(processedData.plotOption=='d3.cmd.plot.table')
-                   tabulate(d3.select("#dataview"), processedData);
-            });
-        }
-    });
+                if (processedData.Caption) 
+                    addCaption(root, processedData.Caption);
+                if (processedData.plotOption == 'd3.cmd.plot.line') 
+                    plotData(root, processedData);
+                if (processedData.plotOption == 'd3.cmd.plot.table')
+                    tabulate(root, processedData);
+            });   
+        });
+
 }
+
 
 function process(cmdList, result, callback) {
     if (cmdList.length==0) {
