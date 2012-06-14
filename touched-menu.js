@@ -65,7 +65,7 @@ function updateMenu() {
     if (selection.length>0) {
 	for (var i in editMenu) {
 	    if (editMenu[i][1](selection)) {
-		var li= $('<li/>');
+		var li= $('<li class="builtin"/>');
 		li.text(editMenu[i][0]);
 		li.click(editMenu[i][2]);
 		bar.append(li);

@@ -10,29 +10,33 @@ body {
 #menubar {
     position: fixed;
     padding: 0px;
-    border: 1px solid black;
     height: 50px;
     width: 100%;
-    background: gray;
+    background: navy;
+    color: white;
     font-weight: bold;
     z-index: 100;
 }
 
 #menu li {
     color: white;
-    background-color: gray;
+    border-radius: 10px;
     list-style-type: none;
     padding: 1px 10px 1px 10px;
-    margin: 1px;
+    margin: 1px 2px 1px 2px;
     position: relative;
 }
 
+#menu li.builtin {
+    color: khaki;
+}
+
 #menu li.disabled {
-    color: lightgray;
+    color: gray;
 }
 
 #menu span.menuSelect {
-    color: #00ffea;
+    color: limegreen;
 }
 
 #menu > li {
@@ -41,24 +45,21 @@ body {
 
 #menu .popup {
     position: absolute;
-    background-color: black;
     margin: 1px;
     padding: 1px;
     left: 10px;
     width: 200px;
 }
 
-.showType {
-    float: left;
-    vertical-align:top;
-    font-size: 8pt;
-    color: black;
-    background-color: lime;
+#menu .popup li {
+    background-color: white;
+    color: navy;
+    border: 1px solid navy;
+    box-shadow: 2px 3px 1px 1px navy;
 }
 
 .box {
     position: static;
-    background: white;
     display: table;
     float: left;
     margin: 0px;
@@ -69,19 +70,29 @@ body {
     float:left;
 }
 
+.box {
+    border-radius: 5px;
+}
+
 .box.selected {
     border: 1px solid black;
     background: gold;
-}
-
-.selected .box {
-    background: gold;
+    background: linear-gradient(top, gold 0%, orange 100%);
+    background: -webkit-gradient(linear, left top, left bottom, from(gold), to(orange));
+    background: -moz-linear-gradient(top,  gold,  orange); 
 }
 
 .box.float {
     position: absolute;
-    border: 1px solid black;
-    box-shadow: 3px 5px 3px 2px #000;
+    border: 1px solid maroon;
+    border-radius: 10px;
+    box-shadow: 3px 5px 3px 2px rgba(128, 0, 0, 0.5);
+    padding: 3px;
+    z-index: 50;
+}
+
+.box.float:not(.selected) {
+    background: moccasin;
 }
 
 .box.float.dragged {
@@ -101,10 +112,12 @@ body {
 }
 
 .box.arg {
-    border: 1px solid gray;
+    border: 1px solid purple;
     padding: 0px 15px 0px 15px;
     margin: 1px 2px 1px 2px;
-    color: gray;
+    color: purple;
+    font-style: italic;
+    border-radius: 10px;
 }
 
 .box-text {
