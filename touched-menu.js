@@ -24,14 +24,10 @@ function initMenu() {
 
 // load a grammar file
 function loadGrammarFile(url) {
-    if (loaded[url]) return;
-    loaded[url] = true;
-    var request = new XMLHttpRequest();
-    request.onreadystatechange = function() {
-        if (request.readyState == 4) initGrammar($(request.responseText), url);
-    };
-    request.open("GET", encodeURI(url), true);
-    request.send(null);
+    if (!loaded[url]) {
+        loaded[url] = true;
+        $.get(url, function(response) { initGrammar(response, url); });
+    }
 }
 
 // Interpret a loaded grammar definition
