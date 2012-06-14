@@ -51,7 +51,6 @@ function initGrammar(content, url) {
     	curMenu.template= $(item);
     });
     updateMenu();
-    //console.log(content)
 }
 
 // update the shown menu with respect to the current selection

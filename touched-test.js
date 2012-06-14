@@ -2,7 +2,7 @@ $(init);
 function init() {
     $('tests test').each(function(index, data){
         var name = $(data).attr('name');
-        $("#testChoice").append("<input type='button' onclick='runTest(\""+name+"\")' value='run "+name+"' />");
+        $("#tests").append("<li><input type='button' onclick='runTest(\""+name+"\")' value='run "+name+"' /></li>");
 });
 }
 

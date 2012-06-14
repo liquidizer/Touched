@@ -36,9 +36,10 @@ function init() {
 }
 
 function updateAll() {
-    updateTypes();
     updateMenu();
-    typetext ='';
+    updateTypes();
+    typetext='';
+    $('#canvas').trigger('update');
 }
 
 function elementArea(type) {
@@ -80,7 +81,6 @@ function releaseBox(box) {
 }
 
 function insertBox(arg, item, keepIds) {
-    console.log('insert into '+arg.attr('id'));
     arg.removeClass('box');
     item.removeClass('float');
     arg.contents().replaceWith(item);
@@ -124,6 +124,7 @@ function select(obj) {
 }
 
 function unselectAll() {
+    typetext ='';
     $('.selected').removeClass('selected');
 }
 
@@ -268,7 +269,7 @@ function keyPress(evt) {
         evt.preventDefault();
         var selection= $('.selected');
         selectNext(selection,1);
-        updateAll();
+        updateMenu();
     }
     else if(evt.which==9 || evt.which ==13){
         // TAB, Enter
@@ -276,14 +277,14 @@ function keyPress(evt) {
         evt.preventDefault();
         var selection= $('.selected');
         selectNext(selection, evt.shiftKey ? 5 : 4);
-        updateAll();
+        updateMenu();
     }
     else if (evt.which==38) {
         // KEY_UP
         evt.preventDefault();
         var selection= $('.selected');
         selectNext(selection, 0);
-        updateAll();
+        updateMenu();
     }
     else if(evt.which==37){        
         //KEY_LEFT
@@ -291,7 +292,7 @@ function keyPress(evt) {
         var selection= $('.selected');
         if (selection.size()>0)
             selectNext(selection, 2);
-        updateAll();
+        updateMenu();
     }
     else if(evt.which ==39){
         //KEY_RIGHT
@@ -299,7 +300,7 @@ function keyPress(evt) {
         var selection= $('.selected');
         if (selection.size()>0)
             selectNext(selection, 3);
-        updateAll();
+        updateMenu();
     }
     else if (evt.which==27) {
         // ESCAPE

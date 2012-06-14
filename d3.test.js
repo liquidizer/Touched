@@ -1,6 +1,4 @@
 function getPlot() {
-    $('#testChoice').hide();
-    $("#canvas").append("<div id ='dataview'/>");
     var root = $('#canvas').children();
     d3.select("#dataview").selectAll('div').remove();
     
@@ -8,35 +6,45 @@ function getPlot() {
     for (var i = 0; i < element.length; i++) {
         var filename = getFilename(element[i]);
         //get data  
-        processfile(filename, element[i], d3.select('#dataview').append('div'));
+        var root= d3.select('#dataview').append('div');
+        root.append('p').text('rendering results...');
+        processfile(filename, element[i], root);
     }
 }
 
 function processfile(filename, element, root){
+    if (filename) {
         d3.text(filename, function(data) {
-            var parsedCSV = [];
-            if (data) parsedCSV = d3.csv.parseRows(data);        
-            var result = {
-                data: parsedCSV,
-                size: [300, 200],
-                plotOption: "",
-                xAxis: "",
-                Caption: ""
-            };  
             console.log(filename);
-            var cmdList = extractCommands(element);
-            console.log(cmdList);
-            process(cmdList, result, function(processedData) {
-                // all data is loaded and processed....              
-                if (processedData.Caption) 
-                    addCaption(root, processedData.Caption);
-                if (processedData.plotOption == 'd3.cmd.plot.line') 
-                    plotData(root, processedData);
-                if (processedData.plotOption == 'd3.cmd.plot.table')
-                    tabulate(root, processedData);
-            });   
+            processResult(data, element, root)
         });
+    } else {
+        processResult(undefined, element, root)
+    }
+}
 
+function processResult(data, element, root) {
+    var parsedCSV = [];
+    if (data) parsedCSV = d3.csv.parseRows(data);        
+    var result = {
+        data: parsedCSV,
+        size: [300, 200],
+        plotOption: "",
+        xAxis: "",
+        Caption: ""
+    };  
+    var cmdList = extractCommands(element);
+    console.log(cmdList);
+    root.select('p').remove();
+    process(cmdList, result, function(processedData) {
+        // all data is loaded and processed....              
+        if (processedData.Caption) 
+            addCaption(root, processedData.Caption);
+        if (processedData.plotOption == 'd3.cmd.plot.line') 
+            plotData(root, processedData);
+        if (processedData.plotOption == 'd3.cmd.plot.table')
+            tabulate(root, processedData);
+    });   
 }
 
 

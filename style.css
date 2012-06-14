@@ -149,12 +149,3 @@ body {
   stroke: steelblue;
   stroke-width: 1.5px;
 }
-
-#dataview {
-    position: absolute;
-    top: 100px;
-    left: 300px;
-    width: 960px;
-    height:500px;
-    border: 1px solid red;
-}

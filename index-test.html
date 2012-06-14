@@ -9,6 +9,38 @@
   <script type="text/javascript" src="touched-test.js"></script>
   <script type="text/javascript" src="d3.v2.js"></script>
   <script type="text/javascript" src="d3.test.js"></script>
+  <style>
+    #testChoice {
+        border: 1px solid navy;
+        border - radius: 10px;
+        padding: 10px;
+        margin: 10px
+    }
+    #canvas {
+        width: 50%;
+    }
+    #execution {
+        width: 50%;
+        float: right;
+    }
+  </style>
+  <script language="javascript">
+      $(function() {
+        $('#canvas').bind('update', updateView);
+        $('#autoupdate').bind('change',updateView);
+        $('#showtests').bind('change', function() {
+            if ($('#showtests').attr('checked'))
+              $('#testChoice').show();
+            else
+              $('#testChoice').hide();
+        });
+      });
+      function updateView() {
+        $('#showtests').attr('checked',false);
+        $('#testChoice').hide();
+        if ($('#autoupdate').attr('checked')) getPlot();
+      }
+  </script>
   <body>
     <div id="menubar">
       <ul id="menu"/>
@@ -16,11 +48,20 @@
     <div style="height:50px">Touched Editor</div>
     <div id="canvas">
     </div>
-    <div id="rund3">
-        <input type='button' onclick='getPlot()' value='plot'/>
-    </div>
-    <div id="testChoice">    
-        <input type='button' onclick='recordTest()' value='record a new test case'/>
+    <div id="execution">
+        <div id="rund3">
+            <input type='checkbox' checked='true' id="autoupdate"/> Update plot
+            <input type='checkbox' checked='true' id="showtests"/> Show tests
+        </div>
+        <div id="testChoice">
+            <div>
+                <input type='button' onclick='recordTest()' value='record a new test case'/>
+            </div>
+            <h3>Recorded tests</h3>
+            <ul id="tests"/>
+        </div>
+        <div id="dataview">
+        </div>
     </div>
     <div style="clear:both;height:20px"/>
   </body>
