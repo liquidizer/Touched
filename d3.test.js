@@ -15,7 +15,7 @@ function getPlot() {
 function processfile(filename, element, root){
     if (filename) {
         d3.text(filename, function(data) {
-            console.log(filename);
+            //console.log(filename);
             processResult(data, element, root)
         });
     } else {
@@ -34,7 +34,7 @@ function processResult(data, element, root) {
         Caption: ""
     };  
     var cmdList = extractCommands(element);
-    console.log(cmdList);
+    //console.log(cmdList);
     root.select('p').remove();
     process(cmdList, result, function(processedData) {
         // all data is loaded and processed....              
@@ -76,6 +76,15 @@ function process(cmdList, result, callback) {
             if (command.length == 3) result.data[i].splice(command[1] - 1, command[2] - command[1] + 1);
             if (command.length == 2) result.data[i].splice(command[1] - 1, 1);
         }
+    }
+    else if(command[0] == 'd3.filter.selectcolumnbyvalue'){
+           //console.log(result.data);
+           var findres= [];
+           for(var i =0; i < result.data.length; i++){
+               if(result.data[i][(command[1]-1)] == command[2])
+                  findres.push(result.data[i]);
+           }
+           result.data = findres;
     }
     else if(command[0] == 'd3.plot-option.size'){
         result.size[0] = command[1];
@@ -182,6 +191,15 @@ function extractFilters(node) {
             partiallist.push(num[0]);
             list.push(partiallist);
         }
+    }
+    else if(type =='d3.filter.selectcolumnbyvalue'){
+           var rowNumber = extractFilters($(ele).find('[data-name= "rownumber"]'));
+           var value = extractFilters($(ele).find('[data-name= "value"]'));
+           var partiallist = [];
+           partiallist.push(type);
+           partiallist.push(rowNumber[0]);           
+           partiallist.push(value[0]);
+           list.push(partiallist);       
     }
     else if(type == 'd3.filter.transpose'){
             var partiallist = [];

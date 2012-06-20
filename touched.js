@@ -239,11 +239,13 @@ function keyPress(evt) {
                 if (typetext == item.text().substring(0, typetext.length).toUpperCase()) {
                     item.html('<span class="menuSelect">' + item.text().substring(0,  typetext.length) + '</span>' + item.text().substring( typetext.length, item.text().length));
                     chosen.push(item);
+                    //console.log(item.text());
                 }
                 else {
                     item.text(menu[i].textContent);
                     item.addClass('disabled');
                 }
+                               
             }
             if (chosen.length == 0) {
                 updateAll();
@@ -252,6 +254,20 @@ function keyPress(evt) {
                 evt.preventDefault();
                 chosen[0].click();
                 typetext = '';
+            }           
+            else if(chosen.length > 1){
+                var hassameChar = true;
+                for(var num=0; num < chosen.length-1; num++){
+                    if(chosen[num].text().substring(0,6) == chosen[num+1].text().substring(0,6))
+                        hassameChar = hassameChar && true;             
+                    else hassameChar = false;
+                }
+                if(hassameChar){
+                    typetext= chosen[0].text().substring(0,6).toUpperCase();
+                    for(var num=0; num < chosen.length; num++){
+                         chosen[num].html('<span class="menuSelect">' + chosen[0].text().substring(0,6) + '</span>' + chosen[num].text().substring( typetext.length,chosen[num].text().length));   
+                    }
+                }
             }
         }
         if(evt.keyCode ==8){
