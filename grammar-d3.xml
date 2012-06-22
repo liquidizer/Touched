@@ -44,7 +44,7 @@
   </item>  
 
   <item name="D3/Sort" type="d3.filter.sort">
-    Sort by Column: <arg type="number" name="column"/>
+    Sort by Column: <arg type="number" name="column" default="1"/>
   </item>  
 
   <item name="D3/Plot/LineChart" type="d3.cmd.plot.line">
