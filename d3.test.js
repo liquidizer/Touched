@@ -79,12 +79,14 @@ function process(cmdList, result, callback) {
     }
     else if(command[0] == 'd3.filter.selectcolumnbyvalue'){
            //console.log(result.data);
-           var findres= [];
-           for(var i =0; i < result.data.length; i++){
-               if(result.data[i][(command[1]-1)] == command[2])
-                  findres.push(result.data[i]);
-           }
-           result.data = findres;
+        result.data = transpose(result);
+        var findres= [];
+        for(var i =0; i < result.data.length; i++){
+           if(result.data[i][(command[1]-1)] == command[2])
+              findres.push(result.data[i]);
+        }
+        result.data = findres;
+        result.data = transpose(result);
     }
     else if(command[0] == 'd3.plot-option.size'){
         result.size[0] = command[1];
@@ -194,11 +196,11 @@ function extractFilters(node) {
     }
     else if(type =='d3.filter.selectcolumnbyvalue'){
            var rowNumber = extractFilters($(ele).find('[data-name= "rownumber"]'));
-           var value = extractFilters($(ele).find('[data-name= "value"]'));
+           var valueEle = $(ele).find('[data-name= "value"]');
            var partiallist = [];
            partiallist.push(type);
            partiallist.push(rowNumber[0]);           
-           partiallist.push(value[0]);
+           partiallist.push(valueEle.text());
            list.push(partiallist);       
     }
     else if(type == 'd3.filter.transpose'){
