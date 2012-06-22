@@ -1,21 +1,42 @@
 function getPlot() {
-    var root = $('#canvas').children();
+    var code= toCode($('#canvas'));
     d3.select("#dataview").selectAll('div').remove();
     
-    var element = root.find('[data-type= "d3.cmd"]');
-    for (var i = 0; i < element.length; i++) {
-        var filename = getFilename(element[i]);
+    code.arg('start').args('command').each( function(i, cmd) {
+        var filename = getFilename(cmd.node);
         //get data  
         var root= d3.select('#dataview').append('div');
         root.append('p').text('rendering results...');
-        processfile(filename, element[i], root);
+        processfile(filename, cmd.node, root);
+        
+    });
+}
+
+// Convert a jQuery object into a code object that knows its arguments and its type
+function toCode(node) {
+    var list= $([]);
+    var next= node.children();
+    while (next.length>0) {
+        list= list.add(next.filter('.arg'));
+        next= next.filter(':not(.arg)').children();
     }
+    return {
+        args: function(name) { 
+            return list.filter( function() {
+                return !name || $(this).attr('data-name')==name;
+            }).children().map( function (i,obj) { return toCode($(obj)); });
+        },
+        arg: function(name) { return this.args(name)[0] || toCode($([])); },
+        node: node,
+        type: node.attr('data-type'),
+        text: node.is('.box-text') && node.text()
+    };
 }
 
 function processfile(filename, element, root){
     if (filename) {
         d3.text(filename, function(data) {
-            //console.log(filename);
+            console.log(filename);
             processResult(data, element, root)
         });
     } else {
@@ -34,7 +55,7 @@ function processResult(data, element, root) {
         Caption: ""
     };  
     var cmdList = extractCommands(element);
-    //console.log(cmdList);
+    console.log(cmdList);
     root.select('p').remove();
     process(cmdList, result, function(processedData) {
         // all data is loaded and processed....              
@@ -77,6 +98,7 @@ function process(cmdList, result, callback) {
             if (command.length == 2) result.data[i].splice(command[1] - 1, 1);
         }
     }
+
     else if(command[0] == 'd3.filter.selectcolumnbyvalue'){
            //console.log(result.data);
         result.data = transpose(result);
@@ -88,6 +110,7 @@ function process(cmdList, result, callback) {
         result.data = findres;
         result.data = transpose(result);
     }
+
     else if(command[0] == 'd3.plot-option.size'){
         result.size[0] = command[1];
         result.size[1] = command[2];
@@ -130,8 +153,11 @@ function transpose(result) {
 }
 
 function getFilename(node){
+    return toCode($(node)).arg('data').arg('filename').text;
+    /*
      var ele = $(node);
      var name = $(ele).attr('data-name');
+    console.log(node);
      if (name == 'filename') return ele.text();    
      else {
          var filename
@@ -141,6 +167,7 @@ function getFilename(node){
          return filename;
      }
      return undefined;
+     */
 }
 
 function extractCommands(element) {
@@ -194,6 +221,7 @@ function extractFilters(node) {
             list.push(partiallist);
         }
     }
+<<<<<<< HEAD
     else if(type =='d3.filter.selectcolumnbyvalue'){
            var rowNumber = extractFilters($(ele).find('[data-name= "rownumber"]'));
            var valueEle = $(ele).find('[data-name= "value"]');
@@ -203,6 +231,8 @@ function extractFilters(node) {
            partiallist.push(valueEle.text());
            list.push(partiallist);       
     }
+=======
+>>>>>>> a11cdb22cbcde1254e4b466589cdfd44d9760226
     else if(type == 'd3.filter.transpose'){
             var partiallist = [];
             partiallist.push(type);
