@@ -1,16 +1,39 @@
 function getPlot() {
     var code= toCode($('#canvas'));
-    d3.select("#dataview").selectAll('div').remove();
-    
-    code.arg('start').args('command').each( function(i, cmd) {
-        var filename = getFilename(cmd.node);
-        //get data  
-        var root= d3.select('#dataview').append('div');
-        root.append('p').text('rendering results...');
-        processfile(filename, cmd.node, root);
-        
-    });
+    d3.select("#dataview").selectAll('div').remove();    
+    var output= d3.select('#dataview');
+    var script= code.arg('start');
+    processScript(script, output);
 }
+
+// list of commands available in this grammar
+var commands = {
+    d3: {
+        cmd: { // function(code, output)
+            caption: processCaption,
+            table: processTable,
+            line : processLine
+        },
+        filter: { // function(code, data)
+            removerow: removeRows,
+            keeprow: keepRows,
+            removecolumn: removeColumns,
+            keepcolumn: keepColumns,
+            transpose: transposeFilter,
+            sort : sortData,
+            selectcolumnbyvalue : selectColumnbyValue
+        },
+        plotoption:{// function(code, options)
+            XAxis : getXAxis,
+            size : getSize
+        }
+    },
+    get: function(name) {
+        var f= this;
+        name.split('.').forEach(function(sec) { f=f[sec]; });
+        return f;
+    }
+};
 
 // Convert a jQuery object into a code object that knows its arguments and its type
 function toCode(node) {
@@ -29,116 +52,134 @@ function toCode(node) {
         arg: function(name) { return this.args(name)[0] || toCode($([])); },
         node: node,
         type: node.attr('data-type'),
-        text: node.is('.box-text') && node.text()
+        text: node.is('.box-text') ? node.text() : undefined
     };
 }
 
-function processfile(filename, element, root){
-    if (filename) {
-        d3.text(filename, function(data) {
-            console.log(filename);
-            processResult(data, element, root)
+function processScript(code, output) {
+    code.args('command').each( function (i, cmd) {
+        var root= output.append('div');
+        commands.get(cmd.type)(cmd, root);
+    });
+}
+
+function processCaption(code, output) {
+    output.append('h1').text(code.arg('caption').text);
+}
+
+function processTable(code, output) {
+    output.append('p').text('rendering table...');
+    processData(code.arg('data'), function (data) {
+        tabulate(data, output);
+        output.select('p').remove();
+    });
+}
+
+function processLine(code, output){
+    output.append('p').text('rendering LinePlot...');
+    processData(code.arg('data'), function (data) {
+        var options={
+            size: [300,200],
+            xaxis : undefined
+            };
+        code.args('option').each(function(i, cmd) {
+            commands.get(cmd.type)(cmd, options);
         });
-    } else {
-        processResult(undefined, element, root)
-    }
+        plotData(options, data, output);
+        output.select('p').remove();
+    });
 }
 
-function processResult(data, element, root) {
-    var parsedCSV = [];
-    if (data) parsedCSV = d3.csv.parseRows(data);        
-    var result = {
-        data: parsedCSV,
-        size: [300, 200],
-        plotOption: "",
-        xAxis: "",
-        Caption: ""
-    };  
-    var cmdList = extractCommands(element);
-    console.log(cmdList);
-    root.select('p').remove();
-    process(cmdList, result, function(processedData) {
-        // all data is loaded and processed....              
-        if (processedData.Caption) 
-            addCaption(root, processedData.Caption);
-        if (processedData.plotOption == 'd3.cmd.plot.line') 
-            plotData(root, processedData);
-        if (processedData.plotOption == 'd3.cmd.plot.table')
-            tabulate(root, processedData);
-    });   
+function processData(code, callback) {
+    var filename= code.arg('filename').text;
+    d3.text(filename, function(data) {
+        data = d3.csv.parseRows(data);
+        data= processDataFilters(code, data);
+        callback(data);
+    });
+}
+
+function processDataFilters(code, data) {
+    code.args('filter').each(function (i, cmd) {
+        data= commands.get(cmd.type)(cmd, data);
+    });
+    return data;
 }
 
 
-function process(cmdList, result, callback) {
-    if (cmdList.length==0) {
-        callback(result);
-        return;
+function getRange(code) {
+    if (code.type=='number') return {
+        contains: function(x) { return x==parseFloat(code.text); }};
+    else if (code.type== 'range') {
+        return {
+            contains: function(x) {
+                return x>=parseFloat(code.arg('start').text) &&
+                       x<=parseFloat(code.arg('end').text);
+            }}
     }
-    var command = cmdList.shift();    
-    if (command[0] == 'd3.filter.keeprow') {
-        if (command.length == 3) result.data = result.data.slice(command[1] - 1, command[2]);
-        else if (command.length == 2) result.data = result.data.slice(command[1] - 1,command[1]);
-    }
-    else if (command[0] == 'd3.filter.keepcolumn') {   
-        for (var i = 0; i < result.data.length; i++) {
-            if (command.length == 3) result.data[i] = result.data[i].slice(command[1] - 1, command[2]);
-            if (command.length == 2) result.data[i] = result.data[i].slice(command[1] - 1, command[1]);
-        }
-    }
-    else if (command[0] == 'd3.filter.transpose') {
-        result.data = transpose(result);
-    }
-    else if(command[0] == 'd3.filter.removerow'){
-        if (command.length == 3) result.data.splice(command[1] - 1, command[2] - command[1] + 1);        
-        else if (command.length == 2) result.data.splice(command[1] - 1, 1);
-    }
-    else if (command[0] == 'd3.filter.removecolumn') {
-        for (var i = 0; i < result.data.length; i++) {
-            if (command.length == 3) result.data[i].splice(command[1] - 1, command[2] - command[1] + 1);
-            if (command.length == 2) result.data[i].splice(command[1] - 1, 1);
-        }
-    }
-
-    else if(command[0] == 'd3.filter.selectcolumnbyvalue'){
-           //console.log(result.data);
-        result.data = transpose(result);
-        var findres= [];
-        for(var i =0; i < result.data.length; i++){
-           if(result.data[i][(command[1]-1)] == command[2])
-              findres.push(result.data[i]);
-        }
-        result.data = findres;
-        result.data = transpose(result);
-    }
-
-    else if(command[0] == 'd3.plot-option.size'){
-        result.size[0] = command[1];
-        result.size[1] = command[2];
-    }
-    else if(command[0] == 'd3.cmd.plot.line' || command[0]=='d3.cmd.plot.table'){
-        result.plotOption = command[0];
-    }
-    else if(command[0] == 'd3.plot-option.XAxis'){
-        result.xAxis = result.data[command[1]-1];
-        result.data.splice(command[1]-1,1);
-    }
-    else if (command[0] == 'd3.filter.sort') {
-        //console.log(result.data);
-        //sort  
-        result.data = transpose(result);
-        result.data.sort(function(a,b){return a[command[1]-1]-b[command[1]-1];});
-        result.data = transpose(result);
-        //console.log(result.data);
-    }
-    else if(command[0] == 'd3.cmd.caption'){
-        result.Caption = command[1];
-    }
-    process(cmdList, result, callback);
 }
 
-function transpose(result) {
-    var w = result.data.length,
-        h = result.data[0].length;
+function removeRows(code, data) {
+    var range= getRange(code.arg('rows'));
+    return data.filter (function ( i, index) { return !range.contains(index+1); });
+}
+
+function keepRows(code, data) {
+    var range= getRange(code.arg('rows'));
+    return data.filter (function (i, index) { return range.contains(index+1); });
+}
+
+function removeColumns(code, data) {
+    var range= getRange(code.arg('columns'));
+    return data.map(function (row, i) {
+        return row.filter (function (ele,i) { return !range.contains(i+1); });
+    });
+}
+
+function keepColumns(code, data) {
+    var range= getRange(code.arg('columns'));
+    return data.map(function (row, i) {
+        return row.filter (function (ele,i) { return range.contains(i+1); });
+    });
+}
+
+function selectColumnbyValue(code, data) {
+    var value;
+    var rownumber = parseFloat(code.arg('rownumber').text)
+    if (code.arg('value').type == 'number') value = parseFloat(code.arg('value').text);
+    else if (code.arg('value').type == 'text') value = code.arg('value').text;
+    data = transpose(data);
+    var findres = [];
+    for (var i = 0; i < data.length; i++) {
+        if (data[i][(rownumber - 1)] == value) findres.push(data[i]);
+    }
+    data = transpose(findres);
+    return data ;
+}
+
+function transposeFilter(code, data) {
+    return transpose(data);
+}
+
+function sortData(code, data){
+    var column =parseFloat(code.arg('column').text);
+    data = transpose(data);
+    data.sort(function(a,b){return a[column-1]-b[column-1];});
+    return data;
+}
+
+function getXAxis(code, options){
+    options.xaxis=parseFloat(code.arg('column').text);
+}
+
+function getSize(code, options){
+    options.size[0]=parseFloat(code.arg('width').text);
+    options.size[1]=parseFloat(code.arg('height').text);
+}
+
+function transpose(data) {
+    var w = data.length,
+        h = data[0].length;
     var i, j, t = [];
     for (i = 0; i < h; i++) {
         // Insert a new row (array)
@@ -146,137 +187,26 @@ function transpose(result) {
         // Loop through every item per item in outer array (width)
         for (j = 0; j < w; j++) {
             // Save transposed data.
-            t[i][j] = result.data[j][i];
+            t[i][j] = data[j][i];
         }
     }
     return t;
-}
-
-function getFilename(node){
-    return toCode($(node)).arg('data').arg('filename').text;
-    /*
-     var ele = $(node);
-     var name = $(ele).attr('data-name');
-    console.log(node);
-     if (name == 'filename') return ele.text();    
-     else {
-         var filename
-         ele.children().each(function(index, child) {
-             filename = filename || getFilename(child);
-         });
-         return filename;
-     }
-     return undefined;
-     */
-}
-
-function extractCommands(element) {
-    var resList=[];
-    var ele = $(element);
-    var type = $(ele).attr('data-type');
-    if(type == 'd3.cmd.plot.line' || type=='d3.cmd.plot.table'){
-         resList = extractFilters(ele);
-         var partiallist = [];
-         partiallist.push(type);
-         resList.push(partiallist);
-         //return resList;
-    }
-    else if (type == 'd3.cmd.caption'){
-         var partiallist = [];
-         partiallist.push(type);
-         var titlele= ele.find('[data-name= "Caption"]')
-         partiallist.push(titlele.text());
-         resList.push(partiallist);
-    }
-    else {
-        ele.children().each(function(index, child) {
-            resList=resList.concat(extractCommands($(child)));
-            //console.log(data);
-        });
-    }
-    return resList;
-}
-
-function extractFilters(node) {
-    var list=[];
-    var ele = $(node);
-    var type = $(ele).attr('data-type');
-    //if(type) console.log(type);
-    if(type == 'd3.filter.keeprow' || type == 'd3.filter.keepcolumn' || type =='d3.filter.removerow' || type == 'd3.filter.removecolumn'){
-        var rangeele = $(ele).find('[data-type= "range"]');
-        if (rangeele.length != 0) {
-            var start = extractFilters($(rangeele).find('[data-name= "start"]'));
-            var end = extractFilters($(rangeele).find('[data-name= "end"]'));
-            var partiallist = [];
-            partiallist.push(type);
-            partiallist.push(start[0]);
-            partiallist.push(end[0]);
-            list.push(partiallist);
-        }
-        else{
-            var num = extractFilters($(ele).find('[data-type= "number"]'));
-            var partiallist = [];
-            partiallist.push(type);           
-            partiallist.push(num[0]);
-            list.push(partiallist);
-        }
-    }
-<<<<<<< HEAD
-    else if(type =='d3.filter.selectcolumnbyvalue'){
-           var rowNumber = extractFilters($(ele).find('[data-name= "rownumber"]'));
-           var valueEle = $(ele).find('[data-name= "value"]');
-           var partiallist = [];
-           partiallist.push(type);
-           partiallist.push(rowNumber[0]);           
-           partiallist.push(valueEle.text());
-           list.push(partiallist);       
-    }
-=======
->>>>>>> a11cdb22cbcde1254e4b466589cdfd44d9760226
-    else if(type == 'd3.filter.transpose'){
-            var partiallist = [];
-            partiallist.push(type);
-            list.push(partiallist);
-    }
-    else if(type=='number'){
-        list= [parseFloat(ele.text())];
-    }
-    else if(type == 'd3.plot-option.size'){
-        var width = extractFilters($(ele).find('[data-name = "width"]'));
-        var height = extractFilters($(ele).find('[data-name = "height"]'));
-        var partiallist = [];
-        partiallist.push(type);
-        partiallist.push(width[0]);
-        partiallist.push(height[0]);
-        list.push(partiallist);
-    }
-    else if(type == 'd3.plot-option.XAxis'|| type == 'd3.filter.sort'){
-        var column = extractFilters($(ele).find('[data-name = "column"]'));
-        var partiallist = [];
-        partiallist.push(type);
-        partiallist.push(column[0]);
-        list.push(partiallist);
-    }
-    else {
-        ele.children().each(function(index, child) {
-            list= list.concat(extractFilters($(child)));
-            //console.log(data);
-        });
-    } 
-    return list;   
 }
 
 function addCaption(root, title){
     root.append('h1').text(title);
 }
 
-function plotData(root, processeddata) {
-    var data = processeddata.data,
-    size = processeddata.size;
+function plotData(options, processeddata, root) {
+    //var data = processeddata.data,
+    var size = options.size;
     //console.log(processeddata.xAxis);
-    var dataPlot = getData(data,processeddata.xAxis);
+    var xAxis = processeddata[options.xaxis-1];
+    if(xAxis)
+        processeddata.splice(options.xaxis-1,1);
+    var dataPlot = getData(processeddata,xAxis);
     //console.log(dataPlot);
-    plot(root,dataPlot,size, processeddata.Caption);
+    plot(root,dataPlot,size);
 }
 
 function getData(value, xAxis) {
@@ -319,7 +249,7 @@ function getyMin(data){
         else return d.y;});
 }
 
-function plot(root,data, size, caption){    
+function plot(root,data, size){    
     
     var margin = {top: 10, right: 10, bottom: 20, left: 40},
     width = size[0] - margin.left - margin.right,
@@ -357,11 +287,11 @@ var svg = root
     .attr("height", height + margin.top + margin.bottom)
     .append("g")
     .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
-    
+/*
 svg.append("text")
     .attr("class", "title")
     .text(caption);
-
+*/
 svg.append("g")
     .attr("class", "x axis")
     .attr("transform", "translate(0," + height + ")")
@@ -418,13 +348,13 @@ svg3.data(data)
     }
 }
 
-function tabulate(root,processeddata){
+function tabulate(processeddata, root){
     //console.log(data);   
     root.append("table")
       .style("border-collapse", "collapse")
       .style("border", "2px black solid")
       .selectAll("tr")
-      .data(processeddata.data)
+      .data(processeddata)
       .enter()
       .append("tr")
       .selectAll("td")

@@ -11,7 +11,7 @@
   <item name="D3/Data" type="d3.data.csv">
     Data: <arg type="text|file" name="filename"/>
     <group name="Data" repeat="*" class="box-body">
-      <arg type="d3.filter" name="command"/>
+      <arg type="d3.filter" name="filter"/>
     </group>
   </item>
   
@@ -44,13 +44,13 @@
   </item>  
 
   <item name="D3/Sort" type="d3.filter.sort">
-    Sort by Column: <arg type="number" name="column" default="1"/>
+    Sort by Column: <arg type="number" name="column"/>
   </item>  
 
-  <item name="D3/Plot/LineChart" type="d3.cmd.plot.line">
+  <item name="D3/Plot/LineChart" type="d3.cmd.line">
     Plot <arg type="d3.data" name="data"/>
     <group name="options" repeat="*" class="box-body">
-        <arg type="d3.plot-option" name="option"/>
+        <arg type="d3.plotoption" name="option"/>
     </group>
   </item>
   
@@ -58,20 +58,20 @@
     circle
   </item-->
 
-  <item name="D3/PlotOption/Size" type="d3.plot-option.size">
+  <item name="D3/PlotOption/Size" type="d3.plotoption.size">
     Size: <arg type="number" name="width"/> x <arg type="number" name="height"/>
   </item>
 
-  <item name="D3/PlotOption/XAxis" type="d3.plot-option.XAxis">
+  <item name="D3/PlotOption/XAxis" type="d3.plotoption.XAxis">
     XAxis: <arg type="number" name="column"/> 
   </item>
   
-  <item name="D3/Plot/Table" type="d3.cmd.plot.table">
+  <item name="D3/Plot/Table" type="d3.cmd.table">
     Table <arg type="d3.data" name="data"/>
   </item>
   
   <item name="D3/Caption" type="d3.cmd.caption">
-    Caption <arg type="text" name="Caption"/>
+    Caption <arg type="text" name="caption"/>
   </item>
   
 
