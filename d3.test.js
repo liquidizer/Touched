@@ -3,6 +3,7 @@ function getPlot() {
     d3.select("#dataview").selectAll('div').remove();    
     var output= d3.select('#dataview');
     var script= code.arg('start');
+    clearErrors();
     processScript(script, output);
 }
 
@@ -23,16 +24,14 @@ var commands = {
             sort : sortData,
             selectcolumnbyvalue : selectColumnbyValue
         },
+	data: {
+	    csv : processData
+	},
         plotoption:{// function(code, options)
             XAxis : getXAxis,
             size : getSize
         }
     },
-    get: function(name) {
-        var f= this;
-        name.split('.').forEach(function(sec) { f=f[sec]; });
-        return f;
-    }
 };
 
 // Convert a jQuery object into a code object that knows its arguments and its type
@@ -52,14 +51,33 @@ function toCode(node) {
         arg: function(name) { return this.args(name)[0] || toCode($([])); },
         node: node,
         type: node.attr('data-type'),
-        text: node.is('.box-text') ? node.text() : undefined
+        text: node.is('.box-text') ? node.text() : undefined,
+	tryf: function(f) {
+	    var id= this.node.attr('id');
+	    return function(a,b) {
+		try {
+		    return f(a,b);
+		} catch(e) {
+		    markError(id, e);
+		}
+	    }
+	},
+	call: function(data) {
+	    var f= commands;
+	    this.assert(this.type, "Missing argument");
+	    this.type.split('.').forEach(function(sec) { f=f[sec]; });
+	    return this.tryf(f)(this,data);
+        },
+	assert: function(test, message) {
+	    if (!test) throw message;
+	}
     };
 }
 
 function processScript(code, output) {
     code.args('command').each( function (i, cmd) {
         var root= output.append('div');
-        commands.get(cmd.type)(cmd, root);
+	cmd.call(root);
     });
 }
 
@@ -69,7 +87,7 @@ function processCaption(code, output) {
 
 function processTable(code, output) {
     output.append('p').text('rendering table...');
-    processData(code.arg('data'), function (data) {
+    code.arg('data').call(function (data) {
         tabulate(data, output);
         output.select('p').remove();
     });
@@ -77,13 +95,13 @@ function processTable(code, output) {
 
 function processLine(code, output){
     output.append('p').text('rendering LinePlot...');
-    processData(code.arg('data'), function (data) {
+    code.arg('data').call(function (data) {
         var options={
             size: [300,200],
             xaxis : undefined
             };
         code.args('option').each(function(i, cmd) {
-            commands.get(cmd.type)(cmd, options);
+		cmd.call(options);
         });
         plotData(options, data, output);
         output.select('p').remove();
@@ -92,16 +110,18 @@ function processLine(code, output){
 
 function processData(code, callback) {
     var filename= code.arg('filename').text;
-    d3.text(filename, function(data) {
+    code.assert(filename, "No file specified");
+    d3.text(filename, code.tryf(function(data, error) {
+	code.assert(data, "Could not read data");
         data = d3.csv.parseRows(data);
         data= processDataFilters(code, data);
         callback(data);
-    });
+    }));
 }
 
 function processDataFilters(code, data) {
     code.args('filter').each(function (i, cmd) {
-        data= commands.get(cmd.type)(cmd, data);
+	    data= cmd.call(data);
     });
     return data;
 }
@@ -163,6 +183,7 @@ function transposeFilter(code, data) {
 
 function sortData(code, data){
     var column =parseFloat(code.arg('column').text);
+    code.assert(column > 0, "Invalid column"); 
     data = transpose(data);
     data.sort(function(a,b){return a[column-1]-b[column-1];});
     return data;

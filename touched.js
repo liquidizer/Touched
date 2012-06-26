@@ -416,6 +416,14 @@ function msUp (evt) {
     return false;
 }
 
+function clearErrors() {
+    $('.runtime-error').removeClass('runtime-error');
+}
+
+function markError(id, message) {
+    $('#'+id).addClass('runtime-error');
+}
+
 // Translate events that come from touch devices
 function translateTouch(evt) {
     if (evt.touches!=undefined) {
