@@ -43,33 +43,35 @@ function toCode(node) {
         next= next.filter(':not(.arg)').children();
     }
     return {
-        args: function(name) { 
-            return list.filter( function() {
+        args: function(name, force) { 
+            var arglist= list.filter( function() {
                 return !name || $(this).attr('data-name')==name;
-            }).children().map( function (i,obj) { return toCode($(obj)); });
+            })
+	    arglist.each( function(i,obj) {
+	        if(force && $(obj).children().length==0)
+		    markError($(obj).attr('id'), "Missing argument");
+	    });
+	    return arglist.children()
+		.map( function(i,obj) { return toCode($(obj)); });
         },
-        arg: function(name) { return this.args(name)[0] || toCode($([])); },
+        arg: function(name) { return this.args(name, true)[0] || toCode($([])) },
         node: node,
         type: node.attr('data-type'),
         text: node.is('.box-text') ? node.text() : undefined,
-	tryf: function(f) {
-	    var id= this.node.attr('id');
-	    return function(a,b) {
-		try {
-		    return f(a,b);
-		} catch(e) {
-		    markError(id, e);
-		}
-	    }
-	},
 	call: function(data) {
-	    var f= commands;
-	    this.assert(this.type, "Missing argument");
-	    this.type.split('.').forEach(function(sec) { f=f[sec]; });
-	    return this.tryf(f)(this,data);
+	    if (this.type) {
+		var f= commands;
+		this.type.split('.').forEach(function(sec) { 
+			f=f[sec]; 
+		    });
+		return f(this, data);
+	    }
         },
 	assert: function(test, message) {
-	    if (!test) throw message;
+	    if (!test) this.error(message);
+	},
+	error: function(message) {
+	    markError(this.node.attr('id'), message);
 	}
     };
 }
@@ -109,19 +111,21 @@ function processLine(code, output){
 }
 
 function processData(code, callback) {
-    var filename= code.arg('filename').text;
-    code.assert(filename, "No file specified");
-    d3.text(filename, code.tryf(function(data, error) {
-	code.assert(data, "Could not read data");
-        data = d3.csv.parseRows(data);
-        data= processDataFilters(code, data);
-        callback(data);
-    }));
+    var file= code.arg('filename');
+    d3.text(file.text, function(data) {
+	if (!data) 
+	    file.error("Could not read file");
+	else {
+	    data= d3.csv.parseRows(data);
+	    data= processDataFilters(code, data);
+	    callback(data);
+	}
+    });
 }
 
 function processDataFilters(code, data) {
     code.args('filter').each(function (i, cmd) {
-	    data= cmd.call(data);
+	data= cmd.call(data) || data;
     });
     return data;
 }
@@ -136,6 +140,9 @@ function getRange(code) {
                 return x>=parseFloat(code.arg('start').text) &&
                        x<=parseFloat(code.arg('end').text);
             }}
+    }
+    else if (!code.type) {
+	return { contains: function() { return false; } };
     }
 }
 

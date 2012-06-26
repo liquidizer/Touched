@@ -108,7 +108,19 @@ body {
 .runtime-error {
     border: 2px solid purple;
     margin: 3px;
-    box-shadow: 0px 0px 3px 2px purple;
+    box-shadow: 0px 0px 5px 5px rgba(128,0,92,0.5);
+}
+
+.runtime-message {
+    position: absolute;
+    background-color: rgba(128,0,92,0.8);
+    border-radius: 10px;
+    padding: 3px;
+    color: white;
+    pointer-events: none;
+}
+:not(.selected) + .runtime-message {
+    display: none;
 }
 
 .box.arg {

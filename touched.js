@@ -421,7 +421,12 @@ function clearErrors() {
 }
 
 function markError(id, message) {
-    $('#'+id).addClass('runtime-error');
+    var obj= $('#'+id);
+    obj.addClass('runtime-error');
+    var msg= $('<div class="runtime-message">'+message+'</div>');
+    obj.after(msg);
+    msg.offset({ top: obj.offset().top + obj.height(), 
+		left: obj.offset().left + 20});
 }
 
 // Translate events that come from touch devices
