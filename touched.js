@@ -340,45 +340,67 @@ function msDown (event) {
         
         // store mouse position. Will be updated when mouse moves.
         startPos= [evt.clientX, evt.clientY];
-
+        blocked = undefined
         hasMoved= false;
         return false;
     }
 }
 
+var blocked = undefined;
 function msMove(event) {
     var evt= translateTouch(event);
     if (hand) {
-        event.preventDefault();
+        event.preventDefault();   
         var dx= evt.clientX - startPos[0];
         var dy= evt.clientY - startPos[1];
         if (hasMoved || Math.abs(dx)+Math.abs(dy)>20) {
-            if (!hasMoved) {
+            // compare the evt location with the blocked information
+            if (blocked) { 
+                if ((evt.clientY < blocked.top) || (evt.clientY - blocked.top > blocked.height) || evt.clientX < blocked.left || (evt.clientX - blocked.left > blocked.width)) {
+                    // the X Y are not in the blocked area
+                    //blocked = undefined;
+                    console.log("unblocked");
+                }
+             console.log((evt.clientY -blocked.top)+","+(evt.clientX -blocked.left));
+            }
+            if (!hasMoved && !blocked) {
+                // look for the containing element that can be moved
                 while (!hand.hasClass('element')) {
                     if (hand.attr('id')=='canvas') return;
                     hand = hand.parent();
                 }
+                // record the original position
                 startOffset= hand.offset();
                 if (!hand.hasClass('float')) {
-                    if (hand.attr('data-type') == 'ident') {
-                        var clone = hand.clone();
-                        clone.removeClass('selected');
-                        hand.before(clone);
-                    }
-                    else {
-                        releaseBox(hand);
-                    }
+                    // make the object float
+                    releaseBox(hand);
                     hand.addClass('float');
+                    /*
+                    var arg1 =hand.parent();
+                    setTimeout(function (){
+                    blocked = {
+                        height : arg1.height(),
+                        width : arg1.width(),
+                        top : arg1.offset().top,
+                        left: arg1.offset().left
+                    };},0);*/
                     $('#canvas').append(hand);
                     updateAll();
-                }
+                } 
                 hand.addClass('dragged');
                 hasMoved= true;
             }
 
             if (hasMoved) {
                 var arg= $(evt.target);
-                if (arg.hasClass('box') && arg.hasClass('arg') && !arg.parents().is(hand)) {
+                if (arg.is('.box.arg') && !arg.parents().is(hand)) {
+                    // insert dragged element into target
+                    blocked = {
+                        height : arg.height(),
+                        width : arg.width(),
+                        top : arg.offset().top,
+                        left: arg.offset().left
+                    };
                     insertBox(arg, hand);
                     updateAll();
                     startPos= [evt.clientX, evt.clientY];
