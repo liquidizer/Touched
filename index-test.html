@@ -36,9 +36,11 @@
         });
       });
       function updateView() {
-        $('#showtests').attr('checked',false);
-        $('#testChoice').hide();
-        if ($('#autoupdate').attr('checked')) getPlot();
+          if ($('.element').length>0) {
+            $('#showtests').attr('checked',false);
+            $('#testChoice').hide();
+            if ($('#autoupdate').attr('checked')) getPlot();
+          }
       }
   </script>
   <body>

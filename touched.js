@@ -39,7 +39,7 @@ function updateAll() {
     updateMenu();
     updateTypes();
     typetext='';
-    $('#canvas').trigger('update');
+    setTimeout( function() { $('#canvas').trigger('update'); }, 1);
 }
 
 function elementArea(type) {

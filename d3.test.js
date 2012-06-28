@@ -112,7 +112,7 @@ function processLine(code, output){
 
 function processData(code, callback) {
     var file= code.arg('filename');
-    d3.text(file.text, function(data) {
+    if (file.text) d3.text(file.text, function(data) {
 	if (!data) 
 	    file.error("Could not read file");
 	else {
@@ -205,7 +205,7 @@ function getSize(code, options){
 
 function transpose(data) {
     var w = data.length,
-        h = data[0].length;
+        h = w && data[0].length;
     var i, j, t = [];
     for (i = 0; i < h; i++) {
         // Insert a new row (array)
