@@ -32,7 +32,7 @@
   </item>
   
   <item name="D3/Filter/SelectByValue" type="d3.filter.selectcolumnbyvalue">
-    Select By : Row <arg type="number" name="rownumber"/> = <arg type="number|text" name="value"/>
+    Select By : Row <arg type="number" name="rownumber"/> = <arg type="number|text|range" name="value"/>
   </item>
   
   <item name="D3/Filter/RemoveColumn" type="d3.filter.removecolumn">

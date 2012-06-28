@@ -49,7 +49,7 @@ function toCode(node) {
             })
 	    arglist.each( function(i,obj) {
 	        if(force && $(obj).children().length==0)
-		    markError($(obj).attr('id'), "Missing argument");
+		       markError($(obj).attr('id'), "Missing argument");
 	    });
 	    return arglist.children()
 		.map( function(i,obj) { return toCode($(obj)); });
@@ -134,12 +134,14 @@ function processDataFilters(code, data) {
 function getRange(code) {
     if (code.type=='number') return {
         contains: function(x) { return x==parseFloat(code.text); }};
+    else if(code.type == 'text') return{
+        contains: function(x) { return x==code.text; }};
     else if (code.type== 'range') {
         return {
             contains: function(x) {
                 return x>=parseFloat(code.arg('start').text) &&
                        x<=parseFloat(code.arg('end').text);
-            }}
+            }};
     }
     else if (!code.type) {
 	return { contains: function() { return false; } };
@@ -171,16 +173,11 @@ function keepColumns(code, data) {
 }
 
 function selectColumnbyValue(code, data) {
-    var value;
-    var rownumber = parseFloat(code.arg('rownumber').text)
-    if (code.arg('value').type == 'number') value = parseFloat(code.arg('value').text);
-    else if (code.arg('value').type == 'text') value = code.arg('value').text;
+    var rownumber = parseFloat(code.arg('rownumber').text);    
+    var range = getRange(code.arg('value'));    
+    data = transpose(data);   
+    data = data.filter(function (ele,index) { return range.contains(ele[rownumber-1]); });
     data = transpose(data);
-    var findres = [];
-    for (var i = 0; i < data.length; i++) {
-        if (data[i][(rownumber - 1)] == value) findres.push(data[i]);
-    }
-    data = transpose(findres);
     return data ;
 }
 
@@ -193,6 +190,7 @@ function sortData(code, data){
     code.assert(column > 0, "Invalid column"); 
     data = transpose(data);
     data.sort(function(a,b){return a[column-1]-b[column-1];});
+    data = transpose(data);
     return data;
 }
 
@@ -221,19 +219,12 @@ function transpose(data) {
     return t;
 }
 
-function addCaption(root, title){
-    root.append('h1').text(title);
-}
-
 function plotData(options, processeddata, root) {
-    //var data = processeddata.data,
     var size = options.size;
-    //console.log(processeddata.xAxis);
     var xAxis = processeddata[options.xaxis-1];
     if(xAxis)
         processeddata.splice(options.xaxis-1,1);
     var dataPlot = getData(processeddata,xAxis);
-    //console.log(dataPlot);
     plot(root,dataPlot,size);
 }
 
@@ -278,7 +269,6 @@ function getyMin(data){
 }
 
 function plot(root,data, size){    
-    
     var margin = {top: 10, right: 10, bottom: 20, left: 40},
     width = size[0] - margin.left - margin.right,
     height = size[1] - margin.top - margin.bottom,
@@ -315,11 +305,7 @@ var svg = root
     .attr("height", height + margin.top + margin.bottom)
     .append("g")
     .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
-/*
-svg.append("text")
-    .attr("class", "title")
-    .text(caption);
-*/
+
 svg.append("g")
     .attr("class", "x axis")
     .attr("transform", "translate(0," + height + ")")
@@ -329,25 +315,19 @@ svg.append("g")
     .attr("class", "y axis")
     .call(yAxis); 
 
-if (data[0] instanceof Array)
- var svg2= svg.selectAll(".line")
+svg.selectAll(".line")
     .data(data) 
-    .enter();
-else 
-  var svg2= svg;
-  
-  svg2.append("path")
+    .enter()
+    .append("path")
     .attr("class", "line")
     .attr("d", line)
     .style("stroke-width", 2) 
     .style("fill", 'none') 
     .style("stroke",  function(d, i) {return color(i);}); 
-
-
-var svg3 = svg.selectAll(".dot");
-if(data[0] instanceof Array){
+    
+var svg2 = svg.selectAll(".dot");
 for(var j=0; j < data.length; j++){
-svg3.data(data[j])
+svg2.data(data[j])
     .enter().append("circle")
     .attr("class", "dot")
     .attr("cx", line.x())
@@ -355,29 +335,10 @@ svg3.data(data[j])
     .attr("r", 3.5)
     .append("svg:title").text(
         function(d){return "time step: "+d.x + "\n"+ "value: " +d.y;})
-        }
-}
-else{
-svg3.data(data)
-    .enter()
-    //.append("circle")
-    //.attr("class", "dot")
-    .append("rect")
-    .attr("class", "cell")
-    //.attr("cx", line.x())
-    //.attr("cy", line.y())
-    //.attr("r", 3.5) 
-    .attr("x", line.x())
-    .attr("y", line.y())
-    .attr("width", 3.5)
-    .attr("height", 5)
-    .append("svg:title").text(
-        function(d){return "value: "+ d.y;})
     }
 }
 
-function tabulate(processeddata, root){
-    //console.log(data);   
+function tabulate(processeddata, root){  
     root.append("table")
       .style("border-collapse", "collapse")
       .style("border", "2px black solid")
@@ -387,7 +348,6 @@ function tabulate(processeddata, root){
       .append("tr")
       .selectAll("td")
       .data (function(row) {
-         //console.log(row);
          return row;})
       .enter()
       .append("td")
