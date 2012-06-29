@@ -10,6 +10,7 @@ var redoBuffer= [];
 var startPos;
 var startOffset;
 var hasMoved= false;
+var blocked = undefined;
 var unselect= false;
 
 // typed text for keyboard control
@@ -346,7 +347,6 @@ function msDown (event) {
     }
 }
 
-var blocked = undefined;
 function msMove(event) {
     var evt= translateTouch(event);
     if (hand) {
@@ -358,11 +358,10 @@ function msMove(event) {
             if (blocked) { 
                 if ((evt.clientY < blocked.top) || (evt.clientY - blocked.top > blocked.height) || evt.clientX < blocked.left || (evt.clientX - blocked.left > blocked.width)) {
                     // the X Y are not in the blocked area
-                    //blocked = undefined;
-                    console.log("unblocked");
+                    blocked = undefined;
                 }
-             console.log((evt.clientY -blocked.top)+","+(evt.clientX -blocked.left));
             }
+            
             if (!hasMoved && !blocked) {
                 // look for the containing element that can be moved
                 while (!hand.hasClass('element')) {
@@ -372,18 +371,12 @@ function msMove(event) {
                 // record the original position
                 startOffset= hand.offset();
                 if (!hand.hasClass('float')) {
+                    // block object from snap back
+                    var parent =hand.parent();
+                    setTimeout(function (){ blockArea(parent); },1);
                     // make the object float
                     releaseBox(hand);
                     hand.addClass('float');
-                    /*
-                    var arg1 =hand.parent();
-                    setTimeout(function (){
-                    blocked = {
-                        height : arg1.height(),
-                        width : arg1.width(),
-                        top : arg1.offset().top,
-                        left: arg1.offset().left
-                    };},0);*/
                     $('#canvas').append(hand);
                     updateAll();
                 } 
@@ -391,19 +384,14 @@ function msMove(event) {
                 hasMoved= true;
             }
 
-            if (hasMoved) {
+            if (hasMoved && !blocked) {
                 var arg= $(evt.target);
                 if (arg.is('.box.arg') && !arg.parents().is(hand)) {
                     // insert dragged element into target
-                    blocked = {
-                        height : arg.height(),
-                        width : arg.width(),
-                        top : arg.offset().top,
-                        left: arg.offset().left
-                    };
+                    startPos= [evt.clientX, evt.clientY];
+                    blockArea(arg);
                     insertBox(arg, hand);
                     updateAll();
-                    startPos= [evt.clientX, evt.clientY];
                     hasMoved= false;
                     unselect= false;
                 }
@@ -429,6 +417,16 @@ function msUp (evt) {
         hand= null;
     }
     return false;
+}
+
+// block a screan region against snapping back too early
+function blockArea(arg) {
+    blocked = {
+        height: arg.outerHeight(),
+        width: arg.outerWidth(),
+        top: arg.offset().top - $(window).scrollTop(),
+        left: arg.offset().left - $(window).scrollLeft()
+    };
 }
 
 function clearErrors() {
