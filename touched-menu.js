@@ -20,6 +20,7 @@ function initMenu() {
     loadGrammarFile('grammar-xml.xml');
     loadGrammarFile('grammar-formula.xml');
     loadGrammarFile('grammar-d3.xml');
+    loadGrammarFile('grammar-g.xml');
 }
 
 // load a grammar file
@@ -30,7 +31,7 @@ function loadGrammarFile(url) {
     }
 }
 
-// Interpret a loaded grammar definition
+// Interpret a loaded grammakr definition
 function initGrammar(content, url) {
     $(content).find('require').each(function (i, item) {
         var file= $(item).attr('src');
@@ -140,7 +141,13 @@ function expandTemplate(template, item) {
 	    div.attr('data-repeat', sec.attr('repeat'));
 	    item.append(div);
 	    expandTemplate(sec, div);
-	} else {
+	} 
+    else if (sec.is('key')) {
+        var text= sec.text().replace(/^\s+|\s+$/g,'');
+        var area= textArea(text)
+        area.addClass('keyword');
+	    if (!!text) item.append(area);
+    } else {
 	    var text= sec.text().replace(/^\s+|\s+$/g,'');
 	    if (!!text) item.append(textArea(text));
 	}

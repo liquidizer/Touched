@@ -29,7 +29,7 @@ function init() {
     canvas.attr('onmousedown','msDown(event)');
     canvas.attr('ontouchstart','msDown(event)');
     $('html').keydown(keyPress);
-    canvas.append(dropArea('d3.script|xml.doc|exp.list','start'));
+    canvas.append(dropArea('d3.script|xml.doc|touched.grammar','start'));
     select(canvas.find('.arg'));
     initMenu();
     updateAll();
