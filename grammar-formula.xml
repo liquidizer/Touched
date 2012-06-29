@@ -19,7 +19,7 @@
   </item>
 
   <item name="Formula/Functions/Sin" type="exp.formula">
-    sin(<arg type="exp.formula|number" name="arg"/>)
+    sin(<arg type="exp.formula|numbernumber" name="arg"/>)
   </item>
 
   <item name="Formula/Functions/Cos" type="exp.formula">

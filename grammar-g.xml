@@ -1,0 +1,55 @@
+<grammar>
+  <item name="Touched/Grammar" type="touched.grammar" new="Touched Grammar">  
+    Touched Grammar    
+    <group name="Items" repeat="*" class="box-body">
+      <arg type="touched.item" name="item"/>
+    </group>    
+  </item>
+
+  <item name="Touched/Require" type="touched.item.require">
+    <key>Require:</key> <arg type="text|file" name="filename"/>
+  </item>
+  
+  <item name="Touched/Group" type="touched.item.group">
+    <key>Group</key>
+    menu=<arg type="text" name="name"/>,
+    type=<arg type="text" name="type"/>
+    <group name="Items" repeat="*" class="box-body">
+      <arg type="touched.item" name="item"/>
+    </group>
+  </item>
+
+  <item name="Touched/Element" type="touched.item.element">
+    <key>Element</key>
+    menu=<arg type="text" name="name"/>,
+    type=<arg type="text" name="type"/>
+    <group name="Content" repeat="*" class="box-body">
+        <arg type="touched.item-content|text" name="content"/>
+    </group>
+  </item>
+
+  <item name="Touched/Repeat" type="touched.item-content.repeat">
+      <key>Repeat</key>
+      <group class="box-body">
+           <arg type="touched.item-content.arg" name="arg"/>
+      </group>
+  </item>
+
+  <item name="Touched/Argument" type="touched.item-content.arg">
+    <key>Argument</key>
+    name=<arg type="text" name="name"/>, 
+    type=<arg type="text" name="type"/>
+  </item>
+
+  <item name="Touched/MultilineBlock" type="touched.item-content.block">
+    Multiline Block:
+    <group name="Display" repeat="*" class="box-body">
+        <arg type="touched.item-content|text" name="content"/>
+    </group>
+  </item>
+  
+  <item name="Touched/Keyword" type="touched.item-content.keyword">
+    <key>Keyword:</key>
+    name=<arg type="text" name="keyword"/>
+  </item>
+</grammar>

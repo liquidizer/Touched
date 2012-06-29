@@ -140,6 +140,11 @@ body {
     font-weight: bold;
 }
 
+.keyword.box-text {
+    font-weight: bold;
+    color: firebrick;
+}
+
 .box-body > .arg {
     clear: both;
     margin: 1px 1px 0px 20px;
