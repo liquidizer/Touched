@@ -55,7 +55,12 @@ function initGrammar(content, url) {
 
 // update the shown menu with respect to the current selection
 function updateMenu() {
-    submitMenu= undefined;
+    if (submitMenu) {
+	submitMenu();
+	submitMenu= null;
+	updateAll();
+	return;
+    }
     var bar= $('#menu');
     bar.children().remove();
     var selection=$('.selected');
@@ -104,9 +109,12 @@ function menuEntry(type, name, submenu) {
 	if (pop.length>0) pop.remove();
 	else {
 	    if (submenu.template) insertItem(submenu.template)
-	    else
-		fillMenu(type, submenu,
-			 li.append('<ul/>').find(':last').addClass('popup'));
+	    else {
+		li.parent().find('ul').remove();
+		var ul= $('<ul class="popup"/>');
+		li.append(ul);
+		fillMenu(type, submenu, ul);
+	    }
 	}
 	return false;
     });
@@ -196,53 +204,55 @@ function menu_add_before() {
 }
 
 function menu_add(type, increment) {
-    return menu_edit(type, increment);
+    return function() {
+        var selection= $('.selected');
+	value= parseFloat(selection.text())+increment;
+	menu_edit_setValue(selection, type, value.toString() );
+	updateAll();
+    }
 }
 
 // show a text input control for setting the selected text item
-function menu_edit(type, constValue) {
+function menu_edit(type) {
     return function() {
         var selection= $('.selected');
-        if (constValue) {
-            var value= constValue;
-            if (typeof(constValue)=='number')
-                if (!selection.hasClass('arg'))
-                    value= parseFloat(selection.text())+constValue;
-            menu_edit_setValue(type, value.toString() );
-    	} else {
-            var elt= $('#menu');
-            elt.contents().remove();
-            //add id to input
-            var input=$('<input id="input"/>');
-            if (type=='exp.number.const') input.attr('type','number');
-            //add id to button
-            var set_button=$('<input type="button" id="okbutt" value="OK"/>');
-            var cancel_button=$('<input type="button" value="Cancel"/>');
-        
-            if (!selection.hasClass('arg'))
-        	    input.attr('value',$('.selected').text());
-            submitMenu= function() { menu_edit_setValue(type, input[0].value); };
-            cancel_button.click(function() { updateMenu(); });
-            set_button.click(submitMenu);
-        
-            elt.append(input);
-            elt.append(set_button);
-            elt.append(cancel_button);
+	var elt= $('#menu');
+	elt.contents().remove();
+
+	//add input controls
+	var input=$('<input id="input"/>');
+	var set_button=$('<input type="button" id="okbutt" value="OK"/>');
+	var cancel_button=$('<input type="button" value="Cancel"/>');
+
+	// fill existing text into input field
+	if (!selection.hasClass('arg'))
+	    input.attr('value',selection.text());
+
+	// define submit and cancel callbacks
+	submitMenu= function() {
+	    menu_edit_setValue(selection, type, input[0].value); 
+	};
+	var cancelMenu= function() { submitMenu=null; updateMenu(); }
+
+	input.keydown(function(evt) { if (evt.which==27) cancelMenu(); });
+	cancel_button.click(cancelMenu);
+	set_button.click(submitMenu);
+
+	//insert input elements into menu bar
+	elt.append(input);
+	elt.append(set_button);
+	elt.append(cancel_button);
             
-            input.focus();
-    	}
+	input.focus();
     }
 }
 
 // set the value of the selected text element
-function menu_edit_setValue(type, value) {
-    var selection= $('.selected');
+function menu_edit_setValue(selection, type, value) {
     value= value.replace(/^\s+|\s+$/g,'');
     if (value=='') {
         if (!selection.hasClass('arg'))
-	        menu_delete();
-        else
-            updateAll();
+	    menu_delete();
     } else {
 	if (selection.hasClass('arg')) {
 	    var div= textArea();
@@ -252,8 +262,6 @@ function menu_edit_setValue(type, value) {
 	    selection= div;
 	}
 	selection.text(value);
-	select(selection);
-	updateAll();
     }
 }
 

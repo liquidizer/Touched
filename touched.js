@@ -36,8 +36,8 @@ function init() {
 }
 
 function updateAll() {
-    updateMenu();
     updateTypes();
+    updateMenu();
     typetext='';
     setTimeout( function() { $('#canvas').trigger('update'); }, 1);
 }
@@ -248,12 +248,13 @@ function keyPress(evt) {
                                
             }
             if (chosen.length == 0) {
-                updateAll();
+		typetext = '';
+                updateMenu();
             }
             else if(chosen.length == 1) {
+                typetext = '';
                 evt.preventDefault();
                 chosen[0].click();
-                typetext = '';
             }           
             else if(chosen.length > 1){
                 var hassameChar = true;
@@ -271,17 +272,14 @@ function keyPress(evt) {
             }
         }
         if(evt.keyCode ==8){
-            updateAll();
+	    typetext= '';
+            updateMenu();
         }
         if(evt.keyCode == 46)
            menu_delete();
     }
-    if (evt.which==9 || evt.which==13)
-        // TAB or RETURN
-        if (submitMenu) submitMenu();
     if (evt.which==40) {
         //KEY_DOWN
-        typetext = '';
         evt.preventDefault();
         var selection= $('.selected');
         selectNext(selection,1);
@@ -289,7 +287,6 @@ function keyPress(evt) {
     }
     else if(evt.which==9 || evt.which ==13){
         // TAB, Enter
-        typetext = '';
         evt.preventDefault();
         var selection= $('.selected');
         selectNext(selection, evt.shiftKey ? 5 : 4);
@@ -317,10 +314,6 @@ function keyPress(evt) {
         if (selection.size()>0)
             selectNext(selection, 3);
         updateMenu();
-    }
-    else if (evt.which==27) {
-        // ESCAPE
-        updateAll();
     }
 }
 
@@ -418,6 +411,7 @@ function msUp (evt) {
 
 function clearErrors() {
     $('.runtime-error').removeClass('runtime-error');
+    $('.runtime-message').remove();
 }
 
 function markError(id, message) {

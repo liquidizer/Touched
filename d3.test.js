@@ -51,7 +51,7 @@ function toCode(node) {
 	        if(force && $(obj).children().length==0)
 		       markError($(obj).attr('id'), "Missing argument");
 	    });
-	    return arglist.children()
+	    return arglist.children().filter(':not(.error)')
 		.map( function(i,obj) { return toCode($(obj)); });
         },
         arg: function(name) { return this.args(name, true)[0] || toCode($([])) },

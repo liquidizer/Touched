@@ -126,7 +126,6 @@ body {
 .box.arg {
     border: 1px solid purple;
     padding: 0px 15px 0px 15px;
-    margin: 1px 2px 1px 2px;
     color: purple;
     font-style: italic;
     border-radius: 10px;
@@ -143,7 +142,7 @@ body {
 
 .box-body > .arg {
     clear: both;
-    margin: 2px 1px 2px 20px;
+    margin: 1px 1px 0px 20px;
 }
 
 .axis path, .axis line {
