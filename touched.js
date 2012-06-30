@@ -211,7 +211,7 @@ function selectNext(obj, axis) {
 //keyboard control
 function keyPress(evt) {
     //console.log(evt.which);
-    if (!submitMenu) {
+    if (!$(document.activeElement).is('INPUT')) {
         if (evt.ctrlKey) {
             if (evt.which == 67)
                 //run code for CTRL+C 
@@ -249,7 +249,7 @@ function keyPress(evt) {
                                
             }
             if (chosen.length == 0) {
-		typetext = '';
+		        typetext = '';
                 updateMenu();
             }
             else if(chosen.length == 1) {
@@ -272,12 +272,28 @@ function keyPress(evt) {
                 }
             }
         }
-        if(evt.keyCode ==8){
-	    typetext= '';
+        else if(evt.keyCode ==8){
+	        typetext= '';
             updateMenu();
         }
-        if(evt.keyCode == 46)
+        else if(evt.keyCode == 46)
            menu_delete();
+        else if(evt.which==37){        
+            //KEY_LEFT
+            evt.preventDefault();
+            var selection= $('.selected');
+            if (selection.size()>0)
+                selectNext(selection, 2);
+            updateMenu();
+        }
+        else if(evt.which ==39){
+            //KEY_RIGHT
+            evt.preventDefault();
+            var selection= $('.selected');
+            if (selection.size()>0)
+                selectNext(selection, 3);
+            updateMenu();
+        }
     }
     if (evt.which==40) {
         //KEY_DOWN
@@ -298,22 +314,6 @@ function keyPress(evt) {
         evt.preventDefault();
         var selection= $('.selected');
         selectNext(selection, 0);
-        updateMenu();
-    }
-    else if(evt.which==37){        
-        //KEY_LEFT
-        evt.preventDefault();
-        var selection= $('.selected');
-        if (selection.size()>0)
-            selectNext(selection, 2);
-        updateMenu();
-    }
-    else if(evt.which ==39){
-        //KEY_RIGHT
-        evt.preventDefault();
-        var selection= $('.selected');
-        if (selection.size()>0)
-            selectNext(selection, 3);
         updateMenu();
     }
 }
