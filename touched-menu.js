@@ -21,9 +21,7 @@ function initMenu() {
     if (param) {
         loadGrammarFile(decodeURI(param[1]));
     } else {
-        loadGrammarFile('grammar-xml.xml');
-        loadGrammarFile('grammar-d3.xml');
-        loadGrammarFile('grammar-g.xml');
+	loadGrammarFile('grammar/grammar.g');
     }
 }
 
@@ -37,24 +35,56 @@ function loadGrammarFile(url) {
 
 // Interpret a loaded grammakr definition
 function initGrammar(content, url) {
-    $(content).find('require').each(function (i, item) {
-        var file= $(item).attr('src');
-        if (!file.match(/(^|\/)\//))
-            file= url.replace(/\/[^/]*$/, '/'+file);
-        loadGrammarFile(file);
-    });
-    $(content).find('item').each(function (i, item) {
-    	var name= $(item).attr('name').match(/[^\/]+/g);
-    	var type= $(item).attr('type');
-    	var curMenu= grammarMenu;
-    	while (name[0]) {
-    	    var sec= name.shift();
-    	    if (!curMenu[sec]) curMenu[sec]= {};
-    	    curMenu= curMenu[sec]
-    	    curMenu._type= type_unify(type, curMenu._type || type);
-    	}
-    	curMenu.template= $(item);
-    });
+    var expand= function(code, item, arg) {
+	code.args(arg || 'content').each( function(i,cmd) {
+	    if (cmd.text) item.append(textArea(cmd.text));
+	    else cmd.call(item);
+	});
+    }
+    var code= toCode($(content), {
+	touched : {
+	    grammar : function(code) {
+		code.args('item').each( function(i,cmd) { cmd.call(); });
+	    },
+	    item : {
+		element : function(code) {
+		    var name= code.arg('name').text;
+		    var type= code.arg('type').text;
+		    grammarMenu[name]={
+    			_type: type,
+			expand: function() { 
+			    var item = elementArea(type);
+			    expand(code, item); 
+			    return item;
+			}
+		    }
+    		}
+	    },
+	    "item-content" : {
+		keyword : function(code, item) {
+		    var text= code.arg('keyword').text;
+		    var area= textArea(text)
+		    area.addClass('keyword');
+		    item.append(area);
+		},
+		arg : function(code, item) {
+		    item.append(dropArea(code.arg('type').text, 
+					 code.arg('name').text));
+		},
+		block : function(code, item) {
+		    var div= $('<div class="group box-body"/>');
+		    item.append(div);
+		    expand(code, div);
+		},
+		repeat : function(code, item) {
+		    //var div= $('<div class="group" data-repeat="*"/>');
+		    //item.append(div);
+		    item.attr('data-repeat','*');
+		    expand(code, item, 'arg');
+		}
+	    }
+	}
+    }).call();
     updateMenu();
 }
 
@@ -91,7 +121,7 @@ function fillMenu(type, menu, parent) {
 	    var submenu= menu[name];
 	    if (!submenu._type 
 		|| type_isSuper(type, submenu._type)
-		|| !type.template && type_isSuper(submenu._type, type)) {
+		|| !type.expand && type_isSuper(submenu._type, type)) {
 		submenus.push(submenu);
 		var entry= menuEntry(type, name, submenu);
 		parent.append(entry);
@@ -99,7 +129,7 @@ function fillMenu(type, menu, parent) {
 	}
     }
     // expand menu if only one entry fits the current selection
-    if (submenus.length==1 && ! submenus[0].template) {
+    if (submenus.length==1 && ! submenus[0].expand) {
 	parent.find(':last').remove();
 	fillMenu(type, submenus[0], parent);
     }
@@ -113,7 +143,7 @@ function menuEntry(type, name, submenu) {
 	var pop= li.find('.popup');
 	if (pop.length>0) pop.remove();
 	else {
-	    if (submenu.template) insertItem(submenu.template)
+	    if (submenu.expand) insertItem(submenu)
 	    else {
 		li.parent().find('ul').remove();
 		var ul= $('<ul class="popup"/>');
@@ -129,41 +159,13 @@ function menuEntry(type, name, submenu) {
 // insert an item from the grammar template at the current selection
 function insertItem(template) {
     var selection = $('.selected');
-    var item = elementArea(template.attr('type'));
-    expandTemplate(template, item);
     // if check_canRepeat and there is no next neigbor then:
     if (check_canRepeat(selection) && selection.next('.arg').length == 0)
        selection.after(dropArea(selection.attr('data-type'), selection.attr('data-name')));
+    var item= template.expand();
     insertBox(selection, item);
     selectNext(item, 4);
     updateAll();
-}
-
-// translate a grammar template into html representation
-function expandTemplate(template, item) {
-    template.contents().each(function(i, sec) {
-	sec= $(sec);
-	if (sec.is('ARG')) {
-	    item.append(dropArea(sec.attr('type'), sec.attr('name')));
-	} else if (sec.is('GROUP')) {
-	    var div= $('<div/>');
-        div.addClass('group');
-	    div.addClass(sec.attr('class'));
-        div.attr('data-name', sec.attr('name'));
-	    div.attr('data-repeat', sec.attr('repeat'));
-	    item.append(div);
-	    expandTemplate(sec, div);
-	} 
-    else if (sec.is('key')) {
-        var text= sec.text().replace(/^\s+|\s+$/g,'');
-        var area= textArea(text)
-        area.addClass('keyword');
-	    if (!!text) item.append(area);
-    } else {
-	    var text= sec.text().replace(/^\s+|\s+$/g,'');
-	    if (!!text) item.append(textArea(text));
-	}
-    });
 }
 
 function getContainer(obj) {

@@ -31,7 +31,7 @@ function init() {
     canvas.attr('ontouchstart','msDown(event)');
     $('html').keydown(keyPress);
     if (canvas.children().length==0) {
-	canvas.append(dropArea('d3.script|xml.doc|touched.grammar','start'));
+	canvas.append(dropArea('touched.grammar','start'));
 	select(canvas.find('.arg'));
     }
     initMenu();
