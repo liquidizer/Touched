@@ -41,10 +41,10 @@ function initGrammar(content, url) {
 	    else cmd.call(item);
 	});
     }
-    var code= toCode($(content), {
+    var code= toCode($(content).find('.element:first'), {
 	touched : {
 	    grammar : function(code) {
-		code.args('item').each( function(i,cmd) { cmd.call(); });
+		code.args().each( function(i,cmd) { cmd.call(); });
 	    },
 	    item : {
 		element : function(code) {
@@ -72,14 +72,11 @@ function initGrammar(content, url) {
 					 code.arg('name').text));
 		},
 		block : function(code, item) {
-		    var div= $('<div class="group box-body"/>');
+		    var div= $('<div class="group box-body" data-repeat="*"/>');
 		    item.append(div);
 		    expand(code, div);
 		},
 		repeat : function(code, item) {
-		    //var div= $('<div class="group" data-repeat="*"/>');
-		    //item.append(div);
-		    item.attr('data-repeat','*');
 		    expand(code, item, 'arg');
 		}
 	    }

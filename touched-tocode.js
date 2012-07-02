@@ -12,8 +12,13 @@ function toCode(node, commands) {
                 return !name || $(this).attr('data-name')==name;
             })
 	    arglist.each( function(i,obj) {
-	        if(force && $(obj).children().length==0)
-		       markError($(obj).attr('id'), "Missing argument");
+	        if(force && $(obj).children().length==0) {
+		    try {
+			markError($(obj).attr('id'), "Missing argument");
+		    } catch(e) {
+			throw "Missing argument: "+name;
+		    }
+		}
 	    });
 	    return arglist.children().filter(':not(.error)')
 		.map( function(i,obj) { return toCode($(obj), commands); });
