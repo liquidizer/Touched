@@ -46,13 +46,21 @@ function initGrammar(content, url) {
 	    grammar : function(code) {
 		var root= code.arg('root').text;
 		$('.arg[data-name=start]:first').attr('data-type',root);
-		code.args('item').each( function(i,cmd) { cmd.call(); });
+		code.args('item').each( function(i,cmd) { cmd.call(grammarMenu); });
 	    },
 	    item : {
-		element : function(code) {
+		menu : function(code, menu) {
+		    var name= code.arg('name').text;
+		    var type= code.arg('type').text || 'd3.cmd';
+		    menu[name]= {
+			_type: type,
+		    }
+		    code.args('item').each( function(i,cmd) { cmd.call(menu); });
+		},
+		element : function(code, menu) {
 		    var name= code.arg('name').text;
 		    var type= code.arg('type').text;
-		    grammarMenu[name]={
+		    menu[name]={
     			_type: type,
 			expand: function() { 
 			    var item = elementArea(type);
@@ -78,9 +86,6 @@ function initGrammar(content, url) {
 		    item.append(div);
 		    expand(code, div);
 		},
-		repeat : function(code, item) {
-		    expand(code, item, 'arg');
-		}
 	    }
 	}
     }).call();
