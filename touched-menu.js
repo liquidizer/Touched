@@ -17,10 +17,14 @@ var submitMenu= null;
 // initialize menu entries
 function initMenu() {
     loaded= {};
-    loadGrammarFile('grammar-xml.xml');
-    loadGrammarFile('grammar-formula.xml');
-    loadGrammarFile('grammar-d3.xml');
-    loadGrammarFile('grammar-g.xml');
+    var param= location.search.match('[?&]grammar=([^&]*)');
+    if (param) {
+        loadGrammarFile(decodeURI(param[1]));
+    } else {
+        loadGrammarFile('grammar-xml.xml');
+        loadGrammarFile('grammar-d3.xml');
+        loadGrammarFile('grammar-g.xml');
+    }
 }
 
 // load a grammar file
