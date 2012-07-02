@@ -13,7 +13,7 @@
           var content = $('#canvas').html();
 
           var http = new XMLHttpRequest();
-          http.open("POST", "/save/this", true);
+          http.open("POST", "/save-<touched:id>", true);
           http.send(content);
       }
   </script>
@@ -22,8 +22,6 @@
       <ul id="menu"/>
     </div>
     <div style="height:50px">Touched Editor</div>
-    <div id="canvas">
-        <!-- content -->
-    </div>
+    <div id="canvas"><touched:content></div>
   </body>
 </html>
