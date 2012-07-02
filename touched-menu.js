@@ -51,11 +51,13 @@ function initGrammar(content, url) {
 	    item : {
 		menu : function(code, menu) {
 		    var name= code.arg('name').text;
-		    var type= code.arg('type').text || 'd3.cmd';
-		    menu[name]= {
-			_type: type,
+		    var submenu= {};
+		    menu[name]= submenu;
+		    code.args('item').each( function(i,cmd) { cmd.call(submenu); });
+		    for (key in submenu) {
+			var subtype= submenu[key]._type;
+			submenu._type= type_unify(subtype, submenu._type || subtype);
 		    }
-		    code.args('item').each( function(i,cmd) { cmd.call(menu); });
 		},
 		element : function(code, menu) {
 		    var name= code.arg('name').text;
@@ -133,7 +135,7 @@ function fillMenu(type, menu, parent) {
 	}
     }
     // expand menu if only one entry fits the current selection
-    if (submenus.length==1 && ! submenus[0].expand) {
+    if (submenus.length==1 && (!submenus[0] || !submenus[0].expand)) {
 	parent.find(':last').remove();
 	fillMenu(type, submenus[0], parent);
     }
