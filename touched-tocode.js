@@ -33,7 +33,10 @@ function toCode(node, commands) {
 		this.type.split('.').forEach(function(sec) { 
 			f=f[sec]; 
 		    });
-		return f(this, data);
+		if (f)
+		    return f(this, data);
+		else
+		    throw "Undefined function: "+this.type;
 	    }
         },
 	assert: function(test, message) {

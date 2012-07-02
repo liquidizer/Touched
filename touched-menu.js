@@ -44,7 +44,9 @@ function initGrammar(content, url) {
     var code= toCode($(content).find('.element:first'), {
 	touched : {
 	    grammar : function(code) {
-		code.args().each( function(i,cmd) { cmd.call(); });
+		var root= code.arg('root').text;
+		$('.arg[data-name=start]:first').attr('data-type',root);
+		code.args('item').each( function(i,cmd) { cmd.call(); });
 	    },
 	    item : {
 		element : function(code) {
