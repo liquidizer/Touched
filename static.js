@@ -24,6 +24,7 @@ http.createServer(function (req, res) {
                 body += data;
             });
             req.on('end', function () {
+		res.end();
 		fs.writeFile(filename, body, function(err) {
 		    if (err) console.log(body);
 		});
