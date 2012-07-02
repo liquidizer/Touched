@@ -145,7 +145,7 @@ function transposeFilter(code, data) {
 
 function sortData(code, data){
     var column =parseFloat(code.arg('column').text);
-    code.assert(column > 0, "Invalid column"); 
+    if (!(column>0)) code.arg('column').error("Invalid column"); 
     data = transpose(data);
     data.sort(function(a,b){return a[column-1]-b[column-1];});
     data = transpose(data);

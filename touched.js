@@ -329,7 +329,7 @@ function msDown (event) {
         var active= false;
         var grabbed= $(evt.target);
         while(true) {
-            if (grabbed.attr('id')=='canvas') return;
+            if (grabbed.attr('id')=='canvas') { unselectAll(); return; }
             active = active || grabbed.is('.box-text, .box.arg, .selected, .float');
             if (active && grabbed.hasClass('box')) break;
             grabbed= grabbed.parent();

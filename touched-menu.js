@@ -16,24 +16,23 @@ var submitMenu= null;
 
 // initialize menu entries
 function initMenu() {
-    loaded= {};
     var param= location.search.match('[?&]grammar=([^&]*)');
     if (param) {
         loadGrammarFile(decodeURI(param[1]));
-    } else {
-	loadGrammarFile('grammar/grammar.g');
     }
 }
 
 // load a grammar file
 function loadGrammarFile(url) {
+    loaded= {};
+    grammarMenu={};
     if (!loaded[url]) {
         loaded[url] = true;
         $.get(url, function(response) { initGrammar(response, url); });
     }
 }
 
-// Interpret a loaded grammakr definition
+// Interpret a loaded grammar definition
 function initGrammar(content, url) {
     var expand= function(code, item, arg) {
 	code.args(arg || 'content').each( function(i,cmd) {

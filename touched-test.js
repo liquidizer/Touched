@@ -2,8 +2,20 @@ $(init);
 function init() {
     $('tests test').each(function(index, data){
         var name = $(data).attr('name');
-        $("#tests").append("<li><input type='button' onclick='runTest(\""+name+"\")' value='run "+name+"' /></li>");
+	var grammar= $(data).attr('grammar');
+	var group= $("#tests li").filter(function() { return $(this).attr('g')==grammar; });
+	if (group.length==0) {
+	    group= $("<li g='"+grammar+"'/>");
+	    group.append("<a href='#' onclick='loadGrammar(\""+grammar+"\")'>load "+grammar+"</a></li>");
+	    group.append('<ul/>');
+	    $("#tests").append(group);
+	}
+        group.find('ul').append("<li><input type='button' onclick='runTest(\""+name+"\")' value='run "+name+"' /></li>");
 });
+}
+
+function loadGrammar(grammar) {
+    loadGrammarFile(grammar);
 }
 
 function runTest(name) {

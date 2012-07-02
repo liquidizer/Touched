@@ -69,7 +69,7 @@
     <div style="clear:both;height:20px"/>
   </body>
   <tests style="display:none">
-    <test name="create SVG">
+    <test name="create SVG" grammar="grammar/xml.g">
 {target:"BODY", keyCode:68, isCtrl:false, isShift:false}
 {target:"BODY", keyCode:84, isCtrl:false, isShift:false}
 {target:"BODY", keyCode:84, isCtrl:false, isShift:false}
@@ -180,7 +180,7 @@
 {target:"#input", keyCode:13, isCtrl:false, isShift:false}
 {target:"BODY", keyCode:67, isCtrl:false, isShift:false}
 </test>
-<test name="create HTML">
+<test name="create HTML" grammar="grammar/xml.g">
 {target:"BODY", keyCode:68, isCtrl:false, isShift:false}
 {target:"BODY", keyCode:84, isCtrl:false, isShift:false}
 {target:"BODY", keyCode:84, isCtrl:false, isShift:false}
@@ -288,7 +288,7 @@
 {target:"#input", keyCode:13, isCtrl:false, isShift:false}
 {target:"BODY", keyCode:67, isCtrl:false, isShift:false}
 </test>
-<test name ='d3'>
+<test name ='d3' grammar="grammar/d3.g">
 {target:"BODY", keyCode:83, isCtrl:false, isShift:false}
 {target:"BODY", keyCode:67, isCtrl:false, isShift:false}
 {target:"BODY", keyCode:65, isCtrl:false, isShift:false}
@@ -335,59 +335,35 @@
 {target:"BODY", keyCode:84, isCtrl:false, isShift:false}
 {target:"BODY", keyCode:70, isCtrl:false, isShift:false}
 {target:"BODY", keyCode:83, isCtrl:false, isShift:false}
-</test>
-<test name ='d3_1'>
-{target:"BODY", keyCode:83, isCtrl:false, isShift:false}
-{target:"BODY", keyCode:76, isCtrl:false, isShift:false}
-{target:"BODY", keyCode:68, isCtrl:false, isShift:false}
-{target:"BODY", keyCode:84, isCtrl:false, isShift:false}
-{target:"#input", keyCode:68, isCtrl:false, isShift:false}
-{target:"#input", keyCode:190, isCtrl:false, isShift:false}
-{target:"#input", keyCode:67, isCtrl:false, isShift:false}
-{target:"#input", keyCode:83, isCtrl:false, isShift:false}
-{target:"#input", keyCode:86, isCtrl:false, isShift:false}
-{target:"#input", keyCode:13, isCtrl:false, isShift:false}
-{target:"BODY", keyCode:70, isCtrl:false, isShift:false}
-{target:"BODY", keyCode:82, isCtrl:false, isShift:false}
-{target:"BODY", keyCode:79, isCtrl:false, isShift:false}
 {target:"BODY", keyCode:78, isCtrl:false, isShift:false}
 {target:"#input", keyCode:49, isCtrl:false, isShift:false}
 {target:"#input", keyCode:13, isCtrl:false, isShift:false}
+{target:"BODY", keyCode:84, isCtrl:false, isShift:false}
+{target:"#input", keyCode:49, isCtrl:false, isShift:false}
+{target:"#input", keyCode:48, isCtrl:false, isShift:false}
+{target:"#input", keyCode:48, isCtrl:false, isShift:false}
+{target:"#input", keyCode:13, isCtrl:false, isShift:false}
 {target:"BODY", keyCode:38, isCtrl:false, isShift:false}
+{target:"BODY", keyCode:38, isCtrl:false, isShift:false}
+{target:"BODY", keyCode:67, isCtrl:false, isShift:false}
+{target:"BODY", keyCode:85, isCtrl:false, isShift:false}
 {target:"BODY", keyCode:40, isCtrl:false, isShift:false}
 {target:"BODY", keyCode:40, isCtrl:false, isShift:false}
+{target:"BODY", keyCode:80, isCtrl:false, isShift:false}
+{target:"BODY", keyCode:65, isCtrl:false, isShift:false}
 {target:"BODY", keyCode:83, isCtrl:false, isShift:false}
-{target:"BODY", keyCode:51, isCtrl:false, isShift:false}
-{target:"BODY", keyCode:48, isCtrl:false, isShift:false}
-{target:"BODY", keyCode:48, isCtrl:false, isShift:false}
 {target:"BODY", keyCode:78, isCtrl:false, isShift:false}
-{target:"#input", keyCode:51, isCtrl:false, isShift:false}
-{target:"#input", keyCode:48, isCtrl:false, isShift:false}
-{target:"#input", keyCode:48, isCtrl:false, isShift:false}
-{target:"#input", keyCode:13, isCtrl:false, isShift:false}
-{target:"BODY", keyCode:78, isCtrl:false, isShift:false}
-{target:"#input", keyCode:50, isCtrl:false, isShift:false}
 {target:"#input", keyCode:53, isCtrl:false, isShift:false}
-{target:"#input", keyCode:48, isCtrl:false, isShift:false}
 {target:"#input", keyCode:13, isCtrl:false, isShift:false}
-{target:"BODY", keyCode:40, isCtrl:false, isShift:false}
-{target:"BODY", keyCode:84, isCtrl:false, isShift:false}
-{target:"BODY", keyCode:68, isCtrl:false, isShift:false}
-{target:"BODY", keyCode:84, isCtrl:false, isShift:false}
-{target:"#input", keyCode:68, isCtrl:false, isShift:false}
-{target:"#input", keyCode:190, isCtrl:false, isShift:false}
-{target:"#input", keyCode:67, isCtrl:false, isShift:false}
-{target:"#input", keyCode:83, isCtrl:false, isShift:false}
-{target:"#input", keyCode:86, isCtrl:false, isShift:false}
-{target:"#input", keyCode:13, isCtrl:false, isShift:false}
-{target:"BODY", keyCode:84, isCtrl:false, isShift:false}
-{target:"BODY", keyCode:70, isCtrl:false, isShift:false}
 {target:"BODY", keyCode:67, isCtrl:false, isShift:false}
+{target:"BODY", keyCode:39, isCtrl:false, isShift:false}
 {target:"BODY", keyCode:78, isCtrl:false, isShift:false}
+{target:"#input", keyCode:8, isCtrl:false, isShift:false}
 {target:"#input", keyCode:50, isCtrl:false, isShift:false}
 {target:"#input", keyCode:13, isCtrl:false, isShift:false}
 {target:"BODY", keyCode:67, isCtrl:false, isShift:false}
 {target:"BODY", keyCode:67, isCtrl:false, isShift:false}
+{target:"BODY", keyCode:85, isCtrl:false, isShift:false}
 </test>
 </tests>
 </html>
