@@ -18,7 +18,7 @@ var typetext ='';
 
 $(init);
 function init() {
-    var canvas= $('#canvas');
+    canvas= $('#canvas');
     $('body').mousemove(msMove);
     $('body').mouseup(msUp);
     $('body').mousedown(function(evt) { 
@@ -39,10 +39,10 @@ function init() {
 }
 
 function updateAll() {
-    updateTypes();
+    updateTypes(canvas);
     updateMenu();
     typetext='';
-    setTimeout( function() { $('#canvas').trigger('update'); }, 1);
+    setTimeout( function() { canvas.trigger('update'); }, 1);
 }
 
 function elementArea(type) {
@@ -124,6 +124,14 @@ function touched_undo(cmd) {
 function select(obj) {
     unselectAll();
     obj.addClass('selected');
+    // scroll selected object into visible area
+    var top= obj.offset().top;
+    var can= canvas.offset().top;
+    if (top - $(window).scrollTop() < can) {
+	$(window).scrollTop(top - can);
+    } else if (top+30 > $(window).scrollTop()+$(window).height()) {
+	$(window).scrollTop(top - $(window).height() + 30);
+    }
 }
 
 function unselectAll() {
@@ -158,7 +166,7 @@ function selectNext(obj, axis) {
         height =0;
         topoffset = reverse ? 100000000 : 0;
     }
-    while (obj.attr('id') != 'canvas') {
+    while (!obj.is(canvas)) {
         // check if current element should be selected
         if (isactive && obj.hasClass('box')) {
             if (selectnext) {
@@ -329,7 +337,7 @@ function msDown (event) {
         var active= false;
         var grabbed= $(evt.target);
         while(true) {
-            if (grabbed.attr('id')=='canvas') { unselectAll(); return; }
+            if (grabbed.is(canvas)) { unselectAll(); return; }
             active = active || grabbed.is('.box-text, .box.arg, .selected, .float');
             if (active && grabbed.hasClass('box')) break;
             grabbed= grabbed.parent();
@@ -367,7 +375,7 @@ function msMove(event) {
             if (!hasMoved && !blocked) {
                 // look for the containing element that can be moved
                 while (!hand.hasClass('element')) {
-                    if (hand.attr('id')=='canvas') return;
+                    if (hand.is(canvas)) return;
                     hand = hand.parent();
                 }
                 // record the original position
@@ -379,7 +387,7 @@ function msMove(event) {
                     // make the object float
                     releaseBox(hand);
                     hand.addClass('float');
-                    $('#canvas').append(hand);
+                    canvas.append(hand);
                     updateAll();
                 } 
                 hand.addClass('dragged');

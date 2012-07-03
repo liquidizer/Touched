@@ -1,5 +1,5 @@
-function updateTypes() {
-    inferChildren($('#canvas'));
+function updateTypes(canvas) {
+    inferChildren(canvas);
 }
 
 function inferChildren(obj, type) {
