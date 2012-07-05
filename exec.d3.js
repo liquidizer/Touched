@@ -1,40 +1,31 @@
-function getPlot() {
-    var code= toCode($('#canvas'), commands);
-    d3.select("#dataview").selectAll('div').remove();    
-    var output= d3.select('#dataview');
-    var script= code.arg('start');
-    clearErrors();
-    processScript(script, output);
-}
-
 // list of commands available in this grammar
-var commands = {
-    d3: {
-        cmd: { // function(code, output)
-            caption: processCaption,
-            table: processTable,
-            line : processLine
-        },
-        filter: { // function(code, data)
-            removerow: removeRows,
-            keeprow: keepRows,
-            removecolumn: removeColumns,
-            keepcolumn: keepColumns,
-            transpose: transposeFilter,
-            sort : sortData,
-            selectcolumnbyvalue : selectColumnbyValue
-        },
-	data: {
-	    csv : processData
-	},
-        plotoption:{// function(code, options)
-            XAxis : getXAxis,
-            size : getSize
-        }
+commands.d3= {
+    script : processScript,
+    cmd: { // function(code, output)
+	caption: processCaption,
+	table: processTable,
+	line : processLine
     },
+    filter: { // data= function(code, data)
+	removerow: removeRows,
+	keeprow: keepRows,
+	removecolumn: removeColumns,
+	keepcolumn: keepColumns,
+	transpose: transposeFilter,
+	sort : sortData,
+	selectcolumnbyvalue : selectColumnbyValue
+    },
+    data: {
+	csv : processData
+    },
+    plotoption:{// function(code, options)
+	XAxis : getXAxis,
+	size : getSize
+    }
 };
 
 function processScript(code, output) {
+    output.selectAll('*').remove();
     code.args('command').each( function (i, cmd) {
         var root= output.append('div');
 	cmd.call(root);
