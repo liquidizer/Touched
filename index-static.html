@@ -14,12 +14,11 @@
       function saveContent() {
           var content = $('#canvas').html();
           var http = new XMLHttpRequest();
-          var code= location.search.match(/[^&]code=([^&]*)/)[1];
           http.onreadystatechange = function() { 
              if (http.readyState==4 && http.status!=200) 
                  $('#menu').html('<b>Error saving document</b>');
           };
-          http.open("POST", "/save/<touched:file>?code="+code, true);
+          http.open("POST", "/save/<touched:file>?code=<touched:code>", true);
           http.send(content);
       }
   </script>
