@@ -57,17 +57,55 @@ http.createServer(function(req, res) {
 	    }	   
 	}
     }
+    else if (req.url.match("/redirect/")) {
+	var url= req.url.match("/redirect/(.*)")[1];
+	redirect(res, url);
+    }
     else {
 	var filename = req.url.match('^/([^?]*)')[1];
 	fs.readFile(filename, function(err, data) {
             var mime = 'text/html';
 	    if (filename.match(/.js/)) mime = 'text/javascript';
 	    if (filename.match(/.css/)) mime = 'text/css';
-	    res.writeHead(200, { 'Content-Type': mime });
-	    res.end(data || '<h1>File does not exist.</h1>');
+	    if (data) {
+		res.writeHead(200, { 'Content-Type': mime });
+		res.end(data)
+	    } else {
+		res.writeHead(404, { 'Content-Type': 'text/plain' });
+		res.end('File does not exist.');
+	    }
         });
     }
 }).listen(port);
+
+function redirect(res, url) {
+    var comps= url.match("http://([^/:]+)(:[0-9]+)?(.*)");
+    if (comps) {
+	var options= {
+	    host: comps[1],
+	    port: comps[2] || 80,
+	    path: comps[3] || '/',
+	};
+	http.get(options, function(red) {
+	    red.setEncoding('utf8');
+	    if (red.statusCode >= 300 && red.statusCode<310 && headers.location) {
+		// redirecting
+ 		redirect(res, red.headers.location);
+	    } else {
+		res.writeHead(red.statusCode);
+		red.on('data', function (chunk) {
+		    res.write(chunk);
+		});
+		red.on('end', function() {
+		    res.end();
+		});
+	    }
+	});
+    } else {
+	res.writeHead(400);
+	res.end();
+    }
+}
 
 function denyAccess(res, message) {
     console.log(message);

@@ -41,9 +41,12 @@ function toCode(node, commands) {
 		var f= commands;
 		var type= this.type
 		type.split('.').forEach(function(sec) { 
-			f=f[sec];
-			if (!f) throw "Undefined function: "+type;
-		    });
+		    f=f && f[sec];
+		});
+		if (!f) {
+		    this.error("Command is not defined: "+type);
+		    throw "Undefined function: "+type;
+		}
 		return f(this, data, callback);
 	    }
         },

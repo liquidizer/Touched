@@ -11,14 +11,17 @@ commands.viz= {
     },
     cmd : {
 	data : function(code, output, callback) {
-	    var file= code.arg('src');
-	    if (file.text) d3.text(file.text, function(data) {
-		    if (!data) file.error("Could not read file");
+	    var url= code.arg('src').text;
+	    if (url) {
+		if (url.match(/[a-z]+:\/\//)) url= "/redirect/"+encodeURI(url);
+		d3.text(url, function(data) {
+		    if (!data) code.arg('src').error("Could not read file");
 		    else {
 			data= VizData.text(data);
 			code.fold('filter', data, callback);
 		    }
 		});
+	    }
 	}
     },
     filter : {
