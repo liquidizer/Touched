@@ -33,6 +33,7 @@ function init() {
 	select(canvas.find('.arg'));
     }
     canvas.find('.dragged').removeClass('dragged');
+    canvas.find('.runtime-error').removeClass('runtime-error');
     initMenu();
     updateAll();
 }
@@ -331,7 +332,6 @@ function keyPress(evt) {
 function msDown (event) {
     var evt= translateTouch(event);
     if (hand==null && evt.target!=null) {
-        event.preventDefault();
         // find signaling object
         var active= false;
         var grabbed= $(evt.target);
@@ -346,15 +346,15 @@ function msDown (event) {
             grabbed= grabbed.parent();
         }
         hand= grabbed;
+        event.preventDefault();
         if (!hand.hasClass('selected')) {
             select(hand);
             updateMenu();
         }
         
         // store object position. Will be updated when mouse moves.
-        startOffset= { top: hand.offset().top - evt.clientY, 
-		       left: hand.offset().left - evt.clientX };
 	blocked = undefined;
+	startOffset = undefined;
 	startPos= [ evt.clientX, evt.clientY ];
     }
 }
@@ -384,6 +384,8 @@ function msMove(event) {
                     if (hand.is(canvas)) return;
                     hand = hand.parent();
                 }
+		startOffset= { top: hand.offset().top - startPos[1], 
+			       left: hand.offset().left - startPos[0] };
                 // record the original position
                 if (!hand.hasClass('float')) {
                     // block object from snap back

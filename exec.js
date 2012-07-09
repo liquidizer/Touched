@@ -3,7 +3,7 @@ function execute() {
     clearErrors();
     var output=d3.select('#dataview');
     var code= toCode($('#canvas'), commands);
-    code.arg('start').call(output);
+    code.args('start').each(function(i,cmd) { cmd.call(output); });
 }
 
 // implement the xml grammar

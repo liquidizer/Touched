@@ -19,6 +19,7 @@ function loadGrammar(grammar) {
 }
 
 function runTest(name) {
+    sessionStorage.removeItem('Touched-clipboard');
     $('#testChoice').hide();
    
     var data= $('tests test[name="'+name+'"]');
@@ -36,9 +37,9 @@ function stepThroughTest(array, num) {
         e.ctrlKey = res.isCtrl;
         e.shiftKey = res.isShift;
         if (res.target == '#input') {
-            var oldvalue = $('#input').attr('value');
+            var oldvalue = $('#input').val() || '';
             if (res.keyCode == 8) {
-                $('#input').attr('value', oldvalue.replace(/.$/,''));
+                $('#input').val(oldvalue.replace(/.$/,''));
             }
             else if(res.keyCode == 190)
                 $('#input').attr('value', oldvalue+'.'); 

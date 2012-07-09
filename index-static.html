@@ -17,7 +17,7 @@
   <script type="text/javascript" src="exec.viz.js"></script>
   <style>
     #updateswitch {
-      float: right;
+      margin: 10px;
     }
     #dataview table,td {
       border-collapse: collapse;
@@ -45,6 +45,7 @@
              $('#dataview').show();
 	     execute();
 	  } else {
+	     clearErrors();
 	     $('#dataview').hide();
 	  }
       }
@@ -54,10 +55,13 @@
       <ul id="menu"/>
     </div>
     <div style="height:50px">Touched Editor</div>
-    <div id="canvas"><touched:content></div>
-    <span id="updateswitch">
+    <div>
+      <div id="canvas"><touched:content></div>
+      <div style="height:50px; clear:both"/>
+    </div>
+    <div id="updateswitch">
       <input type='checkbox' id="autoupdate"/> Run
-    </span>
-    <div id="dataview"/>
+      <div id="dataview"/>
+    </div>
   </body>
 </html>

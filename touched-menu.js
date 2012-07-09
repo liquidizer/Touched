@@ -11,7 +11,7 @@ var editMenu= [
     [ 'Cut', check_canDelete, menu_delete ]
 ];
 
-var clipboard= null;
+// input entry to submit before menu update
 var submitMenu= null;
 
 // initialize menu entries
@@ -185,6 +185,7 @@ function check_canDelete(obj) {
 }
 
 function check_canPaste(obj) {
+    var clipboard= sessionStorage.getItem('Touched-clipboard');
     return clipboard && obj.hasClass('arg') && obj.hasClass('box');
 }
 
@@ -286,7 +287,8 @@ function menu_edit_setValue(selection, type, value) {
 function menu_paste() {
     var selection= $('.selected');
     if (check_canPaste(selection)) {
-        var clone= clipboard.clone();
+	var clipboard= sessionStorage.getItem('Touched-clipboard');
+        var clone= $(clipboard).clone();
         insertBox(selection, clone);
         select(clone);
         updateAll();
@@ -296,8 +298,10 @@ function menu_paste() {
 function menu_copy() {
     var selection= $('.selected');
     if (check_canCopy(selection)) {
-        clipboard= selection.clone();
-        if (clipboard.hasClass('arg')) clipboard= null;
+	var clipboard= undefined;
+        if (!selection.hasClass('arg'))
+            clipboard= selection[0].outerHTML;
+	sessionStorage.setItem('Touched-clipboard', clipboard);
     }
 }
 
