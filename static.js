@@ -62,7 +62,7 @@ http.createServer(function(req, res) {
 	redirect(res, url);
     }
     else {
-	var filename = req.url.match('^/([^?]*)')[1];
+	var filename = req.url.match('^/+([^?]*)')[1];
 	fs.readFile(filename, function(err, data) {
             var mime = 'text/html';
 	    if (filename.match(/.js/)) mime = 'text/javascript';
@@ -88,7 +88,7 @@ function redirect(res, url) {
 	};
 	http.get(options, function(red) {
 	    red.setEncoding('utf8');
-	    if (red.statusCode >= 300 && red.statusCode<310 && headers.location) {
+	    if (red.statusCode >= 300 && red.statusCode<310 && red.headers.location) {
 		// redirecting
  		redirect(res, red.headers.location);
 	    } else {

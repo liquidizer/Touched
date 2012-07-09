@@ -7,11 +7,9 @@ var undoBuffer= [];
 var redoBuffer= [];
 
 // The screen coordinates of the last drag update.
-var startPos;
 var startOffset;
-var hasMoved= false;
+var startPos;
 var blocked = undefined;
-var unselect= false;
 
 // typed text for keyboard control
 var typetext ='';
@@ -34,6 +32,7 @@ function init() {
 	canvas.append(dropArea('none','start'));
 	select(canvas.find('.arg'));
     }
+    canvas.find('.dragged').removeClass('dragged');
     initMenu();
     updateAll();
 }
@@ -337,23 +336,26 @@ function msDown (event) {
         var active= false;
         var grabbed= $(evt.target);
         while(true) {
-            if (grabbed.is(canvas)) { unselectAll(); return; }
+            if (grabbed.is(canvas)) { 
+		unselectAll(); 
+		updateMenu();
+		return; 
+	    }
             active = active || grabbed.is('.box-text, .box.arg, .selected, .float');
             if (active && grabbed.hasClass('box')) break;
             grabbed= grabbed.parent();
         }
         hand= grabbed;
-        unselect= hand.hasClass('selected');
-        if (!unselect) {
+        if (!hand.hasClass('selected')) {
             select(hand);
             updateMenu();
         }
         
-        // store mouse position. Will be updated when mouse moves.
-        startPos= [evt.clientX, evt.clientY];
-        blocked = undefined
-        hasMoved= false;
-        return false;
+        // store object position. Will be updated when mouse moves.
+        startOffset= { top: hand.offset().top - evt.clientY, 
+		       left: hand.offset().left - evt.clientX };
+	blocked = undefined;
+	startPos= [ evt.clientX, evt.clientY ];
     }
 }
 
@@ -361,17 +363,21 @@ function msMove(event) {
     var evt= translateTouch(event);
     if (hand) {
         event.preventDefault();   
-        var dx= evt.clientX - startPos[0];
-        var dy= evt.clientY - startPos[1];
-        if (hasMoved || Math.abs(dx)+Math.abs(dy)>20) {
+	var hasMoved= hand.hasClass('dragged');
+
+        if (hasMoved || Math.abs(startPos[0]-evt.clientX)+Math.abs(startPos[1]-evt.clientY)>20) {
+
             // compare the evt location with the blocked information
             if (blocked) { 
-                if ((evt.clientY < blocked.top) || (evt.clientY - blocked.top > blocked.height) || evt.clientX < blocked.left || (evt.clientX - blocked.left > blocked.width)) {
+		if ((evt.clientY < blocked.top) || 
+		    (evt.clientY - blocked.top > blocked.height) || 
+		    (evt.clientX < blocked.left) || 
+		    (evt.clientX - blocked.left > blocked.width)) {
                     // the X Y are not in the blocked area
                     blocked = undefined;
-                }
+		}
             }
-            
+
             if (!hasMoved && !blocked) {
                 // look for the containing element that can be moved
                 while (!hand.hasClass('element')) {
@@ -379,7 +385,6 @@ function msMove(event) {
                     hand = hand.parent();
                 }
                 // record the original position
-                startOffset= hand.offset();
                 if (!hand.hasClass('float')) {
                     // block object from snap back
                     var parent =hand.parent();
@@ -391,42 +396,41 @@ function msMove(event) {
                     updateAll();
                 } 
                 hand.addClass('dragged');
-                hasMoved= true;
             }
 
-            if (hasMoved && !blocked) {
+            if (hand.hasClass('dragged') && !blocked) {
                 var arg= $(evt.target);
                 if (arg.is('.box.arg') && !arg.parents().is(hand)) {
                     // insert dragged element into target
-                    startPos= [evt.clientX, evt.clientY];
+		    startPos= [evt.clientX, evt.clientY];
                     blockArea(arg);
                     insertBox(arg, hand);
+		    hand.removeClass('dragged');
                     updateAll();
-                    hasMoved= false;
-                    unselect= false;
                 }
             }
-            if (hasMoved) {
+            if (hand.hasClass('dragged')) {
                 hand.offset({
-                    top: startOffset.top + dy, 
-                    left: startOffset.left + dx
+                    top: startOffset.top + evt.clientY, 
+                    left: startOffset.left + evt.clientX
                 });
             }
         }
     }
 }
 
-function msUp (evt) {
-    evt.preventDefault();
+function msUp (event) {
     if (hand) {
-        hand.removeClass('dragged');
-        if (unselect && !hasMoved) {
-            hand.removeClass('selected');
-            updateMenu();
+	if (hand.hasClass('dragged')) {
+            hand.removeClass('dragged');
+            updateAll();
         }
         hand= null;
+    } 
+    else if ($(event.target).is('body')) {
+	unselectAll();
+	updateMenu();
     }
-    return false;
 }
 
 // block a screan region against snapping back too early
