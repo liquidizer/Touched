@@ -19,41 +19,41 @@ function loadGrammar(grammar) {
 }
 
 function runTest(name) {
-    sessionStorage.removeItem('Touched-clipboard');
+    clear_clipboard();
     $('#testChoice').hide();
-   
     var data= $('tests test[name="'+name+'"]');
     var testData = $(data).text();
-    var array = testData.split("}");
+    var array = testData.split("\n").filter(function (x) { return x; });
     stepThroughTest(array, 0);
 }
 
-function stepThroughTest(array, num) {
-    if (num < array.length - 1) {
-        var res = eval("(" + array[num] + "})");
+function stepThroughTest(array) {
+    if (array.length>0) {
+        var res = eval("(" + array.shift() + ")");
         var e = jQuery.Event("keydown");
         e.keyCode = res.keyCode;
         e.which = res.keyCode;
         e.ctrlKey = res.isCtrl;
         e.shiftKey = res.isShift;
         if (res.target == '#input') {
-            var oldvalue = $('#input').val() || '';
-            if (res.keyCode == 8) {
+	    var oldvalue = $('#input').val() || '';
+	    if (res.keyCode == 8) {
                 $('#input').val(oldvalue.replace(/.$/,''));
-            }
-            else if(res.keyCode == 190)
+	    }
+	    else if(res.keyCode == 190)
                 $('#input').attr('value', oldvalue+'.'); 
-            else {
+	    else {
                 var newvalue = String.fromCharCode(res.keyCode);
                 if (!e.shiftKey) newvalue = newvalue.toLowerCase();
                 $('#input').attr('value', oldvalue + newvalue);
-            }
+	    }
         }
         $(res.target).trigger(e);
-        if (res.target != '#input') setTimeout(function() {
-            stepThroughTest(array, num + 1)
-        }, 200);
-        else stepThroughTest(array, num + 1);
+	var stepNext= function() { stepThroughTest(array); };
+        if (res.target != '#input') 
+	    setTimeout(stepNext, 200);
+	else
+	    setTimeout(stepNext, 20);
     }
 }
 

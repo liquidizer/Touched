@@ -11,9 +11,6 @@ var editMenu= [
     [ 'Cut', check_canDelete, menu_delete ]
 ];
 
-// input entry to submit before menu update
-var submitMenu= null;
-
 // initialize menu entries
 function initMenu() {
     var param= location.search.match('[?&]grammar=([^&]*)');
@@ -95,9 +92,8 @@ function initGrammar(content, url) {
 
 // update the shown menu with respect to the current selection
 function updateMenu() {
-    if (submitMenu) {
-	submitMenu();
-	submitMenu= null;
+    if ($('#okbutt').length>0) {
+	$('#okbutt').click().remove();
 	updateAll();
 	return;
     }
@@ -185,7 +181,7 @@ function check_canDelete(obj) {
 }
 
 function check_canPaste(obj) {
-    var clipboard= sessionStorage.getItem('Touched-clipboard');
+    var clipboard= localStorage.getItem('Touched-clipboard');
     return clipboard && obj.hasClass('arg') && obj.hasClass('box');
 }
 
@@ -248,7 +244,7 @@ function menu_edit(type) {
 	    input.attr('value',selection.text());
 
 	// define submit and cancel callbacks
-	submitMenu= function() {
+	var submitMenu= function() {
 	    menu_edit_setValue(selection, type, input[0].value); 
 	};
 	var cancelMenu= function() { submitMenu=null; updateMenu(); }
@@ -284,10 +280,14 @@ function menu_edit_setValue(selection, type, value) {
     }
 }
 
+function clear_clipboard() {
+    localStorage.removeItem('Touched-clipboard');
+}
+
 function menu_paste() {
     var selection= $('.selected');
     if (check_canPaste(selection)) {
-	var clipboard= sessionStorage.getItem('Touched-clipboard');
+	var clipboard= localStorage.getItem('Touched-clipboard');
         var clone= $(clipboard).clone();
         insertBox(selection, clone);
         select(clone);
@@ -301,7 +301,7 @@ function menu_copy() {
 	var clipboard= undefined;
         if (!selection.hasClass('arg'))
             clipboard= selection[0].outerHTML;
-	sessionStorage.setItem('Touched-clipboard', clipboard);
+	localStorage.setItem('Touched-clipboard', clipboard);
     }
 }
 

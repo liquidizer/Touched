@@ -377,7 +377,6 @@ function msMove(event) {
                     blocked = undefined;
 		}
             }
-
             if (!hasMoved && !blocked) {
                 // look for the containing element that can be moved
                 while (!hand.hasClass('element')) {
@@ -399,7 +398,6 @@ function msMove(event) {
                 } 
                 hand.addClass('dragged');
             }
-
             if (hand.hasClass('dragged') && !blocked) {
                 var arg= $(evt.target);
                 if (arg.is('.box.arg') && !arg.parents().is(hand)) {
