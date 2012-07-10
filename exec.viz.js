@@ -54,6 +54,18 @@ commands.viz= {
 			.sort(function(a,b){return a[column-1]-b[column-1];});
 		}
 		callback(data);
+	    },
+	    rmcols : function(code, data, callback) {
+		var range= getRange(code.arg('cols'));
+		data.matrix= data.matrix.map(function (row, i) {
+		    return row.filter (function (ele,i) { return !range.contains(i+1); });
+		});
+		callback(data);
+	    },
+	    rmrows : function(code, data, callback) {
+		var range= getRange(code.arg('rows'));
+		data.matrix= data.matrix.filter (function (ele,i) { return !range.contains(i+1); });
+		callback(data);
 	    }
 	}
     }

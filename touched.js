@@ -44,7 +44,7 @@ function initTouched(canvasId, menuId, grammar, curDocument, editable) {
 	}
     }
     activateEvents();
-    updateAll();
+    updateAll(true);
 }
 
 
@@ -85,11 +85,11 @@ function removeEvents() {
     $('html').unbind('keydown');
 }
 
-function updateAll() {
+function updateAll(notrigger) {
     updateTypes(canvas);
     updateMenu();
     typetext='';
-    if (!readonly)
+    if (!readonly && !notrigger)
 	setTimeout( function() { canvas.trigger('update'); }, 1);
 }
 
@@ -185,7 +185,7 @@ function select(obj) {
 function unselectAll() {
     typetext ='';
     $('.selected').removeClass('selected');
-    document.getSelection().empty()
+    document.getSelection().removeAllRanges()
 }
 
 // Move the selection along one of the following axes:
