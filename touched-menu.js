@@ -3,6 +3,7 @@ var grammarMenu= {};
 var editMenu= [
     [ 'Text', check_isType('text'), menu_edit('text') ],
     [ 'Number', check_isType('number'), menu_edit('number') ],
+    [ 'File', check_isExt('file', 'menu_file'), function() { window['menu_file'](); } ],
     [ '+1', check_isType('number',true), menu_add('number',1) ],
     [ '-1', check_isType('number',true), menu_add('number',-1) ],
     [ 'Before', check_canRepeat, menu_add_before ],
@@ -106,8 +107,8 @@ function updateMenu() {
     if (!readonly && selection.is('.arg'))
 	fillMenu(selection.attr('data-type'), grammarMenu, menuBar);
     if (selection.length>0) {
-	for (var i=0;i<editMenu.length;i++) {
-	    if (!readonly || editMenu[i][0]=='Copy') {
+	for (var i=0; i<editMenu.length; i++) {
+	    if (!readonly || editMenu[i][2]==menu_copy) {
 		if (editMenu[i][1](selection)) {
 		    var li= $('<li class="builtin"/>');
 		    li.text(editMenu[i][0]);
@@ -204,6 +205,10 @@ function check_isType(type, isobj) {
     return function(obj) {
         return type_isa(obj, type) && (!isobj || !obj.hasClass('arg'));
     };
+}
+
+function check_isExt(type, fun) {
+    return function(obj) { return window[fun] && check_isType(type)(obj); }
 }
 
 function menu_add_after() {

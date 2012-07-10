@@ -17,20 +17,22 @@ var canvas= undefined;
 var readonly=false;
 var menuId=undefined;
 
-function initTouched(canvasId, menuid, grammar, curDocument, editable) {
+function initTouched(canvasId, menuId, grammar, curDocument, editable) {
     readonly= editable===false;
     canvas= $('#' + canvasId);
 
     /*
-      if(!standalone) { // switch focus to canvas (makes ZK happy)
-      canvas.append('<input type="text" id="tmpinp">');
-      $("#tmpinp").focus();
-      canvas.children().remove();
-      canvas.bind('update', function() { thetaSaveDoc(canvas.html());} );
-      }
+      TODO 1: add new function "function menu_file()" to open file dialog
+      TODO 2: move this to calling script:
+
+        // switch focus to canvas (makes ZK happy)
+        canvas.append('<input type="text" id="tmpinp">');
+        $("#tmpinp").focus();
+        canvas.children().remove();
+        canvas.bind('update', function() { thetaSaveDoc(canvas.html());} );
     */
     
-    initMenu(menuid, readonly);
+    initMenu(menuId);
     if (grammar) loadGrammarFile(grammar);
 
     if (curDocument) {
