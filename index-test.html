@@ -19,12 +19,11 @@
         padding: 10px;
         margin: 10px
     }
-    #canvas {
-        width: 50%;
-    }
     #execution {
-        width: 50%;
-        float: right;
+        position: absolute;
+        top: 60;
+        left: 45%;
+        width: 45%;
     }
     #dataview table,td {
       border-collapse: collapse;
@@ -33,6 +32,7 @@
   </style>
   <script language="javascript">
       $(function() {
+        initTouched('canvas','menu');
         $('#canvas').bind('update', updateView);
         $('#autoupdate').bind('change',updateView);
         $('#showtests').bind('change', function() {

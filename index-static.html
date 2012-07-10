@@ -26,9 +26,9 @@
   </style>
   <script language="javascript">
       $(function() {
+        initTouched('canvas','menu','<touched:g>', '<touched:content>');
         $('#canvas').bind('update', function() { saveContent(); runContent(); });
         $('#autoupdate').bind('change', runContent);
-        loadGrammarFile("<touched:g>");
       });
       function saveContent() {
           var content = $('#canvas').html();
@@ -56,7 +56,7 @@
     </div>
     <div style="height:50px">Touched Editor</div>
     <div>
-      <div id="canvas"><touched:content></div>
+      <div id="canvas"></div>
       <div style="height:50px; clear:both"/>
     </div>
     <div id="updateswitch">

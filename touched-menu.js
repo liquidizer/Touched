@@ -1,3 +1,4 @@
+var menuBar;
 var grammarMenu= {};
 var editMenu= [
     [ 'Text', check_isType('text'), menu_edit('text') ],
@@ -12,7 +13,10 @@ var editMenu= [
 ];
 
 // initialize menu entries
-function initMenu() {
+function initMenu(menuId) {
+    menuBar= $('#'+menuId);
+
+    // load a grammar provided by request parameters
     var param= location.search.match('[?&]grammar=([^&]*)');
     if (param) {
         loadGrammarFile(decodeURI(param[1]));
@@ -83,7 +87,7 @@ function initGrammar(content, url) {
 		    var div= $('<div class="group box-body" data-repeat="*"/>');
 		    item.append(div);
 		    expand(code, div);
-		},
+		}
 	    }
 	}
     }).call();
@@ -97,18 +101,19 @@ function updateMenu() {
 	updateAll();
 	return;
     }
-    var bar= $('#menu');
-    bar.children().remove();
     var selection=$('.selected');
-    if (selection.is('.arg'))
-	fillMenu(selection.attr('data-type'), grammarMenu, bar);
+    menuBar.children().remove();
+    if (!readonly && selection.is('.arg'))
+	fillMenu(selection.attr('data-type'), grammarMenu, menuBar);
     if (selection.length>0) {
-	for (var i in editMenu) {
-	    if (editMenu[i][1](selection)) {
-		var li= $('<li class="builtin"/>');
-		li.text(editMenu[i][0]);
-		li.click(editMenu[i][2]);
-		bar.append(li);
+	for (var i=0;i<editMenu.length;i++) {
+	    if (!readonly || editMenu[i][0]=='Copy') {
+		if (editMenu[i][1](selection)) {
+		    var li= $('<li class="builtin"/>');
+		    li.text(editMenu[i][0]);
+		    li.click(editMenu[i][2]);
+		    menuBar.append(li);
+		}
 	    }
 	}
     }
@@ -175,14 +180,15 @@ function getContainer(obj) {
 }
 
 function check_canDelete(obj) {
-    return obj.parent().hasClass('arg') || 
-    obj.hasClass('float') ||
-	getContainer(obj).parent().attr('data-repeat')=='*';
+    return !readonly && (
+	obj.parent().hasClass('arg') || 
+	    obj.hasClass('float') ||
+	    getContainer(obj).parent().attr('data-repeat')=='*');
 }
 
 function check_canPaste(obj) {
     var clipboard= localStorage.getItem('Touched-clipboard');
-    return clipboard && obj.hasClass('arg') && obj.hasClass('box');
+    return !readonly && clipboard && obj.is('.arg.box');
 }
 
 function check_canRepeat(obj) {
@@ -231,8 +237,7 @@ function menu_add(type, increment) {
 function menu_edit(type) {
     return function() {
         var selection= $('.selected');
-	var elt= $('#menu');
-	elt.contents().remove();
+	menuBar.contents().remove();
 
 	//add input controls
 	var input=$('<input id="input"/>');
@@ -254,9 +259,9 @@ function menu_edit(type) {
 	set_button.click(submitMenu);
 
 	//insert input elements into menu bar
-	elt.append(input);
-	elt.append(set_button);
-	elt.append(cancel_button);
+	menuBar.append(input)
+	    .append(set_button)
+	    .append(cancel_button);
             
 	input.focus();
     }
@@ -302,6 +307,7 @@ function menu_copy() {
         if (!selection.hasClass('arg'))
             clipboard= selection[0].outerHTML;
 	localStorage.setItem('Touched-clipboard', clipboard);
+	updateMenu();
     }
 }
 

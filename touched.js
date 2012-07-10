@@ -13,36 +13,82 @@ var blocked = undefined;
 
 // typed text for keyboard control
 var typetext ='';
+var canvas= undefined;
+var readonly=false;
+var menuId=undefined;
 
-$(init);
-function init() {
-    canvas= $('#canvas');
-    $('body').mousemove(msMove);
-    $('body').mouseup(msUp);
-    $('body').mousedown(function(evt) { 
-        if (evt.target.nodeName!="INPUT")
-            evt.preventDefault(); 
-        });
+function initTouched(canvasId, menuid, grammar, curDocument, editable) {
+    readonly= editable===false;
+    canvas= $('#' + canvasId);
+
+    /*
+      if(!standalone) { // switch focus to canvas (makes ZK happy)
+      canvas.append('<input type="text" id="tmpinp">');
+      $("#tmpinp").focus();
+      canvas.children().remove();
+      canvas.bind('update', function() { thetaSaveDoc(canvas.html());} );
+      }
+    */
+    
+    initMenu(menuid, readonly);
+    if (grammar) loadGrammarFile(grammar);
+
+    if (curDocument) {
+	canvas.html(curDocument);
+    } else {
+	if (canvas.children().length==0) {
+	    canvas.append(dropArea('none','start'));
+	    select(canvas.find('.arg'));
+	}
+    }
+    activateEvents();
+    updateAll();
+}
+
+
+
+function exitTouched() {
+    removeEvents(false);
+}
+
+function pauseTouched() {
+    removeEvents(false);
+}
+
+function resumeTouched() {
+    activateEvents(false);
+}
+
+function activateEvents() {
+    canvas.mousemove(msMove);
+    canvas.mouseup(msUp);
+    canvas.mousedown(msDown);
+    canvas.mousedown(function(evt) {
+	if (evt.target.nodeName!="INPUT")
+	    evt.preventDefault(); 
+    });
     canvas.attr('ontouchmove','msMove(event)');
     canvas.attr('ontouchend','msUp(event)');
-    canvas.attr('onmousedown','msDown(event)');
     canvas.attr('ontouchstart','msDown(event)');
     $('html').keydown(keyPress);
-    if (canvas.children().length==0) {
-	canvas.append(dropArea('none','start'));
-	select(canvas.find('.arg'));
-    }
-    canvas.find('.dragged').removeClass('dragged');
-    canvas.find('.runtime-error').removeClass('runtime-error');
-    initMenu();
-    updateAll();
+}
+
+function removeEvents() {
+    canvas.unbind('mousemove');
+    canvas.unbind('mouseup');
+    canvas.unbind('mousedown');
+    canvas.removeAttr('ontouchmove');
+    canvas.removeAttr('ontouchend');
+    canvas.removeAttr('ontouchstart');
+    $('html').unbind('keydown');
 }
 
 function updateAll() {
     updateTypes(canvas);
     updateMenu();
     typetext='';
-    setTimeout( function() { canvas.trigger('update'); }, 1);
+    if (!readonly)
+	setTimeout( function() { canvas.trigger('update'); }, 1);
 }
 
 function elementArea(type) {
@@ -230,18 +276,18 @@ function keyPress(evt) {
                 //run code for CTRL+V
                 menu_paste();        
             if (evt.which == 88)    
-              //run code for CTRL+X
+		//run code for CTRL+X
                 menu_delete();
             if (evt.which == 89)    
-              //run code for CTRL+Y
+		//run code for CTRL+Y
                 touched_undo(false);
             if (evt.which == 90)    
-              //run code for CTRL+Z
+		//run code for CTRL+Z
                 touched_undo(true);
         }
         else if (evt.keyCode > 64 && evt.keyCode < 91) {
             var type = String.fromCharCode(evt.keyCode);
-            var menu = $($('#menu').find('li:not(.disabled)'));
+            var menu = $(menuBar.find('li:not(.disabled)'));
             if(menu.find('li').length !=0) menu = menu.find('li');
             typetext = typetext + type;
             var chosen= [];
@@ -256,10 +302,10 @@ function keyPress(evt) {
                     item.text(menu[i].textContent);
                     item.addClass('disabled');
                 }
-                               
+                
             }
             if (chosen.length == 0) {
-		        typetext = '';
+		typetext = '';
                 updateMenu();
             }
             else if(chosen.length == 1) {
@@ -277,17 +323,17 @@ function keyPress(evt) {
                 if(hassameChar){
                     typetext= chosen[0].text().substring(0,6).toUpperCase();
                     for(var num=0; num < chosen.length; num++){
-                         chosen[num].html('<span class="menuSelect">' + chosen[0].text().substring(0,6) + '</span>' + chosen[num].text().substring( typetext.length,chosen[num].text().length));   
+                        chosen[num].html('<span class="menuSelect">' + chosen[0].text().substring(0,6) + '</span>' + chosen[num].text().substring( typetext.length,chosen[num].text().length));   
                     }
                 }
             }
         }
         else if(evt.keyCode ==8){
-	        typetext= '';
+	    typetext= '';
             updateMenu();
         }
         else if(evt.keyCode == 46)
-           menu_delete();
+            menu_delete();
         else if(evt.which==37){        
             //KEY_LEFT
             evt.preventDefault();
@@ -345,17 +391,17 @@ function msDown (event) {
             if (active && grabbed.hasClass('box')) break;
             grabbed= grabbed.parent();
         }
-        hand= grabbed;
-        event.preventDefault();
-        if (!hand.hasClass('selected')) {
-            select(hand);
+        if (!grabbed.hasClass('selected')) {
+            select(grabbed);
             updateMenu();
         }
-        
+        if (!readonly) hand= grabbed;
+
         // store object position. Will be updated when mouse moves.
 	blocked = undefined;
 	startOffset = undefined;
 	startPos= [ evt.clientX, evt.clientY ];
+        event.preventDefault();
     }
 }
 
@@ -454,7 +500,7 @@ function markError(id, message) {
     var msg= $('<div class="runtime-message">'+message+'</div>');
     obj.after(msg);
     msg.offset({ top: obj.offset().top + obj.height(), 
-		left: obj.offset().left + 20});
+		 left: obj.offset().left + 20});
 }
 
 // Translate events that come from touch devices
