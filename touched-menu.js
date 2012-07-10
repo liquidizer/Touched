@@ -22,6 +22,15 @@ function initMenu() {
     }
 }
 
+function initMenuView() {
+    var menu= $('#' + menuId);
+    console.log('bar ' + bar.children().size());
+    menu.children().remove();
+    menu.contents().remove();
+    console.log('bar ' + bar.children().size());
+    menu.append('Read only Document');
+}
+
 // load a grammar file
 function loadGrammarFile(url) {
     loaded= {};
@@ -86,7 +95,7 @@ function initGrammar(content, url) {
 		    var div= $('<div class="group box-body" data-repeat="*"/>');
 		    item.append(div);
 		    expand(code, div);
-		},
+		}
 	    }
 	}
     }).call();
@@ -101,13 +110,13 @@ function updateMenu() {
 	updateAll();
 	return;
     }
-    var bar= $('#menu');
+    var bar= $('#' + menuId);
     bar.children().remove();
     var selection=$('.selected');
     if (selection.is('.arg'))
 	fillMenu(selection.attr('data-type'), grammarMenu, bar);
     if (selection.length>0) {
-	for (var i in editMenu) {
+	for (var i=0;i<editMenu.length;i++) {
 	    if (editMenu[i][1](selection)) {
 		var li= $('<li class="builtin"/>');
 		li.text(editMenu[i][0]);
@@ -234,7 +243,7 @@ function menu_add(type, increment) {
 function menu_edit(type) {
     return function() {
         var selection= $('.selected');
-	var elt= $('#menu');
+	var elt= $('#'+menuId);
 	elt.contents().remove();
 
 	//add input controls

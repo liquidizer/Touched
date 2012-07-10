@@ -15,27 +15,110 @@ var unselect= false;
 
 // typed text for keyboard control
 var typetext ='';
+var canvas= undefined;
+var doceditable=false;
+var menuId=undefined;
 
-$(init);
-function init() {
-    canvas= $('#canvas');
-    $('body').mousemove(msMove);
-    $('body').mouseup(msUp);
-    $('body').mousedown(function(evt) { 
+function initTouched(canvasId, menuid, grammar, curDocument, editable,standalone) {
+    canvas= $('#' + canvasId);
+    menuId=menuid;
+    
+	doceditable = editable;
+	if(editable) activateEvents(standalone);
+		
+	if(!standalone) { // switch focus to canvas (makes ZK happy)
+	    canvas.append('<input type="text" id="tmpinp">');
+		$("#tmpinp").focus();
+		canvas.children().remove();
+		
+		canvas.bind('update', function() { thetaSaveDoc(canvas.html());} );
+		}
+	
+	loadGrammarFile(grammar);
+	
+	if (!curDocument) {
+		if (canvas.children().length==0) {
+			canvas.append(dropArea('none','start'));
+			select(canvas.find('.arg'));
+			}
+			
+    } else {
+      console.log('set old content');
+      canvas.html(curDocument);
+      }
+	    
+    if(editable) {
+    	console.log('editable initmenu');
+    	initMenu();
+        updateAll();
+        canvas.attr('disabled',false);
+    } else {
+    	console.log('not editable initmenu');
+        canvas.attr('disabled',true);
+        unselectAll();
+    	initMenuView();
+    }
+
+}
+
+
+
+function exitTouched() {
+	removeEvents(false);
+}
+
+function pauseTouched() {
+	removeEvents(false);
+}
+
+function resumeTouched() {
+	activateEvents(false);
+}
+
+ 
+function activateEvents(standalone) {
+
+	if(standalone) {
+		$('body').mousemove(msMove);
+		$('body').mouseup(msUp);
+		$('body').mousedown(function(evt) { 
         if (evt.target.nodeName!="INPUT")
             evt.preventDefault(); 
-        });
-    canvas.attr('ontouchmove','msMove(event)');
-    canvas.attr('ontouchend','msUp(event)');
-    canvas.attr('onmousedown','msDown(event)');
-    canvas.attr('ontouchstart','msDown(event)');
-    $('html').keydown(keyPress);
-    if (canvas.children().length==0) {
-	canvas.append(dropArea('none','start'));
-	select(canvas.find('.arg'));
-    }
-    initMenu();
-    updateAll();
+			});
+	} else {
+		canvas.mousemove(msMove);
+		canvas.mouseup(msUp);
+		canvas.mousedown(function(evt) { 
+		if (evt.target.nodeName!="INPUT")
+			evt.preventDefault(); 
+			});
+		}	  
+	  
+   canvas.attr('ontouchmove','msMove(event)');
+   canvas.attr('ontouchend','msUp(event)');
+   canvas.attr('onmousedown','msDown(event)');
+   canvas.attr('ontouchstart','msDown(event)');
+   
+   $('html').keydown(keyPress);
+}
+
+function removeEvents(standalone) {
+	$('html').unbind('keydown',keyPress);
+	
+	if(standalone) {
+		$('body').unbind('mousemove');
+	    $('body').unbind('mouseup');
+	    $('body').unbind('mousedown');
+	} else {
+		canvas.unbind('mousemove');
+	    canvas.unbind('mouseup');
+	    canvas.unbind('mousedown');
+		}
+		
+	canvas.removeAttr( 'ontouchmove' );
+	canvas.removeAttr( 'ontouchend' );
+	canvas.removeAttr( 'onmousedown' );
+	canvas.removeAttr( 'ontouchstart' );
 }
 
 function updateAll() {
@@ -241,7 +324,7 @@ function keyPress(evt) {
         }
         else if (evt.keyCode > 64 && evt.keyCode < 91) {
             var type = String.fromCharCode(evt.keyCode);
-            var menu = $($('#menu').find('li:not(.disabled)'));
+            var menu = $($('#'+menuId).find('li:not(.disabled)'));
             if(menu.find('li').length !=0) menu = menu.find('li');
             typetext = typetext + type;
             var chosen= [];
