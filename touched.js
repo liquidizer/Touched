@@ -65,10 +65,9 @@ function activateEvents() {
     canvas.mousemove(msMove);
     canvas.mouseup(msUp);
     canvas.mousedown(msDown);
-    canvas.mousedown(function(evt) {
-	if (evt.target.nodeName!="INPUT")
-	    evt.preventDefault(); 
-    });
+    var noSelect= function(evt) { $(evt.target).is('input') || evt.preventDefault(); };
+    canvas.mousedown(noSelect);
+    menuBar.mousedown(noSelect);
     canvas.attr('ontouchmove','msMove(event)');
     canvas.attr('ontouchend','msUp(event)');
     canvas.attr('ontouchstart','msDown(event)');
@@ -79,6 +78,7 @@ function removeEvents() {
     canvas.unbind('mousemove');
     canvas.unbind('mouseup');
     canvas.unbind('mousedown');
+    menuBar.unbind('mousedown');
     canvas.removeAttr('ontouchmove');
     canvas.removeAttr('ontouchend');
     canvas.removeAttr('ontouchstart');
@@ -185,6 +185,7 @@ function select(obj) {
 function unselectAll() {
     typetext ='';
     $('.selected').removeClass('selected');
+    document.getSelection().empty()
 }
 
 // Move the selection along one of the following axes:

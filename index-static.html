@@ -16,8 +16,12 @@
   <script type="text/javascript" src="exec.d3.js"></script>
   <script type="text/javascript" src="exec.viz.js"></script>
   <style>
-    #updateswitch {
-      margin: 10px;
+    #execution {
+        position: absolute;
+        top: 60;
+        left: 50%;
+        width: 45%;
+        background: white;
     }
     #dataview table,td {
       border-collapse: collapse;
@@ -25,11 +29,27 @@
     }
   </style>
   <script language="javascript">
+      var viewsplit= undefined;
       $(function() {
         initTouched('canvas','menu','<touched:g>', '<touched:content>');
         $('#canvas').bind('update', function() { saveContent(); runContent(); });
         $('#autoupdate').bind('change', runContent);
+	$('#handle').bind('mousedown', viewDown);
       });
+      function viewDown(evt) {
+        var viewsplit= $('#execution').offset().left - evt.clientX;
+	evt.preventDefault();
+	var viewUp= function(evt) {
+	  $('body').unbind('mousemove', viewMove);
+	  $('body').unbind('mouseup', viewUp);
+	}
+	var viewMove= function(evt) {
+	  $('#execution').offset({ left : viewsplit + evt.clientX});
+	}
+        $('body').bind('mousemove', viewMove);
+        $('body').bind('mouseup', viewUp);
+      }
+
       function saveContent() {
           var content = $('#canvas').html();
           var http = new XMLHttpRequest();
@@ -58,10 +78,10 @@
     <div>
       <div id="canvas"></div>
       <div style="height:50px; clear:both"/>
-    </div>
-    <div id="updateswitch">
-      <input type='checkbox' id="autoupdate"/> Run
-      <div id="dataview"/>
+      <div id="execution">
+	<input type='checkbox' id="autoupdate"/><span id="handle">Run</span>
+	<div id="dataview"/>
+      </div>
     </div>
   </body>
 </html>
