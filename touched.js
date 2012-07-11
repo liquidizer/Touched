@@ -82,7 +82,7 @@ function removeEvents() {
     canvas.removeAttr('ontouchmove');
     canvas.removeAttr('ontouchend');
     canvas.removeAttr('ontouchstart');
-    $('html').unbind('keydown');
+    $('html').unbind('keydown', keyPress);
 }
 
 function updateAll(notrigger) {

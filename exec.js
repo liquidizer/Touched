@@ -25,7 +25,8 @@ commands.xml= {
 	    }
 	},
 	attr : function(code, output) {
-	    output.attr(code.arg('attrib').text, code.arg('value').text);
+	    if (code.arg('attrib').text && code.arg('value').text)
+		output.attr(code.arg('attrib').text, code.arg('value').text);
 	}
     }
 }
