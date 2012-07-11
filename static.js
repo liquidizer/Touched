@@ -9,6 +9,16 @@ if (!port) {
     return;
 }
 
+// mime types
+var mimes= {
+    html: 'text/html',
+    js: 'text/javascript',
+    css: 'text/css',
+    jpg: 'image/jpeg',
+    png: 'image/png'
+}
+    
+
 // Generate validation code
 function generateCode(len) {
     var r = Math.floor(Math.random() * 62);
@@ -64,9 +74,7 @@ http.createServer(function(req, res) {
     else {
 	var filename = req.url.match('^/+([^?]*)')[1];
 	fs.readFile(filename, function(err, data) {
-            var mime = 'text/html';
-	    if (filename.match(/.js/)) mime = 'text/javascript';
-	    if (filename.match(/.css/)) mime = 'text/css';
+	    var mime= mimes[filename.replace(/[^.]*\./g,'')] || 'text/plain';
 	    if (data) {
 		res.writeHead(200, { 'Content-Type': mime });
 		res.end(data)
