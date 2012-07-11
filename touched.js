@@ -13,35 +13,24 @@ var blocked = undefined;
 
 // typed text for keyboard control
 var typetext ='';
-var canvas= undefined;
+var canvas;
 var readonly=false;
-var menuId=undefined;
+var menuId;
 
 function initTouched(canvasId, menuId, grammar, curDocument, editable) {
     readonly= editable===false;
     canvas= $('#' + canvasId);
 
-    /*
-      TODO 1: add new function "function menu_file()" to open file dialog
-      TODO 2: move this to calling script:
-
-        // switch focus to canvas (makes ZK happy)
-        canvas.append('<input type="text" id="tmpinp">');
-        $("#tmpinp").focus();
-        canvas.children().remove();
-        canvas.bind('update', function() { thetaSaveDoc(canvas.html());} );
-    */
-    
     initMenu(menuId);
     if (grammar) loadGrammarFile(grammar);
 
     if (curDocument) {
 	canvas.append($(curDocument));
     } else {
-	if (canvas.children().length==0) {
-	    canvas.append(dropArea('none','start'));
-	    select(canvas.find('.arg'));
-	}
+		if (canvas.children().length==0) {
+		    canvas.append(dropArea('none','start'));
+		    select(canvas.find('.arg'));
+			}
     }
     activateEvents();
     updateAll(true);
