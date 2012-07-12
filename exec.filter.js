@@ -11,12 +11,14 @@ commands.filter= {
 	    cmd.call(filter);
 	});
 
-	svg.append('g')
+	var img= svg.append('g')
 	    .append('image')
-	    .attr('filter', 'url('+window.location+'#tfilter)')
 	    .attr('xlink:href', code.arg('src').text)
 	    .attr('width','200')
 	    .attr('height','200');
+	if (code.args('filter').length>0)
+	    img.attr('filter', 'url('+window.location+'#tfilter)')
+
 
 	//code.arg('root-node').call(output);
     },
@@ -24,7 +26,20 @@ commands.filter= {
 	blur : function(code, output) {
 	    output.append('feGaussianBlur')
 		.attr('stdDeviation', code.arg('sigma').text || '0');
-	}
+	},
+	flood : function(code, output) {
+	    output.append('feFlood')
+		.attr('flood-color',code.arg('color').text);
+	},
+	huerotate : function(code, output) {
+	    output.append('feColorMatrix')
+		.attr('type','hueRotate')
+		.attr('values',code.arg('hue').text);
+	},
+	lumalpha : function(code, output) {
+	    output.append('feColorMatrix')
+		.attr('type','luminanceToAlpha');
+	},
     }
 }
 

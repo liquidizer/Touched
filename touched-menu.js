@@ -3,6 +3,7 @@ var grammarMenu= {};
 var editMenu= [
     [ 'Text', check_isType('text'), menu_edit('text') ],
     [ 'Number', check_isType('number'), menu_edit('number') ],
+    [ 'Color', check_isType('color'), menu_edit('color') ],
     [ 'File', check_isExt('file', 'menu_file'), function() { window['menu_file'](); } ],
     [ '+1', check_isType('number',true), menu_add('number',1) ],
     [ '-1', check_isType('number',true), menu_add('number',-1) ],
@@ -98,8 +99,7 @@ function initGrammar(content, url) {
 // update the shown menu with respect to the current selection
 function updateMenu() {
     if ($('#okbutt').length>0) {
-	$('#okbutt').click().remove();
-	updateAll();
+	$('#okbutt').click();
 	return;
     }
     var selection=$('.selected');
@@ -245,7 +245,7 @@ function menu_edit(type) {
 	menuBar.contents().remove();
 
 	//add input controls
-	var input=$('<input id="input"/>');
+	var input=$('<input id="input" type="'+type+'"/>');
 	var set_button=$('<input type="button" id="okbutt" value="OK"/>');
 	var cancel_button=$('<input type="button" value="Cancel"/>');
 
@@ -255,13 +255,16 @@ function menu_edit(type) {
 
 	// define submit and cancel callbacks
 	var submitMenu= function() {
-	    menu_edit_setValue(selection, type, input[0].value); 
+	    menu_edit_setValue(selection, type, input[0].value);
 	};
 	var cancelMenu= function() { submitMenu=null; updateMenu(); }
 
 	input.keydown(function(evt) { if (evt.which==27) cancelMenu(); });
 	cancel_button.click(cancelMenu);
-	set_button.click(submitMenu);
+	set_button.click(function() { 
+	    submitMenu(); 
+	    set_button.remove();
+	    updateAll(); });
 
 	//insert input elements into menu bar
 	menuBar.append(input)
