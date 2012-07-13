@@ -251,13 +251,13 @@ function menu_edit(type) {
 
 	// fill existing text into input field
 	if (!selection.hasClass('arg'))
-	    input.attr('value',selection.text());
+	    input.val(selection.text());
 
 	// define submit and cancel callbacks
 	var submitMenu= function() {
-	    menu_edit_setValue(selection, type, input[0].value);
+	    menu_edit_setValue(selection, type, input.val());
 	};
-	var cancelMenu= function() { submitMenu=null; updateMenu(); }
+	var cancelMenu= function() { set_button.remove(); updateMenu(); }
 
 	input.keydown(function(evt) { if (evt.which==27) cancelMenu(); });
 	cancel_button.click(cancelMenu);

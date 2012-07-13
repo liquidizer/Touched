@@ -47,8 +47,6 @@ function initTouched(canvasId, menuId, grammar, curDocument, editable) {
     updateAll(true);
 }
 
-
-
 function exitTouched() {
     removeEvents(false);
 }
@@ -499,11 +497,13 @@ function clearErrors() {
 
 function markError(id, message) {
     var obj= $('#'+id);
-    obj.addClass('runtime-error');
-    var msg= $('<div class="runtime-message">'+message+'</div>');
-    obj.after(msg);
-    msg.offset({ top: obj.offset().top + obj.height(), 
-		 left: obj.offset().left + 20});
+    if (obj.length>0) {
+	obj.addClass('runtime-error');
+	var msg= $('<div class="runtime-message">'+message+'</div>');
+	obj.after(msg);
+	msg.offset({ top: obj.offset().top + obj.height(), 
+		     left: obj.offset().left + 20});
+    }
 }
 
 // Translate events that come from touch devices

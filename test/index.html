@@ -1,18 +1,21 @@
 <html>
   <meta charset="UTF-8"/>
 
-  <link type="text/css" href="style.css" rel="stylesheet"/>
-  <script type="text/javascript" src="jquery.min.js"></script>
-  <script type="text/javascript" src="touched.js"></script>
-  <script type="text/javascript" src="touched-types.js"></script>
-  <script type="text/javascript" src="touched-menu.js"></script>
+  <link type="text/css" href="../style.css" rel="stylesheet"/>
+
+  <script type="text/javascript" src="../jquery.min.js"></script>
+  <script type="text/javascript" src="../touched.js"></script>
+  <script type="text/javascript" src="../touched-types.js"></script>
+  <script type="text/javascript" src="../touched-menu.js"></script>
+  <script type="text/javascript" src="../touched-tocode.js"></script>
+
   <script type="text/javascript" src="touched-test.js"></script>
-  <script type="text/javascript" src="touched-tocode.js"></script>
-  <script type="text/javascript" src="d3.v2.js"></script>
-  <script type="text/javascript" src="exec.js"></script>
-  <script type="text/javascript" src="exec.d3.js"></script>
-  <script type="text/javascript" src="exec.viz.js"></script>
-  <script type="text/javascript" src="exec.filter.js"></script>
+
+  <script type="text/javascript" src="../d3.v2.js"></script>
+  <script type="text/javascript" src="../exec.js"></script>
+  <script type="text/javascript" src="../exec.d3.js"></script>
+  <script type="text/javascript" src="../exec.viz.js"></script>
+  <script type="text/javascript" src="../exec.filter.js"></script>
   <style>
     #testChoice {
         border: 1px solid navy;
@@ -63,6 +66,9 @@
             <input type='checkbox' checked='true' id="autoupdate"/> Update plot
             <input type='checkbox' checked='true' id="showtests"/> Show tests
         </div>
+	<div id="testStop" style="display:none">
+	      <input type="button" value="STOP" id="STOP"/>
+	</div>
         <div id="testChoice">
             <div>
                 <input type='button' onclick='recordTest()' value='record a new test case'/>
@@ -437,6 +443,22 @@
 </test>
 <test name="blurred tiger" grammar="grammar/filter.g">
 {target:"BODY", keyCode:65, isCtrl:false, isShift:false}
+{target:"BODY", keyCode:84, isCtrl:false, isShift:false}
+{target:"#input", keyCode:84, isCtrl:false, isShift:false}
+{target:"#input", keyCode:73, isCtrl:false, isShift:false}
+{target:"#input", keyCode:71, isCtrl:false, isShift:false}
+{target:"#input", keyCode:69, isCtrl:false, isShift:false}
+{target:"#input", keyCode:82, isCtrl:false, isShift:false}
+{target:"#input", keyCode:190, isCtrl:false, isShift:false}
+{target:"#input", keyCode:74, isCtrl:false, isShift:false}
+{target:"#input", keyCode:80, isCtrl:false, isShift:false}
+{target:"#input", keyCode:71, isCtrl:false, isShift:false}
+{target:"#input", keyCode:13, isCtrl:false, isShift:false}
+{target:"BODY", keyCode:71, isCtrl:false, isShift:false}
+{target:"BODY", keyCode:78, isCtrl:false, isShift:false}
+{target:"#input", keyCode:49, isCtrl:false, isShift:false}
+{target:"#input", keyCode:48, isCtrl:false, isShift:false}
+{target:"#input", keyCode:13, isCtrl:false, isShift:false}
 </test>
 </tests>
 </html>

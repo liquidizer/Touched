@@ -16,15 +16,20 @@ commands.filter= {
 	    .attr('xlink:href', code.arg('src').text)
 	    .attr('width','200')
 	    .attr('height','200');
-	if (code.args('filter').length>0)
-	    img.attr('filter', 'url('+window.location+'#tfilter)')
 
+	if (!filter.select('*').empty()) {
+	    myurl= window.location.href.replace(/[#?].*$/,'');
+	    img.attr('filter', 'url('+myurl+'#tfilter)')
+	}
 
 	//code.arg('root-node').call(output);
     },
     fe : {
 	blur : function(code, output) {
-	    output.append('feGaussianBlur')
+	    if (!(parseFloat(code.arg('sigma').text)>=0))
+		code.arg('sigma').error('Invalid value');
+	    else
+		output.append('feGaussianBlur')
 		.attr('stdDeviation', code.arg('sigma').text || '0');
 	},
 	flood : function(code, output) {

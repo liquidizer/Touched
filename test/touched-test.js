@@ -6,7 +6,7 @@ function init() {
 	var group= $("#tests li").filter(function() { return $(this).attr('g')==grammar; });
 	if (group.length==0) {
 	    group= $("<li g='"+grammar+"'/>");
-	    group.append("<a href='#' onclick='loadGrammar(\""+grammar+"\")'>load "+grammar+"</a></li>");
+	    group.append("<a href='#' onclick='loadGrammar(\"../"+grammar+"\")'>load "+grammar+"</a></li>");
 	    group.append('<ul/>');
 	    $("#tests").append(group);
 	}
@@ -42,10 +42,10 @@ function stepThroughTest(array) {
 	    }
 	    else if(res.keyCode == 190)
                 $('#input').attr('value', oldvalue+'.'); 
-	    else {
+	    else if (res.keyCode!=13) {
                 var newvalue = String.fromCharCode(res.keyCode);
                 if (!e.shiftKey) newvalue = newvalue.toLowerCase();
-                $('#input').attr('value', oldvalue + newvalue);
+                $('#input').val(oldvalue + newvalue);
 	    }
         }
         $(res.target).trigger(e);
@@ -69,9 +69,8 @@ function recordTest() {
         var eventStr= '{target:"'+target+'", keyCode:'+evt.which+', isCtrl:'+evt.ctrlKey+', isShift:'+evt.shiftKey+'}<br/>';
         record= record+eventStr;
     });
-    var finish= $('<input type="button" value="STOP"/>');
-    $('body').append(finish);
-    finish.click(function() {
+    $('#STOP').parent().show();
+    $('#STOP').click(function() {
         document.write(record);
     });
 }
