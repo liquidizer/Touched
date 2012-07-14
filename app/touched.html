@@ -1,21 +1,20 @@
 <html>
   <meta charset="UTF-8"/>
-  <base href="/"/>
   <link type="text/css" href="/style.css" rel="stylesheet"/>
 
   <!-- editor scripts -->
-  <script type="text/javascript" src="jquery.min.js"></script>
-  <script type="text/javascript" src="touched.js"></script>
-  <script type="text/javascript" src="touched-types.js"></script>
-  <script type="text/javascript" src="touched-menu.js"></script>
-  <script type="text/javascript" src="touched-tocode.js"></script>
+  <script type="text/javascript" src="/lib/jquery.min.js"></script>
+  <script type="text/javascript" src="/touched.js"></script>
+  <script type="text/javascript" src="/touched-types.js"></script>
+  <script type="text/javascript" src="/touched-menu.js"></script>
+  <script type="text/javascript" src="/touched-tocode.js"></script>
 
   <!-- execution scripts -->
-  <script type="text/javascript" src="d3.v2.js"></script>
-  <script type="text/javascript" src="exec.js"></script>
-  <script type="text/javascript" src="exec.d3.js"></script>
-  <script type="text/javascript" src="exec.viz.js"></script>
-  <script type="text/javascript" src="exec.filter.js"></script>
+  <script type="text/javascript" src="/lib/d3.v2.js"></script>
+  <script type="text/javascript" src="/exec.js"></script>
+  <script type="text/javascript" src="/exec.d3.js"></script>
+  <script type="text/javascript" src="/exec.viz.js"></script>
+  <script type="text/javascript" src="/exec.filter.js"></script>
   <style>
     #execution {
         position: absolute;
@@ -30,12 +29,18 @@
     }
   </style>
   <script language="javascript">
+      var code= '<touched:code>';
+      var file= '<touched:file>';
       var viewsplit= undefined;
       $(function() {
-        initTouched('canvas','menu','<touched:g>', '<touched:content>');
+        initTouched('canvas','menu','<touched:g>', decodeURI('<touched:content>'), !!code);
         $('#canvas').bind('update', function() { saveContent(); runContent(); });
         $('#autoupdate').bind('change', runContent);
 	$('#handle').bind('mousedown', viewDown);
+	if (!code) {
+	    $('#execution').append('<input type="button" id="EDIT" value="EDIT"/>');
+	    $('#EDIT').click(function() { window.location= '/'+file+'?mode=edit'; });
+	}
       });
       function viewDown(evt) {
         var viewsplit= $('#execution').offset().left - evt.clientX;
@@ -58,7 +63,7 @@
              if (http.readyState==4 && http.status!=200) 
                  $('#menu').html('<b>Error saving document</b>');
           };
-          http.open("POST", "/save/<touched:file>?code=<touched:code>", true);
+          http.open("POST", '/'+file+'?mode=save&code='+code, true);
           http.send(content);
       }
       function runContent() {
