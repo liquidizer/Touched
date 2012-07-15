@@ -50,11 +50,11 @@ http.createServer(function(req, res) {
 
     // serve appropriate file
     if (req.url.match('^/(index.html)?$')) {
-	serveFile(res, 'app/index.html');
+	serveFile(res, 'static/index.html');
     }
-    else if (req.url.match(/[?&]mode=(edit|save)/)) {
+    else if (req.url.match(/[?&](save|edit|view)(&|$)/)) {
 	// check security code for edit and save actions
-	var mode= req.url.match(/[?&]mode=([^&]*)/)[1];
+	var mode= req.url.match(/[?&](save|edit|view)(&|$)/)[1];
 
 	if (mode=='save') {
 	    if (validCode)
@@ -62,13 +62,15 @@ http.createServer(function(req, res) {
 	    else
 		denyAccess(res, 'Invalid security code '+code);
 	}
-	else {
+	else if (mode=='view' || (validCode && mode=='edit')) {
+	    showTouched(res, filename, validCode);
+	} else {
 	    if (waiting) waiting(false);
 	    console.log('Grant access to file : '+filename+' [y/n]?');	 
 	    waiting= function(granted) {
 		if (granted) {
 		    files[filename]=true;
-		    res.writeHead(303, { 'Location': '/'+filename+'?code='+code });
+		    res.writeHead(303, { 'Location': '/'+filename+'?edit&code='+code });
 		    res.end();
 		} else {
 		    denyAccess(res, 'Access denied: '+filename);
@@ -86,13 +88,10 @@ http.createServer(function(req, res) {
     }
 }).listen(port);
 
-function serveFile(res, filename, validCode) {
+function serveFile(res, filename) {
     var mime= mimes[filename.replace(/[^.]*\./g,'')];
     fs.readFile(filename, function(err, data) {
-	if (!mime) {
-	    showTouched(res, filename, data, validCode);
-	} 
-	else if (data) {
+	if (data) {
 	    res.writeHead(200, { 'Content-Type': mime || 'text/plain'});
 	    res.end(data)
 	} else {
@@ -102,7 +101,7 @@ function serveFile(res, filename, validCode) {
     });
 }
 
-function showTouched(res, filename, content, editable) {
+function showTouched(res, filename, editable) {
     var g = 'grammar/' + filename.match('[^.]*$')[0] + '.g';
     fs.stat(g, function(err) {
         if (err) {
@@ -110,16 +109,19 @@ function showTouched(res, filename, content, editable) {
             res.end('The grammar indicated by the file suffix does not exist: ' + g);
         }
         else {
-            fs.readFile('app/touched.html', function(err, data) {
-                res.writeHead(200, {
-                    'Content-Type': 'text/html'
-                });
-		content= content.toString().replace(/^<touched[^>]*>|<\/touched>$/g,'');
-                data = data.toString().replace(/<touched:content>/, encodeURI(content));
-                data = data.toString().replace(/<touched:file>/, filename);
-                data = data.toString().replace(/<touched:code>/, editable ? code : '');
-                data = data.toString().replace(/<touched:g>/, '/' + g);
-                res.end(data);
+	    fs.readFile(filename, function(err, content) {
+		fs.readFile('static/touched.html', function(err, data) {
+                    res.writeHead(200, {
+			'Content-Type': 'text/html'
+                    });
+		    if (content)
+			content= content.toString().replace(/^<touched[^>]*>|<\/touched>$/g,'');
+                    data = data.toString().replace(/<touched:content>/, encodeURI(content || ''));
+                    data = data.toString().replace(/<touched:file>/, filename);
+                    data = data.toString().replace(/<touched:code>/, editable ? code : '');
+                    data = data.toString().replace(/<touched:g>/, '/' + g);
+                    res.end(data);
+		});
             });
         }
     });

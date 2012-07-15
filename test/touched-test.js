@@ -20,7 +20,9 @@ function loadGrammar(grammar) {
 
 function runTest(name) {
     clear_clipboard();
+    select($('.arg.box:first'));
     $('#testChoice').hide();
+    updateAll();
     var data= $('tests test[name="'+name+'"]');
     var testData = $(data).text();
     var array = testData.split("\n").filter(function (x) { return x; });
