@@ -1,41 +1,44 @@
 // Convert a jQuery object into a code object that knows its arguments and its type
 function toCode(node, commands) {
-    var list= $([]);
-    var next= node.children();
-    while (next.length>0) {
-        list= list.add(next.filter('.arg'));
-        next= next.filter(':not(.arg)').children();
-    }
-    return {
-        args: function(name, force) { 
-	    // find attributes with the name
-            var arglist= list;
-	    if (name)
-		arglist= arglist.filter( function() {
-			return $(this).attr('data-name')==name;
-		    });
-	    // mark errors if the force flag is provided
-	    if (force) {
-		arglist.each( function(i,obj) {
-		    if($(obj).children().length==0) {
-			try {
-			    markError($(obj).attr('id'), "Missing argument");
-			} catch(e) {
-			    throw "Missing argument: "+name;
-			}
-		    }
-		});
-		if (arglist.length==0)
-		    throw "Invalid arg : "+this.type+" -> "+name;
+    // search child nodes
+    var findArgs= function(node, args) {
+	for (var i=0; i<node.childNodes.length; ++i) {
+	    var child= node.childNodes[i];
+	    if (child.nodeType==1) {
+		if (child.classList.contains('arg')) {
+		    var name= child.getAttribute('data-name');
+		    var param= child.firstChild;
+		    while (param && (param.nodeType!=1 || param.classList.contains('error'))) 
+			param=param.nextSibling;
+		    args[name]= args[name] || [];
+		    args[name].push(toCode(param || child, {}));
+		} else {
+		    findArgs(child, args);
+		}
 	    }
-	    // return child elements
-	    return arglist.children().filter(':not(.error)')
-		.map( function(i,obj) { return toCode($(obj), commands); });
+	}
+	return args;
+    };
+    var argMap= findArgs(node, {});
+    // build code object
+    return {
+	argMap : argMap,
+        args: function(name, force) {
+	    if (argMap[name]===undefined)
+		throw "Invalid arg : "+this.type+" -> "+name;
+	    if (force && argMap[name].length==0) {
+		try {
+		    markError(this.id, "Missing argument");
+		} catch(e) {
+		    throw "Missing argument: "+name;
+		}
+	    }
+	    return argMap[name];
         },
-        arg: function(name) { return this.args(name, true)[0] || toCode($([])) },
-        node: node,
-        type: node.attr('data-type'),
-        text: node.is('.box-text') ? node.text() : undefined,
+        arg: function(name) { return this.args(name, true)[0] || toCode(null) },
+        id: node.getAttribute('id'),
+        type: node.getAttribute('data-type') || '',
+        text: node.classList.contains('box-text') && node.textContent,
 	call: function(data, callback) {
 	    if (commands) {
 		var f= commands;
@@ -51,17 +54,17 @@ function toCode(node, commands) {
 	    }
         },
 	fold : function(arg, data, callback) {
-	    var list= this.args(arg).toArray();
+	    var i=0;
 	    var f= function(data2) {
-		if (list.length)
-		    list.shift().call(data2, f);
+		if (i < list.length)
+		    this.args(arg)[i++].call(data2, f);
 		else
 		    callback(data2);
 	    };
 	    f(data);
 	},
 	error: function(message) {
-	    markError(this.node.attr('id'), message);
+	    markError(this.id, message);
 	}
     };
 }
