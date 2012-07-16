@@ -213,7 +213,7 @@ function selectNext(obj, axis) {
         height =0;
         topoffset = reverse ? 100000000 : 0;
     }
-    while (!obj.is(canvas)) {
+    while (!obj.is(canvas) && obj.length>0) {
         // check if current element should be selected
         if (isactive && obj.hasClass('box')) {
             if (selectnext) {
@@ -382,7 +382,7 @@ function msDown (event) {
         // find signaling object
         var active= false;
         var grabbed= $(evt.target);
-        while(true) {
+        while(grabbed.length>0) {
             if (grabbed.is(canvas)) { 
 		unselectAll(); 
 		updateMenu();
@@ -427,7 +427,7 @@ function msMove(event) {
             if (!hasMoved && !blocked) {
                 // look for the containing element that can be moved
                 while (!hand.hasClass('element')) {
-                    if (hand.is(canvas)) return;
+                    if (hand.is(canvas) || hand.length==0) return;
                     hand = hand.parent();
                 }
 		startOffset= { top: hand.offset().top - startPos[1], 

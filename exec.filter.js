@@ -48,7 +48,7 @@ commands.filter= {
 }
 
 function createFilters(cmds, output) {
-    cmds.each(function(i, cmd) {
+    cmds.forEach(function(cmd) {
 	cmd.call(output);
     });
     var out='background';

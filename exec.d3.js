@@ -26,7 +26,7 @@ commands.d3= {
 
 function processScript(code, output) {
     output.selectAll('*').remove();
-    code.args('command').each( function (i, cmd) {
+    code.args('command').forEach( function (cmd) {
         var root= output.append('div');
 	cmd.call(root);
     });
@@ -51,7 +51,7 @@ function processLine(code, output){
             size: [300,200],
             xaxis : undefined
             };
-        code.args('option').each(function(i, cmd) {
+        code.args('option').forEach(function(cmd) {
 		cmd.call(options);
         });
         plotData(options, data, output);
@@ -73,12 +73,11 @@ function processData(code, callback) {
 }
 
 function processDataFilters(code, data) {
-    code.args('filter').each(function (i, cmd) {
+    code.args('filter').forEach(function (cmd) {
 	data= cmd.call(data) || data;
     });
     return data;
 }
-
 
 function getRange(code) {
     if (code.type=='number') return {

@@ -2,8 +2,8 @@ var commands={};
 function execute() {
     clearErrors();
     var output=d3.select('#dataview');
-    var code= toCode($('#canvas'), commands);
-    code.args('start').each(function(i,cmd) { cmd.call(output); });
+    var code= toCode($('#canvas')[0], commands);
+    code.args('start').forEach(function(cmd) { cmd.call(output); });
 }
 
 // implement the xml grammar
@@ -16,8 +16,8 @@ commands.xml= {
 	elt : function(code, output) {
 	    if (code.arg('tag').text) {
 		var output= output.append(code.arg('tag').text);
-		code.args('child').each( function(i, child) {
-			if (child.text)
+		code.args('child').forEach( function(child) {
+			if (child.isText)
 			    output.text(child.text);
 			else
 			    child.call(output);

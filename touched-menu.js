@@ -38,24 +38,24 @@ function loadGrammarFile(url) {
 // Interpret a loaded grammar definition
 function initGrammar(content, url) {
     var expand= function(code, item, arg) {
-	code.args(arg || 'content').each( function(i,cmd) {
+	code.args(arg || 'content').forEach( function(cmd) {
 	    if (cmd.text) item.append(textArea(cmd.text));
 	    else cmd.call(item);
 	});
     }
-    var code= toCode($(content).find('.element:first'), {
+    var code= toCode($(content).find('.element:first')[0], {
 	touched : {
 	    grammar : function(code) {
 		var root= code.arg('root').text;
 		$('.arg[data-name=start]:first').attr('data-type',root);
-		code.args('item').each( function(i,cmd) { cmd.call(grammarMenu); });
+		code.args('item').forEach( function(cmd) { cmd.call(grammarMenu); });
 	    },
 	    item : {
 		menu : function(code, menu) {
 		    var name= code.arg('name').text;
 		    var submenu= {};
 		    menu[name]= submenu;
-		    code.args('item').each( function(i,cmd) { cmd.call(submenu); });
+		    code.args('item').forEach( function(cmd) { cmd.call(submenu); });
 		    for (key in submenu) {
 			var subtype= submenu[key]._type;
 			submenu._type= type_unify(subtype, submenu._type || subtype);
