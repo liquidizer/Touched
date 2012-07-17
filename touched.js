@@ -36,7 +36,7 @@ function initTouched(canvasId, menuId, grammar, curDocument, editable) {
     if (grammar) loadGrammarFile(grammar);
 
     if (curDocument) {
-	canvas.html(curDocument);
+	canvas.append($(curDocument));
     } else {
 	if (canvas.children().length==0) {
 	    canvas.append(dropArea('none','start'));

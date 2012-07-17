@@ -1,5 +1,7 @@
 $(init);
 function init() {
+
+    // build the test case list
     $('tests test').each(function(index, data){
         var name = $(data).attr('name');
 	var grammar= $(data).attr('grammar');
@@ -11,7 +13,32 @@ function init() {
 	    $("#tests").append(group);
 	}
         group.find('ul').append("<li><input type='button' onclick='runTest(\""+name+"\")' value='run "+name+"' /></li>");
-});
+    });
+
+    // initialize the touched editor
+    initTouched('canvas','menu');
+
+    // connect execution listeners
+    $('#canvas').bind('update', updateView);
+    $('#autoupdate').bind('change',updateView);
+    $('#showtests').bind('change', function() {
+        if ($('#showtests').attr('checked'))
+            $('#testChoice').show();
+        else
+            $('#testChoice').hide();
+    });
+}
+
+// call this function whenever the model changes
+function updateView() {
+    if ($('.element').length>0) {
+        $('#showtests').attr('checked',false);
+        $('#testChoice').hide();
+        if ($('#autoupdate').attr('checked')) {
+            clearErrors();
+            execute('canvas','dataview');
+        }
+    }
 }
 
 function loadGrammar(grammar) {

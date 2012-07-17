@@ -34,26 +34,6 @@
       border: 1px black solid
     }
   </style>
-  <script language="javascript">
-      $(function() {
-        initTouched('canvas','menu');
-        $('#canvas').bind('update', updateView);
-        $('#autoupdate').bind('change',updateView);
-        $('#showtests').bind('change', function() {
-            if ($('#showtests').attr('checked'))
-              $('#testChoice').show();
-            else
-              $('#testChoice').hide();
-        });
-      });
-      function updateView() {
-          if ($('.element').length>0) {
-            $('#showtests').attr('checked',false);
-            $('#testChoice').hide();
-            if ($('#autoupdate').attr('checked')) execute();
-          }
-      }
-  </script>
   <body>
     <div id="menubar">
       <ul id="menu"/>

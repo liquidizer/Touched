@@ -1,8 +1,7 @@
 var commands={};
-function execute() {
-    clearErrors();
-    var output=d3.select('#dataview');
-    var code= toCode($('#canvas')[0], commands);
+function execute(codeId, outputId) {
+    var code= toCode(document.getElementById(codeId), commands);
+    var output=d3.select('#'+outputId);
     code.args('start').forEach(function(cmd) { cmd.call(output); });
 }
 

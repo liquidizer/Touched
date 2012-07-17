@@ -52,9 +52,12 @@ http.createServer(function(req, res) {
     if (req.url.match('^/(index.html)?$')) {
 	serveFile(res, 'static/index.html');
     }
-    else if (req.url.match(/[?&](save|edit|view)(&|$)/)) {
+    else if (req.url.match('^/test/?$')) {
+	res.writeHead(303, { 'location': '/test/index.html' });
+	res.end();
+    } else if (req.url.match(/[?&](save|edit|view|run)(&|$)/)) {
 	// check security code for edit and save actions
-	var mode= req.url.match(/[?&](save|edit|view)(&|$)/)[1];
+	var mode= req.url.match(/[?&]([^&]*)(&|$)/)[1];
 
 	if (mode=='save') {
 	    if (validCode)
@@ -63,14 +66,16 @@ http.createServer(function(req, res) {
 		denyAccess(res, 'Invalid security code '+code);
 	}
 	else if (mode=='view' || (validCode && mode=='edit')) {
-	    showTouched(res, filename, validCode);
+	    showTouched(res, filename, 'static/touched.html', validCode);
+	} else if (mode=='run') {
+	    showTouched(res, filename, 'static/execute.html', false);
 	} else {
 	    if (waiting) waiting(false);
 	    console.log('Grant access to file : '+filename+' [y/n]?');	 
 	    waiting= function(granted) {
 		if (granted) {
 		    files[filename]=true;
-		    res.writeHead(303, { 'Location': '/'+filename+'?edit&code='+code });
+		    res.writeHead(303, { 'location': '/'+filename+'?edit&code='+code });
 		    res.end();
 		} else {
 		    denyAccess(res, 'Access denied: '+filename);
@@ -101,7 +106,7 @@ function serveFile(res, filename) {
     });
 }
 
-function showTouched(res, filename, editable) {
+function showTouched(res, filename, template, editable) {
     var g = 'grammar/' + filename.match('[^.]*$')[0] + '.g';
     fs.stat(g, function(err) {
         if (err) {
@@ -110,13 +115,13 @@ function showTouched(res, filename, editable) {
         }
         else {
 	    fs.readFile(filename, function(err, content) {
-		fs.readFile('static/touched.html', function(err, data) {
+		fs.readFile(template, function(err, data) {
                     res.writeHead(200, {
 			'Content-Type': 'text/html'
                     });
 		    if (content)
 			content= content.toString().replace(/^<touched[^>]*>|<\/touched>$/g,'');
-                    data = data.toString().replace(/<touched:content>/, encodeURI(content || ''));
+                    data = data.toString().replace(/<!--touched:content-->/, content || '');
                     data = data.toString().replace(/<touched:file>/, filename);
                     data = data.toString().replace(/<touched:code>/, editable ? code : '');
                     data = data.toString().replace(/<touched:g>/, '/' + g);

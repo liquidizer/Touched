@@ -1,39 +1,41 @@
 <html>
-  <meta charset="UTF-8"/>
-  <link type="text/css" href="/style.css" rel="stylesheet"/>
+  <head>
+    <meta charset="UTF-8"/>
+    <link type="text/css" href="/style.css" rel="stylesheet"/>
 
-  <!-- editor scripts -->
-  <script type="text/javascript" src="/lib/jquery.min.js"></script>
-  <script type="text/javascript" src="/touched.js"></script>
-  <script type="text/javascript" src="/touched-types.js"></script>
-  <script type="text/javascript" src="/touched-menu.js"></script>
-  <script type="text/javascript" src="/touched-tocode.js"></script>
+    <!-- editor scripts -->
+    <script type="text/javascript" src="/lib/jquery.min.js"></script>
+    <script type="text/javascript" src="/touched.js"></script>
+    <script type="text/javascript" src="/touched-types.js"></script>
+    <script type="text/javascript" src="/touched-menu.js"></script>
+    <script type="text/javascript" src="/touched-tocode.js"></script>
 
-  <!-- execution scripts -->
-  <script type="text/javascript" src="/lib/d3.v2.js"></script>
-  <script type="text/javascript" src="/exec.js"></script>
-  <script type="text/javascript" src="/exec.d3.js"></script>
-  <script type="text/javascript" src="/exec.viz.js"></script>
-  <script type="text/javascript" src="/exec.filter.js"></script>
-  <style>
-    #execution {
-        position: absolute;
-        top: 60;
-        left: 50%;
-        width: 45%;
-        background: white;
-    }
-    #dataview table,td {
+    <!-- execution scripts -->
+    <script type="text/javascript" src="/lib/d3.v2.js"></script>
+    <script type="text/javascript" src="/exec.js"></script>
+    <script type="text/javascript" src="/exec.d3.js"></script>
+    <script type="text/javascript" src="/exec.viz.js"></script>
+    <script type="text/javascript" src="/exec.filter.js"></script>
+    <style>
+      #execution {
+      position: absolute;
+      top: 60;
+      left: 50%;
+      width: 45%;
+      background: white;
+      }
+      #dataview table,td {
       border-collapse: collapse;
       border: 1px black solid
-    }
-  </style>
+      }
+    </style>
+  </head>
   <script language="javascript">
       var code= '<touched:code>';
       var file= '<touched:file>';
       var viewsplit= undefined;
       $(function() {
-        initTouched('canvas','menu','<touched:g>', decodeURI('<touched:content>'), !!code);
+        initTouched('canvas','menu','<touched:g>', $('#code > div')[0], !!code);
         $('#canvas').bind('update', function() { saveContent(); runContent(); });
         $('#autoupdate').bind('change', runContent);
 	$('#handle').bind('mousedown', viewDown);
@@ -67,11 +69,11 @@
           http.send(content);
       }
       function runContent() {
+	  clearErrors();
           if ($('#autoupdate').attr('checked')) {
              $('#dataview').show();
-	     execute();
+	     execute('canvas', 'dataview');
 	  } else {
-	     clearErrors();
 	     $('#dataview').hide();
 	  }
       }
@@ -90,4 +92,5 @@
       </div>
     </div>
   </body>
+  <div id="code" style="display:none"><!--touched:content--></div>
 </html>
