@@ -50,7 +50,8 @@ http.createServer(function(req, res) {
 
     // serve appropriate file
     if (req.url.match('^/(index.html)?$')) {
-	serveFile(res, 'static/index.html');
+	res.writeHead(303, { 'location': '/static/index.xml?run' });
+	res.end();
     }
     else if (req.url.match('^/test/?$')) {
 	res.writeHead(303, { 'location': '/test/index.html' });
@@ -133,6 +134,7 @@ function showTouched(res, filename, template, editable) {
 }
 
 function redirect(res, url) {
+    console.log('redirect '+url);
     var comps= url.match("http://([^/:]+)(:[0-9]+)?(.*)");
     if (comps) {
 	var options= {
