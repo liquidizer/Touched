@@ -43,7 +43,7 @@ commands.viz = {
 			},
 			json : function(code, data, callback) {
 				var parsedjson = eval('(' + data.text + ')');
-				console.log(parsedjson);
+				//console.log(parsedjson);
 				data = VizData.json(parsedjson);
 				code.fold('filter', data, callback);
 			}
