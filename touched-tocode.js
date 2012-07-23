@@ -35,7 +35,7 @@ function toCode(node, commands) {
         text: isText ? node.textContent : undefined,
 	isValid: isValid,
         args: function(name, force) {
-	    return argMap[name].filter(function(code) {
+	    return (argMap[name] || []).filter(function(code) {
 		return code.isValid;
 	    });
         },

@@ -19,10 +19,14 @@
     <style>
       #execution {
       position: absolute;
-      top: 60;
-      left: 50%;
+      top: 60px;
+      left: 500px;
       width: 45%;
       background: white;
+      }
+      #execControl {
+      border: 1px solid black;
+      border-radius: 5px;
       }
       #dataview table,td {
       border-collapse: collapse;
@@ -38,9 +42,9 @@
         initTouched('canvas','menu','<touched:g>', $('#code > div')[0], !!code);
         $('#canvas').bind('update', function() { saveContent(); runContent(); });
         $('#autoupdate').bind('change', runContent);
-	$('#handle').bind('mousedown', viewDown);
+	$('#execControl').bind('mousedown', viewDown);
 	if (!code) {
-	    $('#execution').append('<input type="button" id="EDIT" value="EDIT"/>');
+	    $('#execControl').append('<input type="button" id="EDIT" value="EDIT"/>');
 	    $('#EDIT').click(function() { window.location= '/'+file+'?edit'; });
 	}
       });
@@ -52,7 +56,8 @@
 	  $('body').unbind('mouseup', viewUp);
 	}
 	var viewMove= function(evt) {
-	  $('#execution').offset({ left : viewsplit + evt.clientX});
+	  var left=viewsplit+evt.clientX;
+	  $('#execution').offset({ left : viewsplit+evt.clientX });
 	}
         $('body').bind('mousemove', viewMove);
         $('body').bind('mouseup', viewUp);
@@ -87,7 +92,10 @@
       <div id="canvas"></div>
       <div style="height:50px; clear:both"/>
       <div id="execution">
-	<input type='checkbox' id="autoupdate"/><span id="handle">Run</span>
+	<div id="execControl">
+	  <input type='checkbox' id="autoupdate"/>
+	  <span id="handle">Run</span>
+	</div>
 	<div id="dataview"/>
       </div>
     </div>

@@ -6,8 +6,11 @@ commands.filter= {
 
 	var filter= svg.append('defs')
 	    .append('filter').attr('id','tfilter')
+	var creator= FilterCreator(filter, 'img', 'SourceGraphic');
+	code.args('filter').forEach(function(cmd) {
+	    cmd.call(creator);
+	});
 
-	createFilters(code.args('filter'), filter);
 	var img= svg.append('g')
 	    .append('image')
 	    .attr('xlink:href', code.arg('src').text)
@@ -19,6 +22,16 @@ commands.filter= {
 	}
     },
     fe : {
+	merge : {
+	    atop : function(code, output) {
+		var child= output.fork();
+		code.args('filter').forEach(function(cmd) {
+		    cmd.call(child);
+		});
+		output.merge('feComposite', child)
+		    .attr('operator','atop');
+	    }
+	},
 	blur : function(code, output) {
 	    var sigma= parseFloat(code.arg('sigma').text);
 	    if (!(sigma>=0)) code.arg('sigma').error('Invalid value');
@@ -47,17 +60,27 @@ commands.filter= {
     }
 }
 
-function createFilters(cmds, output) {
-    cmds.forEach(function(cmd) {
-	cmd.call(output);
-    });
-    var out='background';
-    output.selectAll('*').forEach( function(fe) {
-	console.log(fe);
-	console.log(fe.attr);
-	return;
-	fe.attr('in', out);
-	out= 'img'+Math.random();
-	fe.attr('out',out);
-    });
+function FilterCreator(output, base, source) {
+    return {
+	ref : 0,
+	in : function() {
+	    return this.ref ? base+this.ref : source;
+	},
+	append : function(name) {
+	    return output.append(name)
+		.attr('in', this.in())
+		.attr('result', base+(++this.ref));
+	},
+	fork : function() {
+	    return FilterCreator(output, '_', this.in());
+	},
+        merge : function(name, child) {
+	    return output.append(name)
+		.attr('in', child.in())
+		.attr('in2', this.in())
+		.attr('result', base+(++this.ref));
+	}
+    }
 }
+
+
