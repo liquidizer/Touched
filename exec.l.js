@@ -1,6 +1,5 @@
 commands.l= {
     system : function(code, output) {
-		output.append('h1').text('L-System');
 		var iterations= parseInt(code.arg('iterations').text || "0");
 		if (iterations>8) {
 			code.arg('iterations').error("Maximum iterations reached");
@@ -10,17 +9,18 @@ commands.l= {
 			code.arg('iterations').error("Minimum iterations reached");
 			return;
 		}
+		output.selectAll('*').remove();
+		//output.append('h1').text('L-System');
 		//output.append('p').text('Iterations: '+iterations);
 		code.fold('rule', {}, function(result) {
-			output.append('h3').text("Rules");
+			/*output.append('h3').text("Rules");
 				var u= output.append('ul');
 				for (i in result) {
 					u.append('li').text(i+' -> '+result[i]);
-				}
+				}*/
 			var res = expand(code.arg('axiom').arg('name').text, iterations, result);
 			//console.log("I"+iterations + ": " + res);
 		
-		output.selectAll('*').remove();
 		var svg = output
 		.append("svg")
 		.attr("width", "100%").attr("height", "100%");
@@ -70,7 +70,7 @@ function plot(output, m, lcode) {
 			.attr('stroke-width', 2)
 			.attr('stroke-linecap', 'round')
 			.attr('transform', "matrix("+m.a+","+m.b+","+m.c+","+m.d+","+m.e+","+m.f+")");
-			m=m.translate(len,0);
+			m=m.translate(len, 0);
 		}
 		else if  (lcode[i]=='+') {
 			m=m.rotate(45);
