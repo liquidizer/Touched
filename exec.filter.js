@@ -7,7 +7,7 @@ commands.filter= {
 	var filter= svg.append('defs')
 	    .append('filter').attr('id','tfilter')
 	var creator= FilterCreator(filter, 'img', 'SourceGraphic');
-	code.args('filter').forEach(function(cmd) {
+	code.args('filter').reverse().forEach(function(cmd) {
 	    cmd.call(creator);
 	});
 
@@ -25,7 +25,7 @@ commands.filter= {
 	merge : {
 	    atop : function(code, output) {
 		var child= output.fork();
-		code.args('filter').forEach(function(cmd) {
+		code.args('filter').reverse().forEach(function(cmd) {
 		    cmd.call(child);
 		});
 		output.merge('feComposite', child)
@@ -57,6 +57,14 @@ commands.filter= {
 	    output.append('feColorMatrix')
 		.attr('type','luminanceToAlpha');
 	},
+	offset : function(code, output) {
+	    output.append('feOffset')
+	    .attr('dx', code.arg('dx').text || 0)
+	    .attr('dy', code.arg('dy').text || 0);
+	},
+	sourcegraphic : function(code, output) {
+	    output.toSource();
+	}
     }
 }
 
@@ -72,13 +80,17 @@ function FilterCreator(output, base, source) {
 		.attr('result', base+(++this.ref));
 	},
 	fork : function() {
-	    return FilterCreator(output, '_', this.in());
+	    return FilterCreator(output, base+this.ref+'_', this.in());
 	},
         merge : function(name, child) {
 	    return output.append(name)
 		.attr('in', child.in())
 		.attr('in2', this.in())
 		.attr('result', base+(++this.ref));
+	},
+	toSource : function() {
+	    this.ref= 0;
+	    source='SourceGraphic';
 	}
     }
 }
