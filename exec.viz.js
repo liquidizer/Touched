@@ -43,7 +43,6 @@ commands.viz = {
 			},
 			json : function(code, data, callback) {
 				var parsedjson = eval('(' + data.text + ')');
-				//console.log(parsedjson);
 				data = VizData.json(parsedjson);
 				code.fold('filter', data, callback);
 			}
@@ -65,32 +64,59 @@ commands.viz = {
 			},
 			rmcols : function(code, data, callback) {
 				var range = getRange(code.arg('cols'));
-				data.matrix = data.matrix.map(function(row, i) {
-					return row.filter(function(ele, i) {
-						return !range.contains(i + 1);
+				if(range) {
+					data.matrix = data.matrix.map(function(row, i) {
+						return row.filter(function(ele, i) {
+							return !range.contains(i + 1);
+						});
 					});
-				});
+				}
+				callback(data);
+			},
+			selcols : function(code, data, callback) {
+				var range = getRange(code.arg('cols'));
+				if(range) {
+					data.matrix = data.matrix.map(function(row, i) {
+						return row.filter(function(ele, i) {
+							return range.contains(i + 1);
+						});
+					});
+				}
 				callback(data);
 			},
 			rmrows : function(code, data, callback) {
 				var range = getRange(code.arg('rows'));
-				data.matrix = data.matrix.filter(function(ele, i) {
-					return !range.contains(i + 1);
-				});
+				if(range) {
+					data.matrix = data.matrix.filter(function(ele, i) {
+						//console.log((i + 1) + ' -> ' + !range.contains(i + 1));
+						return !range.contains(i + 1);
+					});
+				}
+				callback(data);
+			},
+			selrows : function(code, data, callback){
+				var range = getRange(code.arg('rows'));
+				if(range) {
+					data.matrix = data.matrix.filter(function(ele, i) {
+						//console.log((i + 1) + ' -> ' + !range.contains(i + 1));
+						return range.contains(i + 1);
+					});
+				}
 				callback(data);
 			},
 			selectcolumnbyvalue : function(code, data, callback) {
 				var rownumber = parseFloat(code.arg('rownumber').text);
 				var range = getRange(code.arg('value'));
-				data.matrix = transpose(data.matrix);
-				data.matrix = data.matrix.filter(function(ele, index) {
-					return range.contains(ele[rownumber - 1]);
-				});
-				data.matrix = transpose(data.matrix);
+				if(range && rownumber) {
+					data.matrix = transpose(data.matrix);
+					data.matrix = data.matrix.filter(function(ele, index) {
+						return range.contains(ele[rownumber - 1]);
+					});
+					data.matrix = transpose(data.matrix);
+				}
 				callback(data);
 			},
 			lineplot : function(code, data, callback){
-				//console.log(data);
 				data = VizData.lineplot(data.matrix);
 				code.fold('option', data, callback);
 			}
@@ -109,7 +135,6 @@ commands.viz = {
 				callback(data);
 			},
 			tomatrix : function(code, data, callback){
-				//console.log(data.json);
 				data = VizData.matrix(data.json);
 				code.fold('filter', data, callback);
 			}
@@ -187,7 +212,7 @@ function plotJSON(output, data) {
 			return d + " : " + data[d].toString();
 	}).on("click", function(d) {
 		var parent = d3.select(this.parentNode)
-		console.log(data);
+		//console.log(data);
 		if(parent.select("ul").empty()) {
 			plotJSON(parent.append("ul"), data[d]);
 		} else
