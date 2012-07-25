@@ -9,7 +9,7 @@ var redoBuffer= [];
 // The screen coordinates of the last drag update.
 var startOffset;
 var startPos;
-var blocked = undefined;
+var blocked = false
 
 // typed text for keyboard control
 var typetext ='';
@@ -388,7 +388,7 @@ function msDown (event) {
         if (!readonly) hand= grabbed;
 
         // store object position. Will be updated when mouse moves.
-	blocked = undefined;
+	blocked = { time : new Date().getTime() + 100 };
 	startOffset = undefined;
 	startPos= [ evt.clientX, evt.clientY ];
         event.preventDefault();
@@ -404,15 +404,24 @@ function msMove(event) {
         if (hasMoved || Math.abs(startPos[0]-evt.clientX)+Math.abs(startPos[1]-evt.clientY)>20) {
 
             // compare the evt location with the blocked information
-            if (blocked) { 
+            if (blocked.top) { 
 		if ((evt.clientY < blocked.top) || 
 		    (evt.clientY - blocked.top > blocked.height) || 
 		    (evt.clientX < blocked.left) || 
 		    (evt.clientX - blocked.left > blocked.width)) {
                     // the X Y are not in the blocked area
-                    blocked = undefined;
+                    blocked = false;
 		}
             }
+	    if (blocked.time) {
+		// timeout to stop accidential drag
+		if (new Date().getTime() > blocked.time)
+		    blocked= false;
+		else {
+		    msUp(event);
+		    return;
+		}
+	    }
             if (!hasMoved && !blocked) {
                 // look for the containing element that can be moved
                 while (!hand.hasClass('element')) {

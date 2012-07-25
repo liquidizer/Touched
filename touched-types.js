@@ -40,6 +40,7 @@ function type_isa(obj, type) {
 // checks if sup is a generalization of sub
 function type_isSuper(sup, sub) {
     //console.log (sup + ' <- ' + sub +'?');
+    if (sup=='*') return true;
     var supl= sup.split('|');
     var subl= sub.split('|');
     if (supl.length>1) {
