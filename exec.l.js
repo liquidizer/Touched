@@ -1,14 +1,17 @@
 lsys_debug = false;
 lsys_debug_expand = false;
 lsys_debug_plot = false;
+lsys_move_count = 0;
+lsys_move_limit = 10000;
 
 commands.l= {
     system : function(code, output) {
-		iterations= parseInt(code.arg('iterations').text || "0");
-		if (iterations>8) {
+		lsys_move_count = 0;
+		iterations = parseInt(code.arg('iterations').text || "0");
+		/*if (iterations>8) {
 			code.arg('iterations').error("Maximum iterations reached");
 			return;
-		}
+		}*/
 		if (iterations<0) {
 			code.arg('iterations').error("Minimum iterations reached");
 			return;
@@ -21,12 +24,21 @@ commands.l= {
 		var g = svg.append('g');
 		var tracker = new Tracker(svg[0][0]);
 		
-		plot(g, tracker, iterations, new Array(code.arg('axiom')), code.args('rule'));
+		try {
+			plot(g, tracker, iterations, new Array(code.arg('axiom')), code.args('rule'));
+		} catch (err) {
+			if (err=="lsys_move_limit_reached") {
+				console.log("WARNING: move limit reached at " + lsys_move_limit);
+				return;
+			}
+			throw err;
+		} finally {
+			// adapt viewBox to global bounding box so that whole figure is visible
+			var viewport = g[0][0].getBBox();
+			// extra margin of 5 to accommodate stroke line caps
+			svg.attr('viewBox', (viewport.x-5) +' '+ (viewport.y-5) +' '+ (viewport.width+10) +' '+ (viewport.height+10));
+		}
 		
-		// adapt viewBox to global bounding box so that whole figure is visible
-		var viewport = g[0][0].getBBox();
-		// extra margin of 5 to accommodate stroke line caps
-		svg.attr('viewBox', (viewport.x-5) +' '+ (viewport.y-5) +' '+ (viewport.width+10) +' '+ (viewport.height+10));
     }
 }
 
@@ -79,7 +91,8 @@ function plot(output, tracker, iteration, input, rules) {
 		}
 		// for other operators, execute them
 		else if (elem.type=='l.op.move') {
-			var len= elem.arg('length').text;
+			var len = elem.arg('length').text || 0;
+			if (len == 0) return; // for undefined or zero length we do nothing
 			// actual drawing happens here
 			output.append('line')
 			.attr('x1', 0).attr('y1', 0).attr('x2', len).attr('y2', 0)
@@ -90,6 +103,10 @@ function plot(output, tracker, iteration, input, rules) {
 			tracker.matrix=m.translate(len, 0);
 			if (lsys_debug_plot) console.log("move " + len);
 			if (lsys_debug_plot) console.log(m);
+			lsys_move_count++;
+			if (lsys_move_count >= lsys_move_limit) {
+				throw "lsys_move_limit_reached";
+			}
 		}
 		else if (elem.type=='l.op.scale') {
 			tracker.matrix=m.scale(elem.arg('factor').text);
@@ -98,7 +115,8 @@ function plot(output, tracker, iteration, input, rules) {
 			tracker.matrix=m.scaleNonUniform(elem.arg('factorX').text, elem.arg('factorY').text);
 		}
 		else if (elem.type=='l.op.rotate') {
-			var angle = elem.arg('angle').text;
+			var angle = elem.arg('angle').text || 0;
+			if (angle == 0) return; // for undefined or zero angle we do nothing
 			tracker.matrix=m.rotate(angle);
 			if (lsys_debug_plot) console.log("turn " + angle);
 			if (lsys_debug_plot) console.log(m);
