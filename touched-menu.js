@@ -277,7 +277,6 @@ function menu_edit(type) {
 
 // set the value of the selected text element
 function menu_edit_setValue(selection, type, value) {
-    value= value.replace(/^\s+|\s+$/g,'');
     if (value=='') {
         if (!selection.hasClass('arg'))
 	    menu_delete();
