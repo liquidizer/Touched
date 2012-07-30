@@ -267,7 +267,7 @@ function keyPress(evt) {
                 menu_paste();        
             if (evt.which == 88)    
 		//run code for CTRL+X
-                menu_delete();
+                menu_cut();
             if (evt.which == 89)    
 		//run code for CTRL+Y
                 touched_undo(false);

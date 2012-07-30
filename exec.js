@@ -10,7 +10,7 @@ function execute(codeId, outputId) {
             //VizData.json(eval('(' + code.toString() + ')')).toDOM(output.append('div'));
             code.args('start').forEach(function(cmd) { cmd.call(output); });
             codestring = code.toString();
-            }}, 200);         
+            }}, 500);         
     } catch(e) {
    	   	output.append('div').text(code.toString());
     }

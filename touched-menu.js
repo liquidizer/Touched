@@ -11,7 +11,7 @@ var editMenu= [
     [ 'After', check_canRepeat, menu_add_after ],
     [ 'Copy', check_canCopy, menu_copy ],
     [ 'Paste', check_canPaste, menu_paste ],
-    [ 'Cut', check_canDelete, menu_delete ]
+    [ 'Cut', check_canDelete, menu_cut ]
 ];
 
 // initialize menu entries
@@ -318,8 +318,13 @@ function menu_copy() {
     }
 }
 
+function menu_cut(){
+	 menu_copy();
+	 menu_delete();
+}
+
 function menu_delete() {
-    menu_copy();
+   
     var selection = $('.selected');
     if(check_canDelete(selection)) {
         selectNext(selection,4)
