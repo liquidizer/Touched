@@ -190,10 +190,10 @@ function plotLSys(tracker, iterator, rules, callback) {
 				.attr('transform', "matrix("+m.a+","+m.b+","+m.c+","+m.d+","+m.e+","+m.f+")");
 				tracker.matrix=m.translate(len, 0);
 				with (Math) {
-					lsys_bbox_x_min = min(lsys_bbox_x_min, m.e);
-					lsys_bbox_y_min = min(lsys_bbox_y_min, m.f);
-					lsys_bbox_x_max = max(lsys_bbox_x_max, m.e);
-					lsys_bbox_y_max = max(lsys_bbox_y_max, m.f);
+					lsys_bbox_x_min = min(lsys_bbox_x_min, tracker.matrix.e);
+					lsys_bbox_y_min = min(lsys_bbox_y_min, tracker.matrix.f);
+					lsys_bbox_x_max = max(lsys_bbox_x_max, tracker.matrix.e);
+					lsys_bbox_y_max = max(lsys_bbox_y_max, tracker.matrix.f);
 				}
 				if (lsys_debug_plot) console.log("move " + len);
 				lsys_move_count++;
