@@ -1,6 +1,7 @@
 lsys_debug = false;
 lsys_debug_expand = false;
 lsys_debug_plot = false;
+lsys_debug_perf = false;
 lsys_move_count = 0;
 lsys_move_limit = 10000;
 lsys_drawcount = 0;
@@ -10,6 +11,11 @@ commands.l= {
     system : function(code, output) {
 		lsys_drawcount++;
 		lsys_move_count = 0;
+		lsys_bbox_x_min = 0;
+		lsys_bbox_y_min = 0;
+		lsys_bbox_x_max = 0;
+		lsys_bbox_y_max = 0;
+		
 		iterations = parseInt(code.arg('iterations').text || "0");
 		/*if (iterations>8) {
 			code.arg('iterations').error("Maximum iterations reached");
@@ -19,6 +25,7 @@ commands.l= {
 			code.arg('iterations').error("Minimum iterations reached");
 			return;
 		}
+		
 		output.selectAll('*').remove();
 		
 		var svg = output
@@ -32,10 +39,14 @@ commands.l= {
 		var it = new Iterator([code.arg('axiom')], iterations);
 		var rules = code.args('rule');
 		
+		var startTime = (lsys_debug_perf) ? new Date().getTime() : 0;
 		try {
 			plotLSys(tracker, it, rules, function() {
 				tracker.fit();
-				//console.log(tracker.svg[0][0]);
+				if (lsys_debug_perf) {
+					var endTime = new Date().getTime();
+					console.log("rendering finished in " + (endTime-startTime) + " ms");
+				}
 			});
 		} catch (err) {
 			if (err=="lsys_move_limit_reached") {
@@ -46,7 +57,6 @@ commands.l= {
 		} finally {
 			tracker.fit();
 		}
-		
     }
 }
 
@@ -63,9 +73,14 @@ function Tracker(svg, root) {
 	}
 	this.fit = function() {
 		// adapt viewBox to global bounding box so that whole figure is visible
-		var viewport = this.root[0][0].getBBox();
 		// extra margin of 5 to accommodate stroke line caps
-		this.svg.attr('viewBox', (viewport.x-5) +' '+ (viewport.y-5) +' '+ (viewport.width+10) +' '+ (viewport.height+10));
+		
+		//var viewport = this.root[0][0].getBBox();
+		//this.svg.attr('viewBox', (viewport.x-5) +' '+ (viewport.y-5) +' '+ (viewport.width+10) +' '+ (viewport.height+10));
+		
+		var w=lsys_bbox_x_max-lsys_bbox_x_min;
+		var h=lsys_bbox_y_max-lsys_bbox_y_min;
+		this.svg.attr('viewBox', (lsys_bbox_x_min-5) +' '+ (lsys_bbox_y_min-5) +' '+ (w+10) +' '+ (h+10));
 	}
 }
 
@@ -174,6 +189,12 @@ function plotLSys(tracker, iterator, rules, callback) {
 				.attr('stroke-linecap', 'round')
 				.attr('transform', "matrix("+m.a+","+m.b+","+m.c+","+m.d+","+m.e+","+m.f+")");
 				tracker.matrix=m.translate(len, 0);
+				with (Math) {
+					lsys_bbox_x_min = min(lsys_bbox_x_min, m.e);
+					lsys_bbox_y_min = min(lsys_bbox_y_min, m.f);
+					lsys_bbox_x_max = max(lsys_bbox_x_max, m.e);
+					lsys_bbox_y_max = max(lsys_bbox_y_max, m.f);
+				}
 				if (lsys_debug_plot) console.log("move " + len);
 				lsys_move_count++;
 				if (lsys_move_count >= lsys_move_limit) {
