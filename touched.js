@@ -1,5 +1,5 @@
 // DnD frame work
-// hand is a reference to the object currently beeing dragged.
+// hand is a reference to the object currently being dragged.
 var hand= null;
 
 // undo buffer
@@ -9,7 +9,7 @@ var redoBuffer= [];
 // The screen coordinates of the last drag update.
 var startOffset;
 var startPos;
-var blocked = false
+var blocked = false;
 
 // typed text for keyboard control
 var typetext ='';
@@ -191,7 +191,7 @@ function selectNext(obj, axis) {
     var isup = false;
     var isactive=false;
     
-    if(obj.size()>0){
+    if (obj.size()>0) {
         var topoffset = obj.offset().top;
         var height = obj.height();
     }
@@ -266,19 +266,19 @@ function keyPress(evt) {
                 //run code for CTRL+V
                 menu_paste();        
             if (evt.which == 88)    
-		//run code for CTRL+X
+				//run code for CTRL+X
                 menu_cut();
             if (evt.which == 89)    
-		//run code for CTRL+Y
+				//run code for CTRL+Y
                 touched_undo(false);
             if (evt.which == 90)    
-		//run code for CTRL+Z
+				//run code for CTRL+Z
                 touched_undo(true);
         }
         else if (evt.keyCode > 64 && evt.keyCode < 91) {
             var type = String.fromCharCode(evt.keyCode);
             var menu = $(menuBar.find('li:not(.disabled)'));
-            if(menu.find('li').length !=0) menu = menu.find('li');
+            if (menu.find('li').length !=0) menu = menu.find('li');
             typetext = typetext + type;
             var chosen= [];
             for (var i = 0; i < menu.length; i++) {
@@ -295,36 +295,36 @@ function keyPress(evt) {
                 
             }
             if (chosen.length == 0) {
-		typetext = '';
+				typetext = '';
                 updateMenu();
             }
-            else if(chosen.length == 1) {
+            else if (chosen.length == 1) {
                 typetext = '';
                 evt.preventDefault();
                 chosen[0].click();
             }           
-            else if(chosen.length > 1){
+            else if (chosen.length > 1) {
                 var hassameChar = true;
-                for(var num=0; num < chosen.length-1; num++){
-                    if(chosen[num].text().substring(0,6) == chosen[num+1].text().substring(0,6))
+                for (var num=0; num < chosen.length-1; num++) {
+                    if (chosen[num].text().substring(0,6) == chosen[num+1].text().substring(0,6))
                         hassameChar = hassameChar && true;             
                     else hassameChar = false;
                 }
-                if(hassameChar){
+                if (hassameChar) {
                     typetext= chosen[0].text().substring(0,6).toUpperCase();
-                    for(var num=0; num < chosen.length; num++){
+                    for(var num=0; num < chosen.length; num++) {
                         chosen[num].html('<span class="menuSelect">' + chosen[0].text().substring(0,6) + '</span>' + chosen[num].text().substring( typetext.length,chosen[num].text().length));   
                     }
                 }
             }
         }
-        else if(evt.keyCode ==8){
+        else if (evt.keyCode ==8) {
 	    typetext= '';
             updateMenu();
         }
-        else if(evt.keyCode == 46)
+        else if (evt.keyCode == 46)
             menu_delete();
-        else if(evt.which==37){        
+        else if (evt.which==37) {        
             //KEY_LEFT
             evt.preventDefault();
             var selection= $('.selected');
@@ -332,7 +332,7 @@ function keyPress(evt) {
                 selectNext(selection, 2);
             updateMenu();
         }
-        else if(evt.which ==39){
+        else if (evt.which ==39) {
             //KEY_RIGHT
             evt.preventDefault();
             var selection= $('.selected');
@@ -348,7 +348,7 @@ function keyPress(evt) {
         selectNext(selection,1);
         updateMenu();
     }
-    else if(evt.which==9 || evt.which ==13){
+    else if (evt.which==9 || evt.which ==13) {
         // TAB, Enter
         evt.preventDefault();
         var selection= $('.selected');
@@ -434,7 +434,7 @@ function msMove(event) {
                 if (!hand.hasClass('float')) {
                     // block object from snap back
                     var parent =hand.parent();
-                    setTimeout(function (){ blockArea(parent); },1);
+                    setTimeout(function () { blockArea(parent); },1);
                     // make the object float
                     releaseBox(hand);
                     hand.addClass('float');
