@@ -180,7 +180,7 @@ function plotLSys(tracker, iterator, rules, callback) {
 			}
 			else if (elem.type=='l.op.move') {
 				var len = elem.arg('length').text || 0;
-				if (len == 0) return; // for undefined or zero length we do nothing
+				if (len == 0) continue; // for undefined or zero length we do nothing
 				// actual drawing happens here
 				tracker.root.append('line')
 				.attr('x1', 0).attr('y1', 0).attr('x2', len).attr('y2', 0)
@@ -209,7 +209,7 @@ function plotLSys(tracker, iterator, rules, callback) {
 			}
 			else if (elem.type=='l.op.rotate') {
 				var angle = elem.arg('angle').text || 0;
-				if (angle == 0) return; // for undefined or zero angle we do nothing
+				if (angle == 0) continue; // for undefined or zero angle we do nothing
 				tracker.matrix=m.rotate(angle);
 				if (lsys_debug_plot) console.log("turn " + angle);
 			}
