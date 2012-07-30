@@ -4,7 +4,7 @@ function toCode(node, commands) {
     var findArgs= function(node, args) {
 	for (var i=0; i<node.childNodes.length; ++i) {
 	    var child= node.childNodes[i];
-	    if (child.nodeType==1) {
+	    if (child.nodeType==1 && !child.classList.contains('float')) {
 		if (child.classList.contains('arg')) {
 		    var name= child.getAttribute('data-name');
 		    var param= child.firstChild;
@@ -24,6 +24,7 @@ function toCode(node, commands) {
     var argMap= findArgs(node, {});
     var isText= node.classList.contains('box-text');
     var isValid= !node.classList.contains('error') &&
+    !node.classList.contains('float') &&
 	!node.classList.contains('arg');
 
     // build code object
@@ -75,6 +76,40 @@ function toCode(node, commands) {
 	},
 	error: function(message) {
 	    markError(this.id, message);
+	},
+	toString : function (){
+		var result= '';
+		var keys = getKeys(this.argMap);
+		var myargs = this.argMap;
+		var count = 0;
+		keys.forEach(function(key) {
+			myargs[key].forEach(function(element){
+			if(element.isValid){
+			   if(!element.text){
+			   	result = result+ key+count+":"+'{'+"type:" + "\"" +element.type + "\""+ ","+'}'+",";
+			   	count++;
+			   }
+        	   else {
+     	   	    result = result+ key+count+":"+'{'+"type:" + "\"" +element.type + "\""+ "," + "text:" + "\""+element.text + "\""+ ","+'}'+",";
+     	   	    count++;
+     	       }
+		      if(element.toString())
+			     result = result + "args"+count+":"+element.toString()+',';
+			}
+			});					
+		});
+		if(result){
+			return '{'+result+'}';
+		}       
 	}
     };
 }
+
+function getKeys(obj) {
+	var keys = [];
+	for(var key in obj) {
+		keys.push(key);
+	}
+	return keys;
+};
+
