@@ -17,12 +17,8 @@ commands.l= {
 		lsys_bbox_y_max = 0;
 		
 		iterations = parseInt(code.arg('iterations').text || "0");
-		/*if (iterations>8) {
-			code.arg('iterations').error("Maximum iterations reached");
-			return;
-		}*/
 		if (iterations<0) {
-			code.arg('iterations').error("Minimum iterations reached");
+			code.arg('iterations').error("Iterations must be positive");
 			return;
 		}
 		
@@ -33,30 +29,24 @@ commands.l= {
 		.attr("width", "100%").attr("height", "100%");
 		var g = svg.append('g');
 		
-		svg.selectAll('g');
-		
 		var tracker = new Tracker(svg, g);
 		var it = new Iterator([code.arg('axiom')], iterations);
 		var rules = code.args('rule');
 		
 		var startTime = (lsys_debug_perf) ? new Date().getTime() : 0;
-		try {
-			plotLSys(tracker, it, rules, function() {
+		
+		plotLSys(tracker, it, rules, 
+			function() { // callback for final fitting of plot into svg viewBox
 				tracker.fit();
 				if (lsys_debug_perf) {
 					var endTime = new Date().getTime();
 					console.log("rendering finished in " + (endTime-startTime) + " ms");
 				}
-			});
-		} catch (err) {
-			if (err=="lsys_move_limit_reached") {
-				console.log("WARNING: move limit reached at " + lsys_move_limit);
-				return;
+			}, 
+			function() { // callback for aborting
+				console.log("rendering aborted: move limit reached at " + lsys_move_limit);
 			}
-			throw err;
-		} finally {
-			tracker.fit();
-		}
+		);
     }
 }
 
@@ -109,7 +99,7 @@ function Iterator(input, iteration) {
 }
 
 // expand input variables; calls plot on the expanded result
-function expand(tracker, iterator, rules, callback) {
+function expand(tracker, iterator, rules, callback, abort) {
 	if (iterator.iteration<0) {
 		callback(tracker);
 		return;
@@ -139,16 +129,16 @@ function expand(tracker, iterator, rules, callback) {
 		setTimeout(function() {
 			if (lsys_drawcount==old_drawcount) {
 				if (new Date().getTime()-100 > lsys_lastaction) {
-					tracker.fit();
+					tracker.fit(); // adapt svg viewBox to current plot size
 					lsys_lastaction = new Date().getTime();
 				}
-				plotLSys(tracker, it2, rules, callback);
+				plotLSys(tracker, it2, rules, callback, abort);
 			}
 		}, 1);
 	}
 }
 
-function plotLSys(tracker, iterator, rules, callback) {
+function plotLSys(tracker, iterator, rules, callback, abort) {
 	if (iterator.iteration<0) {
 		callback(tracker);
 		return;
@@ -164,8 +154,8 @@ function plotLSys(tracker, iterator, rules, callback) {
 			if (elem.type=='l.op.variable') {
 				var it2 = new Iterator([elem], iterator.iteration);
 				expand(tracker, it2, rules, function() { // after expanding variable...
-					plotLSys(tracker, iterator, rules, callback); // ...continue current plotting iteration with next element
-				});
+					plotLSys(tracker, iterator, rules, callback, abort); // ...continue current plotting iteration with next element
+				}, abort);
 				return;
 			}
 			// for groups, recursively plot content, but use a clone of the current transform matrix
@@ -174,8 +164,8 @@ function plotLSys(tracker, iterator, rules, callback) {
 				var clone = tracker.clone();
 				var it2 = new Iterator(children, iterator.iteration);
 				plotLSys(clone, it2, rules, function() { // after plotting group contents...
-					plotLSys(tracker, iterator, rules, callback); // ...continue current plotting iteration with next element
-				});
+					plotLSys(tracker, iterator, rules, callback, abort); // ...continue current plotting iteration with next element
+				}, abort);
 				return;
 			}
 			else if (elem.type=='l.op.move') {
@@ -198,7 +188,8 @@ function plotLSys(tracker, iterator, rules, callback) {
 				if (lsys_debug_plot) console.log("move " + len);
 				lsys_move_count++;
 				if (lsys_move_count >= lsys_move_limit) {
-					throw "lsys_move_limit_reached";
+					abort();
+					return;
 				}
 			}
 			else if (elem.type=='l.op.scale') {
