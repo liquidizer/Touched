@@ -58,6 +58,7 @@ function toCode(node, commands) {
 		    this.error("Command is not defined: "+type);
 		    throw "Undefined function: "+type;
 		}
+		//console.log(f(this, data, callback));
 		return f(this, data, callback);
 	    } else {
 		callback && callback(data);

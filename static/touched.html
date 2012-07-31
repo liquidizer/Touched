@@ -75,11 +75,13 @@
       }
       function runContent() {
 	  clearErrors();
-          if ($('#autoupdate').attr('checked')) {
+          if ($('#autoupdate').attr('checked')) {     	        	    
              $('#dataview').show();
-	     execute('canvas', 'dataview');
+	         execute('canvas', 'dataview');
 	  } else {
-	     $('#dataview').hide();
+	     //$('#dataview').hide();
+	     $('#dataview').empty(); 
+	     codestring = "";
 	  }
       }
   </script>
