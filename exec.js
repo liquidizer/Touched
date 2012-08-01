@@ -8,11 +8,10 @@ function execute(codeId, outputId) {
 			if(code.toString() != codestring) {
 				output.selectAll('*').remove();
 				//VizData.json(eval('(' + code.toString() + ')')).toDOM(output.append('div'));
-				
 				code.args('start').forEach(function(cmd) {
+					//console.log(cmd);
 					cmd.call(output);
 				});
-				
 				codestring = code.toString();
 			}
 		}, 500);

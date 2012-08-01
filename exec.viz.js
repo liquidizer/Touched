@@ -212,7 +212,6 @@ function plotJSON(output, data) {
 			return d + " : " + data[d].toString();
 	}).on("click", function(d) {
 		var parent = d3.select(this.parentNode)
-		//console.log(data);
 		if(parent.select("ul").empty()) {
 			plotJSON(parent.append("ul"), data[d]);
 		} else
