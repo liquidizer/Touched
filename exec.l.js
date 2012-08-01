@@ -11,6 +11,7 @@ lsys_move_limit = 1000;
 lsys_plot_id = 0;
 lsys_last_fit = 0;
 lsys_last_fill = 0;
+lsys_stroke = "black";
 lsys_stroke_width = 1;
 
 lsys_style = "#lsystem {width: 100%; height: 100%; margin: 5px;}";
@@ -32,12 +33,12 @@ commands.l= {
 		
 		var svg = output.append("svg").attr('id', 'lsystem');
 		
-		var strokeColor = "black"; // TODO: parse this from code
+		var strokeColor = code.arg('stroke').text || lsys_stroke;
 		lsys_custom_style = " #lsystem line {stroke: " + strokeColor + ";}";
 		svg.append("style").attr('type','text/css').text(lsys_style + lsys_custom_style);
 		
 		var plotter = new Plotter(svg);
-		var tracker = new Tracker(svg[0][0].createSVGMatrix());
+		var tracker = new Tracker(svg[0][0].createSVGMatrix(), strokeColor);
 		var it = new Iterator([code.arg('axiom')], iterations);
 		var rules = code.args('rule');
 		
@@ -107,11 +108,12 @@ function Plotter(svg) {
 }
 
 // wrapper for transformation matrix; needed because of JavaScript pass-by-value semantics...
-function Tracker(matrix) {
+function Tracker(matrix, strokeColor) {
 	this.matrix = matrix;
+	this.strokeColor = strokeColor;
 	// clone method needed to fork group transforms
 	this.clone = function() {
-		var clone = new Tracker(this.matrix);
+		var clone = new Tracker(this.matrix, this.strokeColor);
 		return clone;
 	}
 }
@@ -222,9 +224,12 @@ function plotLSys(plotter, tracker, iterator, rules, callback, abort) {
 				var len = elem.arg('length').text || 0;
 				if (len == 0) continue; // for undefined or zero length we do nothing
 				// actual drawing happens here
-				plotter.root.append('line')
+				var line = plotter.root.append('line')
 				.attr('x2', len)
 				.attr('transform', "matrix("+m.a+","+m.b+","+m.c+","+m.d+","+m.e+","+m.f+")");
+				if (tracker.strokeColor != lsys_stroke) {
+					line.style("stroke", tracker.strokeColor);
+				}
 				tracker.matrix = m.translate(len, 0);
 				if (lsys_debug_plot) console.log("move " + len);
 				lsys_move_count++;
@@ -245,6 +250,12 @@ function plotLSys(plotter, tracker, iterator, rules, callback, abort) {
 				if (angle == 0) continue; // for undefined or zero angle we do nothing
 				tracker.matrix = m.rotate(angle);
 				if (lsys_debug_plot) console.log("turn " + angle);
+			}
+			else if (elem.type == 'l.op.color') {
+				var c = elem.arg('color').text;
+				if (!c) continue; // for undefined or zero color we do nothing
+				tracker.strokeColor = c; // store new color to use for subsequent moves
+				if (lsys_debug_plot) console.log("color " + c);
 			}
 		}
 	}
