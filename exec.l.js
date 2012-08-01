@@ -13,6 +13,9 @@ lsys_last_fit = 0;
 lsys_last_fill = 0;
 lsys_stroke_width = 1;
 
+lsys_style = "#lsystem {width: 100%; height: 100%; margin: 5px;}";
+lsys_style += " #lsystem .decorated {stroke-linecap: round;}";
+
 commands.l= {
     system : function(code, output) {
 		lsys_plot_id++;
@@ -27,10 +30,11 @@ commands.l= {
 		
 		output.selectAll('*').remove();
 		
-		var svg = output
-		.append("svg")
-		.attr("width", "100%").attr("height", "100%").attr("style","margin:5pt");
-		var g = svg.append('g');
+		var svg = output.append("svg").attr('id', 'lsystem');
+		
+		var strokeColor = "black"; // TODO: parse this from code
+		lsys_custom_style = " #lsystem line {stroke: " + strokeColor + ";}";
+		svg.append("style").attr('type','text/css').text(lsys_style + lsys_custom_style);
 		
 		var plotter = new Plotter(svg);
 		var tracker = new Tracker(svg[0][0].createSVGMatrix());
@@ -58,7 +62,7 @@ commands.l= {
 // also offers methods for fitting plot into svg viewBox, adapting line stroke width to fill the area, and final plot decoration
 function Plotter(svg) {
 	this.svg = svg;
-	this.root = svg.append('g').attr('style', 'stroke: black');
+	this.root = svg.append('g').attr('id', 'lsystem-root');
 	
 	// adapt viewBox to global bounding box so that whole figure is visible
 	this.fit = function() {
@@ -70,13 +74,14 @@ function Plotter(svg) {
 	this.fill = function() {
 		if (lsys_move_length == 0) return;
 		var viewport = this.root[0][0].getBBox();
-		var lines = this.svg.selectAll(".lsystemLine");
 		var area = viewport.width * viewport.height;
 		var fillFactor = Math.log(area/lsys_move_length);
 		var sw = Math.max(1, Math.round(fillFactor));
 		if (sw != lsys_stroke_width) {
-			var lines = this.svg.selectAll(".lsystemLine");
-			lines.style("stroke-width", sw);
+			//var lines = this.svg.selectAll("#lsystem line");
+			//lines.style("stroke-width", sw);
+			var root = this.svg.select("#lsystem-root");
+			root.style("stroke-width", sw);
 			if (lsys_debug_plot) console.log("moves="+lsys_move_count + "   length="+lsys_move_length);
 			if (lsys_debug_plot) console.log("area="+area + "   ff="+fillFactor + "   -> sw="+sw);
 			if (lsys_debug_plot) console.log("changed stroke width to " + sw);
@@ -91,9 +96,9 @@ function Plotter(svg) {
 		// final stroke width calculation
 		lsys_stroke_width = 0; // reset so that lines are definitely redrawn
 		this.fill();
-		var lines = this.svg.selectAll(".lsystemLine");
-		lines.style("stroke-linecap", "round");
-		
+		var root = this.svg.select("#lsystem-root");
+		root.classed("decorated", true); // toggle beautiful style
+
 		// final viewBox re-calculation as line style changes may have affected bounding box
 		viewport = this.root[0][0].getBBox();
 		// extra margin of 5 to accommodate stroke line caps
@@ -218,9 +223,7 @@ function plotLSys(plotter, tracker, iterator, rules, callback, abort) {
 				if (len == 0) continue; // for undefined or zero length we do nothing
 				// actual drawing happens here
 				plotter.root.append('line')
-				.attr('x1', 0).attr('y1', 0).attr('x2', len).attr('y2', 0)
-				//.attr('stroke', 'black')
-				.attr('class', 'lsystemLine')
+				.attr('x2', len)
 				.attr('transform', "matrix("+m.a+","+m.b+","+m.c+","+m.d+","+m.e+","+m.f+")");
 				tracker.matrix = m.translate(len, 0);
 				if (lsys_debug_plot) console.log("move " + len);
