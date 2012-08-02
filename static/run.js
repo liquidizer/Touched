@@ -142,7 +142,9 @@ function redirect(res, url) {
 	    port: comps[2] || 80,
 	    path: comps[3] || '/',
 	};
+	console.log('a');
 	http.get(options, function(red) {
+	    console.log('b');
 	    red.setEncoding('utf8');
 	    if (red.statusCode >= 300 && red.statusCode<310 && red.headers.location) {
 		// redirecting

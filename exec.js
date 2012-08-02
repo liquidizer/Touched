@@ -4,6 +4,7 @@ function execute(codeId, outputId) {
 	try {
 		setTimeout(function() {
 			var code = toCode(document.getElementById(codeId), commands);
+			var output= d3.select(outputId ? '#'+outputId : document.documentElement);
 			var output = d3.select('#' + outputId);
 			if(code.toString() != codestring) {
 				output.selectAll('*').remove();
@@ -17,6 +18,15 @@ function execute(codeId, outputId) {
 	} catch(e) {
 		output.append('div').text(code.toString());
 	}
+}
+
+function executeFile(filename, output, callback) {
+    d3.text(filename, function(data) {
+	code= toCode($(data)[0], commands);
+	code.args('start').forEach(function(cmd) { 
+	    cmd.call(output, callback); 
+	});
+    });
 }
 
 // implement the xml grammar

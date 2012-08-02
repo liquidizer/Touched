@@ -1,15 +1,17 @@
-<html id="execution"/>
+<html/>
   <head>
     <meta charset="UTF-8"/>
 
     <!-- execution scripts -->
+    <script type="text/javascript" src="/lib/jquery.min.js"></script>
     <script type="text/javascript" src="/lib/d3.v2.js"></script>
     <script type="text/javascript" src="/touched-tocode.js"></script>
     <script type="text/javascript" src="/exec.js"></script>
     <script type="text/javascript" src="/exec.d3.js"></script>
+    <script type="text/javascript" src="/exec.help.js"></script>
+    <script type="text/javascript" src="/exec.l.js"></script>
     <script type="text/javascript" src="/exec.viz.js"></script>
     <script type="text/javascript" src="/exec.filter.js"></script>
-    <script type="text/javascript" src="/exec.l.js"></script>
     <style>
       #dataview table,td {
       border-collapse: collapse;
@@ -19,7 +21,7 @@
   </head>
   <script language="javascript">
     window.onload= function() {
-      execute('code', 'execution');
+      execute('code');
     };
   </script>
   <body>
