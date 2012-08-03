@@ -240,10 +240,17 @@ function plotLSys(plotter, tracker, iterator, rules, callback, abort) {
 				}
 			}
 			else if (elem.type == 'l.op.scale') {
-				tracker.matrix = m.scale(elem.arg('factor').text);
+				var f = elem.arg('factor').text || 1.0;
+				if (f == 1.0) continue; // for undefined factor or factor 1.0 we do nothing (Note: f is coerced to Number internally)
+				tracker.matrix = m.scale(f);
+				if (lsys_debug_plot) console.log("scale " + f);
 			}
 			else if (elem.type == 'l.op.scalenu') {
-				tracker.matrix = m.scaleNonUniform(elem.arg('factorX').text, elem.arg('factorY').text);
+				var fx = elem.arg('factorX').text || 1.0;
+				var fy = elem.arg('factorY').text || 1.0;
+				if ((fx == 1.0) && (fy == 1.0)) continue; // do nothing if both factors are undefined or 1.0
+				tracker.matrix = m.scaleNonUniform(fx, fy);
+				if (lsys_debug_plot) console.log("scalenu " + fx + " " + fy);
 			}
 			else if (elem.type == 'l.op.rotate') {
 				var angle = elem.arg('angle').text || 0;
