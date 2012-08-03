@@ -1,6 +1,9 @@
 var menuBar;
 var grammarMenu= {};
 var editMenu= [
+    [ 'Comment', check_isElement, menu_comment ],
+    [ 'Collapse', check_canCollapse, menu_collapse, { ro: true } ],
+    [ 'Uncollapse', check_isCollapsed, menu_uncollapse, {ro: true } ],
     [ 'Text', check_isType('text'), menu_edit('text') ],
     [ 'Number', check_isType('number'), menu_edit('number') ],
     [ 'Color', check_isType('color'), menu_edit('color') ],
@@ -9,7 +12,7 @@ var editMenu= [
     [ '-1', check_isType('number',true), menu_add('number',-1) ],
     [ 'Before', check_canRepeat, menu_add_before ],
     [ 'After', check_canRepeat, menu_add_after ],
-    [ 'Copy', check_canCopy, menu_copy ],
+    [ 'Copy', check_canCopy, menu_copy, {ro: true} ],
     [ 'Paste', check_canPaste, menu_paste ],
     [ 'Cut', check_canDelete, menu_cut ]
 ];
@@ -108,7 +111,7 @@ function updateMenu() {
 	fillMenu(selection.attr('data-type'), grammarMenu, menuBar);
     if (selection.length>0) {
 	for (var i=0; i<editMenu.length; i++) {
-	    if (!readonly || editMenu[i][2]==menu_copy) {
+	    if (!readonly || (editMenu[i][3]||{}).ro) {
 		if (editMenu[i][1](selection)) {
 		    var li= $('<li class="builtin"/>');
 		    li.text(editMenu[i][0]);
@@ -211,6 +214,20 @@ function check_isExt(type, fun) {
     return function(obj) { return window[fun] && check_isType(type)(obj); }
 }
 
+function check_isElement(obj) {
+    return obj.hasClass('element');
+}
+
+function check_canCollapse(obj) {
+    return !obj.hasClass('collapsed') && 
+	obj.children('.comment').length>0 &&
+	obj.find('.box-body').length>0;
+}
+
+function check_isCollapsed(obj) {
+    return obj.hasClass('collapsed');
+}
+
 function menu_add_after() {
     var selection= $('.selected:last');
     if (!selection.hasClass('arg')) selection=selection.parent();
@@ -241,38 +258,55 @@ function menu_add(type, increment) {
 // show a text input control for setting the selected text item
 function menu_edit(type) {
     return function() {
-        var selection= $('.selected');
-	menuBar.contents().remove();
-
-	//add input controls
-	var input=$('<input id="input" type="'+type+'"/>');
-	var set_button=$('<input type="button" id="okbutt" value="OK"/>');
-	var cancel_button=$('<input type="button" value="Cancel"/>');
-
-	// fill existing text into input field
-	if (!selection.hasClass('arg'))
-	    input.val(selection.text());
-
-	// define submit and cancel callbacks
-	var submitMenu= function() {
-	    menu_edit_setValue(selection, type, input.val());
-	};
-	var cancelMenu= function() { set_button.remove(); updateMenu(); }
-
-	input.keydown(function(evt) { if (evt.which==27) cancelMenu(); });
-	cancel_button.click(cancelMenu);
-	set_button.click(function() { 
-	    submitMenu(); 
-	    set_button.remove();
-	    updateAll(); });
-
-	//insert input elements into menu bar
-	menuBar.append(input)
-	    .append(set_button)
-	    .append(cancel_button);
-            
-	input.focus();
+	var selection= $('.selected');
+	var value= selection.hasClass('arg') ? '' : selection.text();
+	menu_showInput(type, value, function(value) {
+	    menu_edit_setValue(selection, type, value);
+	});
     }
+}
+
+function menu_comment() {
+    var selection= $('.selected');
+    var value=selection.children('.comment').text() || '';
+    menu_showInput('text', value, function(value) {
+	var div= $('<div class="box-text comment"/>');
+	div.text(value);
+	selection.children('.comment').remove();
+	if (value)
+	    selection.prepend(div);
+    });
+}
+
+function menu_showInput(type, value, callback) {
+    menuBar.contents().remove();
+
+    //add input controls
+    var input=$('<input id="input" type="'+type+'"/>');
+    var set_button=$('<input type="button" id="okbutt" value="OK"/>');
+    var cancel_button=$('<input type="button" value="Cancel"/>');
+
+    // fill existing text into input field
+    input.val(value);
+
+    // define cancel action
+    var cancelAction= function() { set_button.remove(); updateMenu(); }
+    input.keydown(function(evt) { if (evt.which==27) cancelAction(); });
+    cancel_button.click(cancelAction);
+
+    // define set action
+    set_button.click(function() { 
+	callback(input.val()); 
+	set_button.remove();
+	updateAll(); 
+    });
+    
+    //insert input elements into menu bar
+    menuBar.append(input)
+	.append(set_button)
+	.append(cancel_button);
+    
+    input.focus();
 }
 
 // set the value of the selected text element
@@ -337,3 +371,12 @@ function menu_delete() {
     }
 }
 
+function menu_collapse() {
+    $('.selected').addClass('collapsed');
+    updateMenu();
+}
+
+function menu_uncollapse() {
+    $('.selected').removeClass('collapsed');
+    updateMenu();
+}

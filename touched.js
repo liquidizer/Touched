@@ -224,20 +224,15 @@ function selectNext(obj, axis) {
                     return;
                 }
             }
-            if (leftright && !isup && obj.find('.box').length==0) {
+            if (leftright && !isup && obj.find('.box').length==0 || obj.is('.collapsed')) {
                 select(obj);
                 return;          
-                //find the parent class of obj   
-                if (obj.parent().hasClass('box') && $('.selected').get(0) != obj.parent().get(0)) {
-                    select(obj.parent());
-                    return;
-                }
             }
         }
         isactive= true;
         // proceed to next element
         var childs = reverse ? obj.children(':last') : obj.children(':first');  
-        if (!isup && !obj.hasClass('float') && childs.length > 0) 
+        if (!isup && !obj.is('.float,.collapsed') && childs.length>0) 
             obj = childs;
         else { 
             var next = reverse ? obj.prev() : obj.next();   
