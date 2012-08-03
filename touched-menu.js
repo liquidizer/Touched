@@ -1,7 +1,7 @@
 var menuBar;
 var grammarMenu= {};
 var editMenu= [
-    [ 'Comment', check_isElement, menu_comment ],
+    [ 'Annotate', check_isElement, menu_comment ],
     [ 'Collapse', check_canCollapse, menu_collapse, { ro: true } ],
     [ 'Uncollapse', check_isCollapsed, menu_uncollapse, {ro: true } ],
     [ 'Text', check_isType('text'), menu_edit('text') ],
