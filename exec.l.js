@@ -53,7 +53,7 @@ commands.l= {
 			}, 
 			function() { // callback for aborting
 				plotter.decorate();
-				console.log("rendering aborted: move limit reached at " + lsys_move_limit);
+				if (lsys_debug) console.log("rendering aborted");
 			}
 		);
     }
@@ -82,7 +82,7 @@ function Plotter(svg) {
 			//var lines = this.svg.selectAll("#lsystem line");
 			//lines.style("stroke-width", sw);
 			var root = this.svg.select("#lsystem-root");
-			root.style("stroke-width", sw);
+			root.style("stroke-width", sw); // styling only the root g element instead of each line reduces SVG disk footprint ALOT
 			if (lsys_debug_plot) console.log("moves="+lsys_move_count + "   length="+lsys_move_length);
 			if (lsys_debug_plot) console.log("area="+area + "   ff="+fillFactor + "   -> sw="+sw);
 			if (lsys_debug_plot) console.log("changed stroke width to " + sw);
@@ -143,53 +143,6 @@ function Iterator(input, iteration) {
 	}
 }
 
-// expand input variables; calls plot on the expanded result
-function expand(plotter, tracker, iterator, rules, callback, abort) {
-	if (iterator.iteration<0) {
-		callback();
-		return;
-	}
-	if (lsys_debug) console.log("expand iteration "+(iterations-iterator.iteration));
-	
-	var elem = iterator.next();
-	if (!elem) {
-		callback();
-	} else {
-		var expanded = []; // store result of this iteration's rules application
-		if (elem.type == 'l.op.variable') {
-			var varName = elem.arg('name').text;
-			if (lsys_debug_expand) console.log("expanding var " + varName);
-			for (r in rules) {
-				var rule = rules[r];
-				var r_in = rule.arg('in');
-				var r_outs = rule.args('out');
-				if (varName == r_in.arg('name').text) {
-					expanded = expanded.concat(r_outs);
-				}
-			}
-		}
-		if (lsys_debug_expand) console.log(expanded);
-		var it2 = new Iterator(expanded, iterator.iteration-1);
-		var current_plot_id = lsys_plot_id;
-		setTimeout(function() {
-			if (lsys_plot_id == current_plot_id) {
-				var timestamp = new Date().getTime();
-				if (timestamp-200 > lsys_last_fit) { // every 200 ms...
-					plotter.fit(); // adapt svg viewBox to current plot size
-					lsys_last_fit = timestamp;
-				}
-				if (timestamp-1000 > lsys_last_fill) { // every second...
-					plotter.fill(); // adapt line stroke width to scale of current plot size
-					lsys_last_fill = timestamp;
-				}
-				plotLSys(plotter, tracker, it2, rules, callback, abort);
-			} else {
-				//console.log("aborting plot of deprecated lsystem");
-			}
-		}, 1);
-	}
-}
-
 function plotLSys(plotter, tracker, iterator, rules, callback, abort) {
 	if (iterator.iteration<0) {
 		callback();
@@ -202,16 +155,47 @@ function plotLSys(plotter, tracker, iterator, rules, callback, abort) {
 			callback();
 		} else {
 			if (lsys_debug_plot) console.log("elem: " + elem.type);
-			m = tracker.matrix;
 			if (elem.type == 'l.op.variable') {
-				var it2 = new Iterator([elem], iterator.iteration);
-				expand(plotter, tracker, it2, rules, function() { // after expanding variable...
-					plotLSys(plotter, tracker, iterator, rules, callback, abort); // ...continue current plotting iteration with next element
-				}, abort);
+				// expand variable and plot the expanded result
+				if (lsys_debug) console.log("expand iteration "+(iterations-iterator.iteration));
+				var expanded = []; // store result of this iteration's rules application
+				var varName = elem.arg('name').text;
+				if (lsys_debug_expand) console.log("expanding var " + varName);
+				for (r in rules) {
+					var rule = rules[r];
+					var r_in = rule.arg('in');
+					var r_outs = rule.args('out');
+					if (varName == r_in.arg('name').text) {
+						expanded = expanded.concat(r_outs);
+					}
+				}
+				if (lsys_debug_expand) console.log(expanded);
+				
+				var it2 = new Iterator(expanded, iterator.iteration-1);
+				var current_plot_id = lsys_plot_id;
+				setTimeout(function() {
+					if (lsys_plot_id == current_plot_id) {
+						var timestamp = new Date().getTime();
+						if (timestamp-500 > lsys_last_fit) { // every 200 ms...
+							plotter.fit(); // adapt svg viewBox to current plot size
+							lsys_last_fit = timestamp;
+						}
+						if (timestamp-2000 > lsys_last_fill) { // every second...
+							plotter.fill(); // adapt line stroke width to scale of current plot size
+							lsys_last_fill = timestamp;
+						}
+						plotLSys(plotter, tracker, it2, rules, function() { // after plotting expansion...
+							plotLSys(plotter, tracker, iterator, rules, callback, abort); // ...continue current plotting iteration with next element
+						}, abort);
+					} else {
+						if (lsys_debug) console.log("l-system is deprecated");
+						abort();
+					}
+				}, 1);
 				return;
 			}
-			// for groups, recursively plot content, but use a clone of the current transform matrix
 			else if (elem.type == 'l.op.group') {
+				// for groups, recursively plot content, but use a clone of the current transform matrix
 				var children = elem.args('child');
 				var clone = tracker.clone();
 				var it2 = new Iterator(children, iterator.iteration);
@@ -221,41 +205,42 @@ function plotLSys(plotter, tracker, iterator, rules, callback, abort) {
 				return;
 			}
 			else if (elem.type == 'l.op.move') {
+				// actual drawing happens here
 				var len = elem.arg('length').text || 0;
 				if (len == 0) continue; // for undefined or zero length we do nothing
-				// actual drawing happens here
 				var line = plotter.root.append('line')
 				.attr('x2', len)
-				.attr('transform', "matrix("+m.a+","+m.b+","+m.c+","+m.d+","+m.e+","+m.f+")");
+				.attr('transform', "matrix("+tracker.matrix.a+","+tracker.matrix.b+","+tracker.matrix.c+","+tracker.matrix.d+","+tracker.matrix.e+","+tracker.matrix.f+")");
 				if (tracker.strokeColor != lsys_stroke) {
 					line.style("stroke", tracker.strokeColor);
 				}
-				tracker.matrix = m.translate(len, 0);
+				tracker.matrix = tracker.matrix.translate(len, 0);
 				if (lsys_debug_plot) console.log("move " + len);
 				lsys_move_count++;
-				lsys_move_length += (+len);
+				lsys_move_length += (+len); // Note: unary + is the fastest way to coerce len to Number type
 				if (lsys_move_limit_enabled && (lsys_move_count >= lsys_move_limit)) {
+					console.log("move limit reached at " + lsys_move_limit);
 					abort();
 					return;
 				}
 			}
 			else if (elem.type == 'l.op.scale') {
 				var f = elem.arg('factor').text || 1.0;
-				if (f == 1.0) continue; // for undefined factor or factor 1.0 we do nothing (Note: f is coerced to Number internally)
-				tracker.matrix = m.scale(f);
+				if (f == 1.0) continue; // for undefined factor or factor 1.0 we do nothing (Note: f is coerced to Number type internally)
+				tracker.matrix = tracker.matrix.scale(f);
 				if (lsys_debug_plot) console.log("scale " + f);
 			}
 			else if (elem.type == 'l.op.scalenu') {
 				var fx = elem.arg('factorX').text || 1.0;
 				var fy = elem.arg('factorY').text || 1.0;
 				if ((fx == 1.0) && (fy == 1.0)) continue; // do nothing if both factors are undefined or 1.0
-				tracker.matrix = m.scaleNonUniform(fx, fy);
+				tracker.matrix = tracker.matrix.scaleNonUniform(fx, fy);
 				if (lsys_debug_plot) console.log("scalenu " + fx + " " + fy);
 			}
 			else if (elem.type == 'l.op.rotate') {
 				var angle = elem.arg('angle').text || 0;
 				if (angle == 0) continue; // for undefined or zero angle we do nothing
-				tracker.matrix = m.rotate(angle);
+				tracker.matrix = tracker.matrix.rotate(angle);
 				if (lsys_debug_plot) console.log("turn " + angle);
 			}
 			else if (elem.type == 'l.op.color') {
