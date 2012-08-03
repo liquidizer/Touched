@@ -176,11 +176,11 @@ function plotLSys(plotter, tracker, iterator, rules, callback, abort) {
 				setTimeout(function() {
 					if (lsys_plot_id == current_plot_id) {
 						var timestamp = new Date().getTime();
-						if (timestamp-500 > lsys_last_fit) { // every 200 ms...
+						if (timestamp-300 > lsys_last_fit) { // every 200 ms...
 							plotter.fit(); // adapt svg viewBox to current plot size
 							lsys_last_fit = timestamp;
 						}
-						if (timestamp-2000 > lsys_last_fill) { // every second...
+						if (timestamp-1000 > lsys_last_fill) { // every second...
 							plotter.fill(); // adapt line stroke width to scale of current plot size
 							lsys_last_fill = timestamp;
 						}
