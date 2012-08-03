@@ -85,16 +85,18 @@ body {
     background: -moz-linear-gradient(top,  gold,  orange); 
 }
 
-.box.float {
-    position: absolute;
+.box.float, .box.sample {
     border: 1px solid maroon;
     border-radius: 10px;
     box-shadow: 3px 5px 3px 2px rgba(128, 0, 0, 0.5);
     padding: 3px;
     z-index: 50;
+    float:none;
 }
-
-.box.float:not(.selected) {
+.box.float {
+    position: absolute;
+}
+.box.float:not(.selected), .box.sample {
     background: moccasin;
 }
 

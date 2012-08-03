@@ -45,22 +45,20 @@ function toCode(node, commands) {
 			return this.argMap[name][0];
 		},
 		call : function(data, callback) {
-			//console.log(commands);
-			if(isValid && commands) {
-				var f = commands;
-				var type = this.type
-				type.split('.').forEach(function(sec) {
-					f = f && f[sec];
-				});
-				if(!f) {
-					this.error("Command is not defined: " + type);
-					throw "Undefined function: " + type;
-				}
-				//console.log("the fucntion is "+f);
-				return f(this, data, callback);
-			} else {
-				callback && callback(data);
+		    if (isValid && commands) {
+			var f= commands;
+			var type= this.type
+			type.split('.').forEach(function(sec) { 
+			    f=f && f[sec];
+			});
+			if (!f) {
+			    this.error("Command is not defined: "+type);
+			    callback(data);
 			}
+			return f(this, data, callback);
+		    } else {
+			callback && callback(data);
+		    }
 		},
 		fold : function(arg, data, callback) {
 			var list = this.args(arg);

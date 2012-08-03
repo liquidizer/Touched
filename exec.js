@@ -5,7 +5,6 @@ function execute(codeId, outputId) {
 		setTimeout(function() {
 			var code = toCode(document.getElementById(codeId), commands);
 			var output= d3.select(outputId ? '#'+outputId : document.documentElement);
-			var output = d3.select('#' + outputId);
 			if(code.toString() != codestring) {
 				output.selectAll('*').remove();
 				//VizData.json(eval('(' + code.toString() + ')')).toDOM(output.append('div'));
@@ -31,9 +30,10 @@ function executeFile(filename, output, callback) {
 
 // implement the xml grammar
 commands.xml= {
-    doc : function(code, output) {
+    doc : function(code, output, callback) {
 	output.selectAll('*').remove();
 	code.arg('root-node').call(output);
+	callback && callback();
     },
     node : {
 	elt : function(code, output) {
