@@ -63,11 +63,10 @@ body {
     position: static;
     display: table;
     float: left;
-    margin: 0px;
+    margin: 1px;
 }
 
 .box.selected {
-    border: 1px solid black;
     background: gold;
     background: linear-gradient(top, gold 0%, orange 100%);
     background: -webkit-gradient(linear, left top, left bottom, from(gold), to(orange));
@@ -128,6 +127,11 @@ body {
     margin: 0px 2px 1px 2px;
 }
 
+.box-text2 {
+    color: firebrick;
+    float: left;
+    margin: 0px 2px 1px 2px;
+}
 
 .box-else {
     clear: both;

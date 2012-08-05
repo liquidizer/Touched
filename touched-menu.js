@@ -2,7 +2,7 @@ var menu= [
        [ 'Def', check_insert_cmd, menu_insert_cmd('def') ],
 	   [ 'If-Else', check_insert_cmd, menu_insert_cmd('if_else') ],
        [ 'Loop', check_insert_cmd, menu_insert_cmd('loop') ],
-	   [ 'Theta', check_insert_cmd, menu_insert_cmd('theta') ],
+	   [ 'While', check_insert_cmd, menu_insert_cmd('while') ],
 	   [ 'Rename', check_istype('ident.new'), menu_edit('ident')],
        [ 'Vars', check_hasVars('>exp'), showVars],
        [ 'Number', check_menuType('exp.number'), [
@@ -314,11 +314,12 @@ function menu_insert_cmd(name) {
             div.append(bodyArea());
             return div;
         },
-        theta: function() {
+        while: function() {
             var div = elementArea();
-            div.attr('data-arg-types', 'exp.number');
-            div.append('<div class="box-text">Theta </div>');
+            div.attr('data-arg-types', 'exp.bool cmd');
+            div.append('<div class="box-text">While </div>');
             div.append(dropArea());
+            div.append(bodyArea());
             return div;
         }
     }
@@ -357,7 +358,7 @@ function menu_add_op(name, type, pattern, priority) {
                 if (type=='exp.list.list')
                     div.append(oldArgs);
             } else {
-                div.append('<div class="box-text">'+args[i]+'</div>');
+                div.append('<div class="box-text2">'+args[i]+'</div>');
             }
         }
         if (type=='exp.list.list')
