@@ -14,7 +14,7 @@ lsys_last_fill = 0;
 lsys_stroke = "black";
 lsys_stroke_width = 1;
 
-lsys_style = "#lsystem {width: 100%; height: 100%; margin: 5px;}";
+lsys_style = "#lsystem {width: 100%; height: 85%; margin: 5px;}";
 lsys_style += " #lsystem .decorated {stroke-linecap: round;}";
 
 commands.l= {
@@ -143,6 +143,36 @@ function Iterator(input, iteration) {
 	}
 }
 
+// returns deterministic value for 'number' types and random integer or float value for 'math.random' types
+function getNumber(code, useInteger) {
+	if (code.type=='number') {
+		return code.text;
+	} else if (code.type=='math.random') {
+		var min = +(code.arg('min').text || 0);
+		var max = +(code.arg('max').text || 1);
+		if (useInteger) {
+			return getRandomInteger(min, max);
+		} else {
+			return getRandomFloat(min, max);
+		}
+	}
+	return undefined;
+}
+
+// generates random integer in range [min, max], i.e. inclusive
+function getRandomInteger(min, max) {
+	var r = min + Math.floor(Math.random()*(max-min+1)); // +1 so max will actually be included in interval
+	//console.log("generating random number between " + min + " and " + max + ": " + r);
+	return r;
+}
+
+// generates random float in range [min, max), i.e. exclusive
+function getRandomFloat(min, max) {
+	var r = min + Math.random()*(max-min); // this is exclusive, so max will actually never be returned
+	//console.log("generating random float between " + min + " and " + max + ": " + r);
+	return r;
+}
+
 function plotLSys(plotter, tracker, iterator, rules, callback, abort) {
 	if (iterator.iteration<0) {
 		callback();
@@ -206,7 +236,7 @@ function plotLSys(plotter, tracker, iterator, rules, callback, abort) {
 			}
 			else if (elem.type == 'l.op.move') {
 				// actual drawing happens here
-				var len = elem.arg('length').text || 0;
+				var len = getNumber(elem.arg('length'), true) || 0;
 				if (len == 0) continue; // for undefined or zero length we do nothing
 				var line = plotter.root.append('line')
 				.attr('x2', len)
@@ -225,20 +255,20 @@ function plotLSys(plotter, tracker, iterator, rules, callback, abort) {
 				}
 			}
 			else if (elem.type == 'l.op.scale') {
-				var f = elem.arg('factor').text || 1.0;
+				var f = getNumber(elem.arg('factor'), false) || 1.0;
 				if (f == 1.0) continue; // for undefined factor or factor 1.0 we do nothing (Note: f is coerced to Number type internally)
 				tracker.matrix = tracker.matrix.scale(f);
 				if (lsys_debug_plot) console.log("scale " + f);
 			}
 			else if (elem.type == 'l.op.scalenu') {
-				var fx = elem.arg('factorX').text || 1.0;
-				var fy = elem.arg('factorY').text || 1.0;
+				var fx = getNumber(elem.arg('factorX'), false) || 1.0;
+				var fy = getNumber(elem.arg('factorY'), false) || 1.0;
 				if ((fx == 1.0) && (fy == 1.0)) continue; // do nothing if both factors are undefined or 1.0
 				tracker.matrix = tracker.matrix.scaleNonUniform(fx, fy);
 				if (lsys_debug_plot) console.log("scalenu " + fx + " " + fy);
 			}
 			else if (elem.type == 'l.op.rotate') {
-				var angle = elem.arg('angle').text || 0;
+				var angle = getNumber(elem.arg('angle'), true) || 0;
 				if (angle == 0) continue; // for undefined or zero angle we do nothing
 				tracker.matrix = tracker.matrix.rotate(angle);
 				if (lsys_debug_plot) console.log("turn " + angle);
