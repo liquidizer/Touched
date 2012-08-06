@@ -383,7 +383,7 @@ function msDown (event) {
         if (!readonly) hand= grabbed;
 
         // store object position. Will be updated when mouse moves.
-	blocked = { time : new Date().getTime() + 100 };
+	blocked = { time : new Date().getTime() + (evt.isTouch ? 100 : 10) };
 	startOffset = undefined;
 	startPos= [ evt.clientX, evt.clientY ];
         event.preventDefault();

@@ -1,22 +1,18 @@
 var commands={};
 var codestring = "";
 function execute(codeId, outputId) {
-	try {
-		setTimeout(function() {
-			var code = toCode(document.getElementById(codeId), commands);
-			var output= d3.select(outputId ? '#'+outputId : document.documentElement);
-			if(code.toString() != codestring) {
-				output.selectAll('*').remove();
-				//VizData.json(eval('(' + code.toString() + ')')).toDOM(output.append('div'));
-				code.args('start').forEach(function(cmd) {
-					cmd.call(output);
-				});
-				codestring = code.toString();
-			}
-		}, 500);
-	} catch(e) {
-		output.append('div').text(code.toString());
-	}
+	setTimeout(function() {
+		var code = toCode(document.getElementById(codeId), commands);
+		var output= d3.select(outputId ? '#'+outputId : document.documentElement);
+		if(code.toString() != codestring) {
+			output.selectAll('*').remove();
+			//VizData.json(eval('(' + code.toString() + ')')).toDOM(output.append('div'));
+			code.args('start').forEach(function(cmd) {
+				cmd.call(output);
+			});
+			codestring = code.toString();
+		}
+	}, 250);
 }
 
 function executeFile(filename, output, callback) {
