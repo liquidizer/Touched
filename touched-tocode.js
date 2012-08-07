@@ -22,7 +22,9 @@ function toCode(node, commands) {
 	// precompute code object attributes
 	var argMap = findArgs(node, {});
 	var isText = node.classList.contains('box-text');
-	var isValid = !node.classList.contains('error') && !node.classList.contains('float') && !node.classList.contains('arg');
+    var isValid= !node.classList.contains('error') &&
+	!node.classList.contains('float') &&
+	!node.classList.contains('arg');
 
 	// build code object
 	return {
@@ -44,54 +46,55 @@ function toCode(node, commands) {
 				argMap[name][0].error("Missing argument");
 			return this.argMap[name][0];
 		},
-		call : function(data, callback) {
-		    if (isValid && commands) {
-			var f= commands;
-			var type= this.type
-			type.split('.').forEach(function(sec) { 
-			    f=f && f[sec];
-			});
-			if (!f) {
-			    this.error("Command is not defined: "+type);
-			    callback(data);
+	call: function(data, callback) {
+	    var f= commands;
+	    var type= this.type
+	    type.split('.').forEach(function(sec) { 
+		f=f && f[sec];
+	    });
+	    if (f) {
+		return f(this, data, callback);
+	    } else {
+		this.error("Command is not defined: "+type);
+		callback && callback(data);
+	    }
+        },
+	fold : function(arg, data, callback) {
+	    var list= this.args(arg);
+	    var i=0;
+	    var f= function(data2) {
+		if (i < list.length)
+		    list[i++].call(data2, f);
+		else
+		    callback && callback(data2);
+	    };
+	    f(data);
+	},
+	error: function(message) {
+	    if (window.markError)
+		window.markError(this.id, message);
+	    else
+		console.warn(message);
+	},
+	toString : function (){
+		var result= '';
+		var keys = getKeys(this.argMap);
+		var myargs = this.argMap;
+		var count = 0;
+		keys.forEach(function(key) {
+			myargs[key].forEach(function(element){
+			if(element.isValid){
+			   if(!element.text){
+			   	result = result+ key+count+":"+'{'+"type:" + "\"" +element.type + "\""+ ","+'}'+",";
+			   	count++;
+			   }
+        	   else {
+     	   	    result = result+ key+count+":"+'{'+"type:" + "\"" +element.type + "\""+ "," + "text:" + "\""+element.text + "\""+ ","+'}'+",";
+     	   	    count++;
+     	       }
+		      if(element.toString())
+			     result = result + "args"+count+":"+element.toString()+',';
 			}
-			return f(this, data, callback);
-		    } else {
-			callback && callback(data);
-		    }
-		},
-		fold : function(arg, data, callback) {
-			var list = this.args(arg);
-			var i = 0;
-			var f = function(data2) {
-				if(i < list.length)
-					list[i++].call(data2, f);
-				else
-					callback(data2);
-			};
-			f(data);
-		},
-		error : function(message) {
-			markError(this.id, message);
-		},
-		toString : function() {
-			var result = '';
-			var keys = getKeys(this.argMap);
-			var myargs = this.argMap;
-			var count = 0;
-			keys.forEach(function(key) {
-				myargs[key].forEach(function(element) {
-					if(element.isValid) {
-						if(!element.text) {
-							result = result + key + count + ":" + '{' + "type:" + "\"" + element.type + "\"" + "," + '}' + ",";
-							count++;
-						} else {
-							result = result + key + count + ":" + '{' + "type:" + "\"" + element.type + "\"" + "," + "text:" + "\"" + element.text + "\"" + "," + '}' + ",";
-							count++;
-						}
-						if(element.toString())
-							result = result + "args" + count + ":" + element.toString() + ',';
-					}
 				});
 			});
 			if(result) {

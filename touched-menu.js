@@ -28,43 +28,50 @@ function initMenu(menuId) {
     }
 }
 
-// load a grammar file
-function loadGrammarFile(url) {
+// load the document grammar file
+function loadGrammarFile(url, callback) {
     loaded= {};
     grammarMenu={};
-    if (!loaded[url]) {
-        loaded[url] = true;
-        $.get(url, function(response) { initGrammar(response, url); });
-    }
+    initGrammar(url, function(menu) {
+	grammarMenu= menu;
+	updateMenu();
+	callback && callback();
+    })
 }
 
-// Interpret a loaded grammar definition
-function initGrammar(content, url) {
+// Loaded and interpret grammar definition definition file
+function initGrammar(url, callback) {
     var expand= function(code, item, arg) {
 	code.args(arg || 'content').forEach( function(cmd) {
 	    if (cmd.text) item.append(textArea(cmd.text));
 	    else cmd.call(item);
 	});
     }
-    var code= toCode($(content).find('.element:first')[0], {
+    var commands= {
 	touched : {
-	    grammar : function(code) {
+	    grammar : function(code, _, callback) {
 		var root= code.arg('root').text;
 		$('.arg[data-name=start]:first').attr('data-type',root);
-		code.args('item').forEach( function(cmd) { cmd.call(grammarMenu); });
+		code.fold('item', {}, callback);
 	    },
 	    item : {
-		menu : function(code, menu) {
+		require : function(code, menu, callback) {
+		    console.log('require');
+		    initGrammar(code.arg('src').text, callback);
+		},
+		menu : function(code, menu, callback) {
 		    var name= code.arg('name').text;
 		    var submenu= {};
 		    menu[name]= submenu;
-		    code.args('item').forEach( function(cmd) { cmd.call(submenu); });
-		    for (key in submenu) {
-			var subtype= submenu[key]._type;
-			submenu._type= type_unify(subtype, submenu._type || subtype);
-		    }
+		    code.fold('item', submenu, function(submenu) {
+			for (key in submenu) {
+			    var subtype= submenu[key]._type;
+			    submenu._type= type_unify(subtype, submenu._type || subtype);
+			}
+			callback(menu);
+		    });
 		},
-		element : function(code, menu) {
+		element : function(code, menu, callback) {
 		    var name= code.arg('name').text;
 		    var type= code.arg('type').text;
 		    menu[name]={
@@ -75,6 +82,7 @@ function initGrammar(content, url) {
 			    return item;
 			}
 		    }
+		    callback(menu);
     		}
 	    },
 	    "item-content" : {
@@ -95,8 +103,15 @@ function initGrammar(content, url) {
 		}
 	    }
 	}
-    }).call();
-    updateMenu();
+    };
+    if (!loaded[url]) {
+        loaded[url] = true;
+        $.get(url, function(content) { 
+	    toCode($(content).find('.element:first')[0], commands, callback).call({}, callback);
+	});
+    } else {
+	callback && callback();
+    }
 }
 
 // update the shown menu with respect to the current selection

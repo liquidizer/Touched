@@ -8,11 +8,14 @@ function init() {
 	var group= $("#tests li").filter(function() { return $(this).attr('g')==grammar; });
 	if (group.length==0) {
 	    group= $("<li g='"+grammar+"'/>");
-	    group.append("<a href='#' onclick='loadGrammar(\"../"+grammar+"\")'>load "+grammar+"</a></li>");
+	    group.append("<a href='#' onclick='loadGrammar(\"../"+grammar+
+			 "\")'>load "+grammar+"</a></li>");
 	    group.append('<ul/>');
 	    $("#tests").append(group);
 	}
-        group.find('ul').append("<li><input type='button' onclick='runTest(\""+name+"\")' value='run "+name+"' /></li>");
+        group.find('ul').append("<li><input type='button' onclick='runTest(\""+
+				name+"\",\"../"+grammar+
+				"\")' value='run "+name+"' /></li>");
     });
 
     // initialize the touched editor
@@ -45,15 +48,17 @@ function loadGrammar(grammar) {
     loadGrammarFile(grammar);
 }
 
-function runTest(name) {
+function runTest(name, grammar) {
     clear_clipboard();
-    select($('.arg.box:first'));
-    $('#testChoice').hide();
-    updateAll();
-    var data= $('tests test[name="'+name+'"]');
-    var testData = $(data).text();
-    var array = testData.split("\n").filter(function (x) { return x; });
-    stepThroughTest(array, 0);
+    loadGrammarFile(grammar, function() {
+	select($('.arg.box:first'));
+	$('#testChoice').hide();
+	updateAll();
+	var data= $('tests test[name="'+name+'"]');
+	var testData = $(data).text();
+	var array = testData.split("\n").filter(function (x) { return x; });
+	stepThroughTest(array, 0);
+    });
 }
 
 
