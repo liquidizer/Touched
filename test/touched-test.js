@@ -67,13 +67,11 @@ function stepThroughTest(array) {
 		e.ctrlKey = res.isCtrl;
 		e.shiftKey = res.isShift;
 		var input = $('#input');
-		//var inputvalue = $('#input').attr('value');
 		if(res.target == '#input') {
-			if(res.value !== undefined) {// new style
+			if(res.value !== undefined) {
 				//$('#input').attr('value', res.value);	
 				$('#input').val(res.value);		
-			} else {// old style
-				// TODO restore old code
+			} else {
 				var oldvalue = $('#input').val() || '';
 				if(res.keyCode == 8) {
 					$('#input').val(oldvalue.replace(/.$/, ''));
@@ -87,9 +85,7 @@ function stepThroughTest(array) {
 				}
 			}
 		}
-		//inputvalue = $('#input').attr('value');
 		$(res.target).trigger(e);
-		//inputvalue = $('#input').attr('value');
 		var stepNext = function() {
 			stepThroughTest(array);
 		};
