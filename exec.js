@@ -3,7 +3,7 @@ var codestring = "";
 function execute(codeId, outputId) {
 	setTimeout(function() {
 		var code = toCode(document.getElementById(codeId), commands);
-		var output= d3.select(outputId ? '#'+outputId : document.documentElement);
+		var output = d3.select(outputId ? '#'+outputId : document.documentElement);
 		if(code.toString() != codestring) {
 			output.selectAll('*').remove();
 			//VizData.json(eval('(' + code.toString() + ')')).toDOM(output.append('div'));
