@@ -298,23 +298,27 @@ function keyPress(evt) {
                 evt.preventDefault();
                 chosen[0].click();
             }           
-            else if (chosen.length > 1) {
-                var hassameChar = true;
+            else if (chosen.length > 1) {          
+                var resnum=100000;
                 for (var num=0; num < chosen.length-1; num++) {
-                    if (chosen[num].text().substring(0,6) == chosen[num+1].text().substring(0,6))
-                        hassameChar = hassameChar && true;             
-                    else hassameChar = false;
+                	var numsame = 0;
+                	var comp1 = chosen[num].text();
+                	var comp2 = chosen[num+1].text();
+                	while (comp1[numsame] && comp1[numsame] == comp2[numsame])
+                		numsame++;
+                   	resnum = Math.min(resnum, numsame);
                 }
-                if (hassameChar) {
-                    typetext= chosen[0].text().substring(0,6).toUpperCase();
+                if (resnum >= 2) {
+                    typetext= chosen[0].text().substring(0,resnum).toUpperCase();
                     for(var num=0; num < chosen.length; num++) {
-                        chosen[num].html('<span class="menuSelect">' + chosen[0].text().substring(0,6) + '</span>' + chosen[num].text().substring( typetext.length,chosen[num].text().length));   
+                        chosen[num].html('<span class="menuSelect">' + chosen[0].text().substring(0,resnum) + '</span>' + chosen[num].text().substring( typetext.length,chosen[num].text().length));   
                     }
                 }
             }
         }
         else if (evt.keyCode ==8) {
-	    typetext= '';
+        	evt.preventDefault();
+	        typetext= '';
             updateMenu();
         }
         else if (evt.keyCode == 46)
