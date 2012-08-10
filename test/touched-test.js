@@ -49,6 +49,7 @@ function loadGrammar(grammar) {
 }
 
 function runTest(name, grammar) {
+    document.activeElement.blur();
     clear_clipboard();
     loadGrammarFile(grammar, function() {
 	select($('.arg.box:first'));

@@ -56,7 +56,6 @@ function initGrammar(url, callback) {
 	    },
 	    item : {
 		require : function(code, menu, callback) {
-		    console.log('require');
 		    initGrammar(code.arg('src').text, callback);
 		},
 		menu : function(code, menu, callback) {
@@ -348,10 +347,9 @@ function clear_clipboard() {
 function menu_paste() {
     var selection= $('.selected');
     if (check_canPaste(selection)) {
-	var clipboard= localStorage.getItem('Touched-clipboard');
-        var clone= $(clipboard).clone();
-        insertBox(selection, clone);
-        select(clone);
+	var clipboard= $(localStorage.getItem('Touched-clipboard'));
+        insertBox(selection, clipboard);
+        select(clipboard);
         updateAll();
     }
 }
@@ -361,7 +359,8 @@ function menu_copy() {
     if (check_canCopy(selection)) {
 	var clipboard= undefined;
         if (!selection.hasClass('arg'))
-            clipboard= selection[0].outerHTML;
+            clipboard= selection[0].outerHTML || // ff bug
+	         selection.clone().wrap('<div/>').parent().html();
 	localStorage.setItem('Touched-clipboard', clipboard);
 	updateMenu();
     }

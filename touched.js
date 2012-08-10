@@ -172,7 +172,7 @@ function select(obj) {
 function unselectAll() {
     typetext ='';
     $('.selected').removeClass('selected');
-    document.getSelection().removeAllRanges()
+    window.getSelection().removeAllRanges()
 }
 
 // Move the selection along one of the following axes:
