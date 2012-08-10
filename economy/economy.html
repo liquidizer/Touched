@@ -1,0 +1,389 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+               "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+lang="en" xml:lang="en">
+<head>
+<title>Economic Modelling</title>
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
+<meta name="generator" content="Org-mode"/>
+<meta name="generated" content="2012-08-12 12:07:02 W. Europe Daylight Time"/>
+<meta name="author" content="Stefan Dirnstorfer"/>
+<meta name="description" content=""/>
+<meta name="keywords" content=""/>
+<style type="text/css">
+ <!--/*--><![CDATA[/*><!--*/
+  html { font-family: Times, serif; font-size: 12pt; }
+  .title  { text-align: center; }
+  .todo   { color: red; }
+  .done   { color: green; }
+  .tag    { background-color: #add8e6; font-weight:normal }
+  .target { }
+  .timestamp { color: #bebebe; }
+  .timestamp-kwd { color: #5f9ea0; }
+  .right  {margin-left:auto; margin-right:0px;  text-align:right;}
+  .left   {margin-left:0px;  margin-right:auto; text-align:left;}
+  .center {margin-left:auto; margin-right:auto; text-align:center;}
+  p.verse { margin-left: 3% }
+  pre {
+	border: 1pt solid #AEBDCC;
+	background-color: #F3F5F7;
+	padding: 5pt;
+	font-family: courier, monospace;
+        font-size: 90%;
+        overflow:auto;
+  }
+  table { border-collapse: collapse; }
+  td, th { vertical-align: top;  }
+  th.right  { text-align:center;  }
+  th.left   { text-align:center;   }
+  th.center { text-align:center; }
+  td.right  { text-align:right;  }
+  td.left   { text-align:left;   }
+  td.center { text-align:center; }
+  dt { font-weight: bold; }
+  div.figure { padding: 0.5em; }
+  div.figure p { text-align: center; }
+  textarea { overflow-x: auto; }
+  .linenr { font-size:smaller }
+  .code-highlighted {background-color:#ffff00;}
+  .org-info-js_info-navigation { border-style:none; }
+  #org-info-js_console-label { font-size:10px; font-weight:bold;
+                               white-space:nowrap; }
+  .org-info-js_search-highlight {background-color:#ffff00; color:#000000;
+                                 font-weight:bold; }
+  /*]]>*/-->
+</style>
+<link rel='stylesheet' href='orgstyle.css' type='text/css'/>
+<script type="text/javascript">
+<!--/*--><![CDATA[/*><!--*/
+ function CodeHighlightOn(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(null != target) {
+     elem.cacheClassElem = elem.className;
+     elem.cacheClassTarget = target.className;
+     target.className = "code-highlighted";
+     elem.className   = "code-highlighted";
+   }
+ }
+ function CodeHighlightOff(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(elem.cacheClassElem)
+     elem.className = elem.cacheClassElem;
+   if(elem.cacheClassTarget)
+     target.className = elem.cacheClassTarget;
+ }
+/*]]>*///-->
+</script>
+
+</head>
+<body>
+
+<div id="preamble">
+
+</div>
+
+<div id="content">
+<h1 class="title">Economic Modelling</h1>
+
+<p>This document introduces a simple online framework for the creation of
+economic models and outlines the process of economic modelling itself.
+</p>
+<p>
+The online editable version of the final model is here: <a href="./model3.economy?play">./model3.economy?play</a>
+</p>
+
+<div id="table-of-contents">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents">
+<ul>
+<li><a href="#sec-1">1 What is Economic Modelling? </a></li>
+<li><a href="#sec-2">2 What is the Meta Model? </a>
+<ul>
+<li><a href="#sec-2-1">2.1 A Simple Meta Model in UML </a></li>
+<li><a href="#sec-2-2">2.2 Building Blocks of the Simple Meta Model </a></li>
+</ul>
+</li>
+<li><a href="#sec-3">3 Creating Economic Models </a>
+<ul>
+<li><a href="#sec-3-1">3.1 Initial Model Setup </a></li>
+<li><a href="#sec-3-2">3.2 Constant Croduction </a></li>
+<li><a href="#sec-3-3">3.3 The Perishable Good </a></li>
+<li><a href="#sec-3-4">3.4 Optimizing the Consumption Rate </a></li>
+</ul>
+</li>
+<li><a href="#sec-4">4 Conclusion </a></li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-1" class="outline-2">
+<h2 id="sec-1"><span class="section-number-2">1</span> What is Economic Modelling? </h2>
+<div class="outline-text-2" id="text-1">
+
+
+<p>
+Economic modelling as it is understood in this document is defined by the
+presence of three separate roles, which interact to gain a common
+understanding for the prevailing economic situation.
+</p>
+
+<div class="figure">
+<p><img src="./img/usecase.png"  alt="./img/usecase.png" /></p>
+<p>Three roles involved in economic modelling</p>
+</div>
+
+<ul>
+<li>The <b>Politician</b> is interested in results and wants to prededict the economic impact of political measures.
+</li>
+<li>The <b>Economist</b> needs a standardized environment where theories and data can be shared.
+</li>
+<li>The <b>Developer</b> wants to simulate economic models and visualize results.
+</li>
+</ul>
+
+
+</div>
+
+</div>
+
+<div id="outline-container-2" class="outline-2">
+<h2 id="sec-2"><span class="section-number-2">2</span> What is the Meta Model? </h2>
+<div class="outline-text-2" id="text-2">
+
+
+<p>
+The meta model describes the building blocks by which the economist
+can enter models and structured data. It is the vocabulary that the
+developer or her simulation software understands.
+</p>
+
+</div>
+
+<div id="outline-container-2-1" class="outline-3">
+<h3 id="sec-2-1"><span class="section-number-3">2.1</span> A Simple Meta Model in UML </h3>
+<div class="outline-text-3" id="text-2-1">
+
+
+<p>
+The following UML diagram represents the meta model as UML class diagram. <a href="https://www.lucidchart.com/documents/edit?#435a-7b20-5024f1db-9f6d-6b0b0a7cb90a?branch=997f8d93-f55f-43dc-803a-c3fbf7e57e30">(Click here to edit in LucidChart)</a>
+</p>
+
+<div class="figure">
+<p><img src="./img/classes.png"  alt="./img/classes.png" /></p>
+<p>Classes of a simple meta model.</p>
+</div>
+
+<p>
+The semantics of these blocks should be defined as follows:
+</p><ul>
+<li><b>Model:</b> an economic theory or hypothesis.
+</li>
+<li><b>Actor:</b> an actor in that model.
+</li>
+<li><b>Action:</b> an action that a actor performs per time period.
+</li>
+<li><b>Produce:</b> the action to produce one unite of a resource.
+</li>
+<li><b>Consume:</b> the action to consume one unite of a resource.
+</li>
+<li><b>Decay:</b> exponential decay of a perishable resource.
+</li>
+<li><b>NoisyScale:</b> random variation of involved resource units.
+</li>
+</ul>
+
+
+</div>
+
+</div>
+
+<div id="outline-container-2-2" class="outline-3">
+<h3 id="sec-2-2"><span class="section-number-3">2.2</span> Building Blocks of the Simple Meta Model </h3>
+<div class="outline-text-3" id="text-2-2">
+
+
+<p>
+Essentially, the meta model defines blocks, by which an economic model, i.e. assumptions about the economic world, can be created. The above meta model infers the basic primitives below. It also defines, how these blocks can be inserted into each other.
+</p>
+
+<div class="figure">
+<p><img src="./img/blocks.png"  alt="./img/blocks.png" /></p>
+<p>Basic blocks which can be combined to create an economic model.</p>
+</div>
+
+</div>
+</div>
+
+</div>
+
+<div id="outline-container-3" class="outline-2">
+<h2 id="sec-3"><span class="section-number-2">3</span> Creating Economic Models </h2>
+<div class="outline-text-2" id="text-3">
+
+
+<p>
+Using the building blocks defined above a range of simple economic
+models and theories can be defined. The previous meta model defined
+the scope of possible models, while the economic models themselfs
+define the actual assumption about the real economy.
+</p>
+
+</div>
+
+<div id="outline-container-3-1" class="outline-3">
+<h3 id="sec-3-1"><span class="section-number-3">3.1</span> Initial Model Setup </h3>
+<div class="outline-text-3" id="text-3-1">
+
+
+<p>
+The model creation is done by combining above primitive building
+blocks into a larger model. This document uses an online editor for
+model creation, that is found here: <a href="./empty.economy?play">./empty.economy?play</a>. (supported by Firefox/Chrome/iPad).
+</p>
+<p>
+The initial screen is divided into three sections:
+</p><ul>
+<li>The menu on the top.
+</li>
+<li>The code section on the left.
+</li>
+<li>The execution view on the right
+</li>
+</ul>
+
+
+<p>
+<img src="./img/touched1.png"  alt="./img/touched1.png" />
+</p>
+<p>
+The root element is inserted by pressing "Model" in the menu, or "M"
+on the keyboard. Then, the selection jumps to the model name. Pressing
+"Text" in menu, or the "T"-key opens a text input field:
+</p>
+<p>
+<img src="./img/touched2.png"  alt="./img/touched2.png" />
+</p>
+<p>
+Following the same sequence we can add an actor with the name "producer":
+</p>
+<p>
+<img src="./img/touched3.png"  alt="./img/touched3.png" />
+</p>
+</div>
+
+</div>
+
+<div id="outline-container-3-2" class="outline-3">
+<h3 id="sec-3-2"><span class="section-number-3">3.2</span> Constant Croduction </h3>
+<div class="outline-text-3" id="text-3-2">
+
+
+<p>
+The first complete model consists of an actor that produces one unit
+of a resource called "apple" per period. This model can be viewed and edited here: <a href="./model1.economy?play">./model1.economy?play</a>
+</p>
+<p>
+Unsurprisingly, the number of apples increases linearly with time.
+</p>
+<p>
+<img src="./img/touched4.png"  alt="./img/touched4.png" />
+</p>
+</div>
+
+</div>
+
+<div id="outline-container-3-3" class="outline-3">
+<h3 id="sec-3-3"><span class="section-number-3">3.3</span> The Perishable Good </h3>
+<div class="outline-text-3" id="text-3-3">
+
+
+<p>
+The next model state adds an actor called "erosion" that introduces
+decay to the resources "apple". The model state can be viewed and
+edited here: <a href="./model2.economy?play">./model2.economy?play</a>
+</p>
+<p>
+Now, that the resource can not be stored indefinitly, the amount of available goods saturates.
+</p>
+<p>
+<img src="./img/touched5.png"  alt="./img/touched5.png" />
+</p>
+</div>
+
+</div>
+
+<div id="outline-container-3-4" class="outline-3">
+<h3 id="sec-3-4"><span class="section-number-3">3.4</span> Optimizing the Consumption Rate </h3>
+<div class="outline-text-3" id="text-3-4">
+
+
+<p>
+The final state of this example model introduces a third actor named
+"consumer", who consumes a fixed amount of resources per
+time. Additionally, the resource production is made random with an
+average of 8 per time unit. The state of this final model can be
+viewed and edited here: <a href="./model3.economy?play">./model3.economy?play</a>
+</p>
+<p>
+With a consumption rate of 6, the available number of resources is
+positive most of the time, but goes to zero in some of the stochastic paths.
+</p>
+<p>
+<img src="./img/touched6.png"  alt="./img/touched6.png" />
+</p>
+<p>
+A decreased consumtion rate of 4 leads to a higher average amount of
+available resource and less risk of short fall. The consumtion rate
+can easily be modified with the "+1" and "-1" entries in the menu.
+</p>
+<p>
+<img src="./img/touched7.png"  alt="./img/touched7.png" />
+</p>
+</div>
+</div>
+
+</div>
+
+<div id="outline-container-4" class="outline-2">
+<h2 id="sec-4"><span class="section-number-2">4</span> Conclusion </h2>
+<div class="outline-text-2" id="text-4">
+
+
+<p>
+In a primitive economic model has been shown, that more efficient
+exploitation of available resources can increase the risk of a crash
+or a short fall.
+</p>
+<p>
+This result has been derived in a three step process:
+</p><ul>
+<li>Defining the meta model, i.e. the vocabulary by which models can be built
+</li>
+<li>Building a range of toy models that describe different aspects of the economy
+</li>
+<li>Deriving a feasible economic explanation from the results
+</li>
+</ul>
+
+
+<p>
+Obviously, it all but certain, that this approach scales up to more
+realistic economic models. 
+</p>
+
+</div>
+</div>
+</div>
+
+<div id="postamble">
+<p class="date">Date: 2012-08-12 12:07:02 W. Europe Daylight Time</p>
+<p class="author">Author: Stefan Dirnstorfer</p>
+<p class="creator">Org version 7.7 with Emacs version 24</p>
+<a href="http://validator.w3.org/check?uri=referer">Validate XHTML 1.0</a>
+
+</div>
+</body>
+</html>
