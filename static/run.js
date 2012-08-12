@@ -56,7 +56,7 @@ http.createServer(function(req, res) {
     else if (req.url.match('^/test/?$')) {
 	res.writeHead(303, { 'location': '/test/index.html' });
 	res.end();
-    } else if (req.url.match(/[?&](save|edit|view|run)(&|$)/)) {
+    } else if (req.url.match(/[?&](save|edit|view|run|play)(&|$)/)) {
 	// check security code for edit and save actions
 	var mode= req.url.match(/[?&]([^&]*)(&|$)/)[1];
 
@@ -66,10 +66,12 @@ http.createServer(function(req, res) {
 	    else
 		denyAccess(res, 'Invalid security code '+code);
 	}
-	else if (mode=='view' || (validCode && mode=='edit')) {
-	    showTouched(res, filename, 'static/touched.html', validCode);
+	else if (mode=='play') {
+	    showTouched(res, filename, 'static/touched.html', '_play_');
+	} else if (mode=='view' || (validCode && mode=='edit')) {
+	    showTouched(res, filename, 'static/touched.html', code);
 	} else if (mode=='run') {
-	    showTouched(res, filename, 'static/execute.html', false);
+	    showTouched(res, filename, 'static/execute.html', '');
 	} else {
 	    if (waiting) waiting(false);
 	    console.log('Grant access to file : '+filename+' [y/n]?');	 
@@ -107,7 +109,7 @@ function serveFile(res, filename) {
     });
 }
 
-function showTouched(res, filename, template, editable) {
+function showTouched(res, filename, template, code) {
     var g = 'grammar/' + filename.match('[^.]*$')[0] + '.g';
     fs.stat(g, function(err) {
         if (err) {
@@ -124,7 +126,7 @@ function showTouched(res, filename, template, editable) {
 			content= content.toString().replace(/^<touched[^>]*>|<\/touched>$/g,'');
                     data = data.toString().replace(/<!--touched:content-->/, content || '');
                     data = data.toString().replace(/<touched:file>/, filename);
-                    data = data.toString().replace(/<touched:code>/, editable ? code : '');
+                    data = data.toString().replace(/<touched:code>/, code);
                     data = data.toString().replace(/<touched:g>/, '/' + g);
                     res.end(data);
 		});
