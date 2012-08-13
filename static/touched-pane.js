@@ -1,5 +1,3 @@
-var code= '<touched:code>';
-var file= '<touched:file>';
 var viewsplit= undefined;
 $(function() {
     initTouched('canvas','menu','<touched:g>', $('#code > div')[0], !!code);
@@ -14,6 +12,7 @@ $(function() {
 	$('#EDIT').click(function() { window.location= '/'+file+'?edit'; });
     }
     setViewSplit($('body').width()/2);
+    runContent();
 });
 function viewUp(evt) {
     $('body').unbind('mousemove', viewMove);

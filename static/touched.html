@@ -21,6 +21,10 @@
 
     <!-- UI scripts -->
     <script type="text/javascript" src="/static/touched-pane.js"></script>
+    <script type="text/javascript">
+      var code= '<touched:code>';
+      var file= '<touched:file>';
+    </script>
     <style>
       #execution {
       position: absolute;
@@ -50,7 +54,7 @@
       <div style="height:50px; clear:both"/>
       <div id="execution">
 	<div id="execControl">
-	  <input type='checkbox' id="autoupdate"/>
+	  <input type='checkbox' id="autoupdate" checked="checked"/>
 	  <span id="handle">Run</span>
 	</div>
 	<div id="dataview"/>

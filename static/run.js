@@ -68,10 +68,12 @@ http.createServer(function(req, res) {
 	}
 	else if (mode=='play') {
 	    showTouched(res, filename, 'static/touched.html', '_play_');
-	} else if (mode=='view' || (validCode && mode=='edit')) {
-	    showTouched(res, filename, 'static/touched.html', code);
+	} else if (mode=='view') {
+	    showTouched(res, filename, 'static/touched.html', '');
 	} else if (mode=='run') {
 	    showTouched(res, filename, 'static/execute.html', '');
+	} else if (mode=='edit' && validCode) {
+	    showTouched(res, filename, 'static/touched.html', code);
 	} else {
 	    if (waiting) waiting(false);
 	    console.log('Grant access to file : '+filename+' [y/n]?');	 
