@@ -18,17 +18,21 @@
     <script type="text/javascript" src="/exec.l.js"></script>
     <script type="text/javascript" src="/exec.viz.js"></script>
     <script type="text/javascript" src="/exec.filter.js"></script>
+
+    <!-- UI scripts -->
+    <script type="text/javascript" src="/static/touched-pane.js"></script>
     <style>
       #execution {
       position: absolute;
       top: 60px;
-      left: 500px;
-      width: 45%;
       background: white;
       }
       #execControl {
       border: 1px solid black;
       border-radius: 5px;
+      }
+      #dataview {
+      margin: 10px;
       }
       #dataview table,td {
       border-collapse: collapse;
@@ -36,59 +40,6 @@
       }
     </style>
   </head>
-  <script language="javascript">
-      var code= '<touched:code>';
-      var file= '<touched:file>';
-      var viewsplit= undefined;
-      $(function() {
-        initTouched('canvas','menu','<touched:g>', $('#code > div')[0], !!code);
-        $('#canvas').bind('update', function() { saveContent(); runContent(); });
-        $('#autoupdate').bind('change', runContent);
-	$('#execControl').bind('mousedown', viewDown);
-	if (!code) {
-	    $('#execControl').append('<input type="button" id="EDIT" value="EDIT"/>');
-	    $('#EDIT').click(function() { window.location= '/'+file+'?edit'; });
-	}
-      });
-      function viewDown(evt) {
-        var viewsplit= $('#execution').offset().left - evt.clientX;
-	evt.preventDefault();
-	var viewUp= function(evt) {
-	  $('body').unbind('mousemove', viewMove);
-	  $('body').unbind('mouseup', viewUp);
-	}
-	var viewMove= function(evt) {
-	  var left=viewsplit+evt.clientX;
-	  $('#execution').offset({ left : viewsplit+evt.clientX });
-	}
-        $('body').bind('mousemove', viewMove);
-        $('body').bind('mouseup', viewUp);
-      }
-
-      function saveContent() {
-	  if (code!='_play_') {
-            var content = $('#canvas').html();
-            var http = new XMLHttpRequest();
-            http.onreadystatechange = function() { 
-               if (http.readyState==4 && http.status!=200) 
-                 $('#menu').html('<b>Error saving document</b>');
-            };
-            http.open("POST", '/'+file+'?save&code='+code, true);
-            http.send(content);
-	  }
-      }
-      function runContent() {
-	  clearErrors();
-          if ($('#autoupdate').attr('checked')) {     	        	    
-             $('#dataview').show();
-	         execute('canvas', 'dataview');
-	  } else {
-	     //$('#dataview').hide();
-	     $('#dataview').empty(); 
-	     codestring = "";
-	  }
-      }
-  </script>
   <body>
     <div id="menubar">
       <ul id="menu"/>
