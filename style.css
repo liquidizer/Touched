@@ -136,12 +136,13 @@ body {
 }
 
 .box-text {
+    color: coral;
     float: left;
     margin: 0px 2px 0px 2px;
 }
 
 .box.box-text {
-    font-weight: bold;
+    color: black;
 }
 
 .comment.box-text {
