@@ -2,7 +2,7 @@
 commands.viz = {
 	script : function(code, output) {
 		output.selectAll('*').remove();
-		code.args('command').each(function(i, cmd) {
+		code.args('command').forEach(function(cmd) {
 			var root = output.append('div');
 			cmd.call(root, function(data) {
 				data.toDOM(root);
