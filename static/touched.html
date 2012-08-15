@@ -24,6 +24,7 @@
     <script type="text/javascript">
       var code= '<touched:code>';
       var file= '<touched:file>';
+      var grammar= '<touched:g>';
     </script>
     <style>
       #execution {
@@ -48,18 +49,24 @@
     <div id="menubar">
       <ul id="menu"/>
     </div>
-    <div style="height:50px">Touched Editor</div>
     <div>
       <div id="canvas"></div>
-      <div style="height:50px; clear:both"/>
       <div id="execution">
 	<div id="execControl">
-	  <input type='checkbox' id="autoupdate" checked="checked"/>
-	  <span id="handle">Run</span>
+	  <span onclick="$('#execsetting').toggle()">Run</span>
+	  <div id="execsetting" style="display:none">
+	    Options:
+	    <p>
+	      <input type='checkbox' id="autoupdate" checked="checked"/> Show execution
+	    </p>
+	    <p>
+	      <input type='checkbox' id="codeleft" checked="checked"/> Place code left
+	    </p>
+	  </div>
 	</div>
 	<div id="dataview"/>
       </div>
     </div>
+    <div id="code" style="display:none"><!--touched:content--></div>
   </body>
-  <div id="code" style="display:none"><!--touched:content--></div>
 </html>

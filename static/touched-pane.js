@@ -1,8 +1,11 @@
 var viewsplit= undefined;
+var codeleft= true;
+var split= 300;
 $(function() {
-    initTouched('canvas','menu','<touched:g>', $('#code > div')[0], !!code);
+    initTouched('canvas','menu',grammar, $('#code > div')[0], !!code);
     $('#canvas').bind('update', function() { saveContent(); runContent(); });
     $('#autoupdate').bind('change', runContent);
+    $('#codeleft').bind('change', switchView);
     $('#execControl').bind('mousedown', viewDown);
     $('#execControl').attr('ontouchstart', 'viewDown(event)');
     $('#execControl').attr('ontouchmove', 'viewMove(event)');
@@ -25,15 +28,25 @@ function viewMove(evt) {
 }
 function viewDown(evt) {
     evt= translateTouch(evt);
-    viewsplit= $('#execution').offset().left - evt.clientX;
+    viewsplit= split - evt.clientX;
     evt.preventDefault();
     $('body').bind('mousemove', viewMove);
     $('body').bind('mouseup', viewUp);
 }
 
-function setViewSplit(left) {
-    $('#execution').offset({ left : left });
-    $('#execution').width($('body').width()-left);
+function setViewSplit(x) {
+    split= x;
+    var targets= codeleft ? ['#canvas','#execution'] : ['#execution','#canvas'];
+    $(targets[0]).offset({ left : 5 });
+    $(targets[0]).width(x - 5);
+    $(targets[1]).offset({ left : x+5 });
+    $(targets[1]).width($('body').width()-x-20);
+    $('#execsetting').hide();
+}
+
+function switchView() {
+    codeleft= $('#codeleft').attr('checked');
+    setViewSplit(split);
 }
 
 function saveContent() {
@@ -49,13 +62,13 @@ function saveContent() {
     }
 }
 function runContent() {
+    $('#execsetting').hide();
     clearErrors();
     if ($('#autoupdate').attr('checked')) {     	        	    
         $('#dataview').show();
 	execute('canvas', 'dataview');
     } else {
-	//$('#dataview').hide();
-	$('#dataview').empty(); 
+	$('#dataview').empty();
 	codestring = "";
     }
 }

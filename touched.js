@@ -76,6 +76,7 @@ function updateAll(notrigger) {
     updateTypes(canvas);
     updateMenu();
     typetext='';
+    canvas.height(canvas.children().height()+200);
     if (!readonly && !notrigger)
 	setTimeout( function() { canvas.trigger('update'); }, 1);
 }
