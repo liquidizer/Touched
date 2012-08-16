@@ -24,20 +24,23 @@ function initTouched(canvasId, menuId, grammar, curDocument, editable) {
     initMenu(menuId);
     if (grammar) loadGrammarFile(grammar);
 
+    activateEvents();
+	
     if (curDocument) {
 	canvas.append($(curDocument));
     } else {
-		if (canvas.children().length==0) {
-		    canvas.append(dropArea('none','start'));
-		    select(canvas.find('.arg'));
-			}
+	if (canvas.children().length==0) {
+		canvas.append(dropArea('none','start'));
+		select(canvas.find('.arg'));
+	}
     }
-    activateEvents();
     updateAll(true);
 }
 
 function exitTouched() {
     removeEvents(false);
+    canvas.children().remove();
+    canvas.empty();
 }
 
 function pauseTouched() {
@@ -49,6 +52,8 @@ function resumeTouched() {
 }
 
 function activateEvents() {
+	if(canvas===undefined) return;
+
     canvas.mousemove(msMove);
     canvas.mouseup(msUp);
     canvas.mousedown(msDown);
@@ -58,10 +63,13 @@ function activateEvents() {
     canvas.attr('ontouchmove','msMove(event)');
     canvas.attr('ontouchend','msUp(event)');
     canvas.attr('ontouchstart','msDown(event)');
-    $('html').keydown(keyPress);
+    
+	$('html').bind('keydown',keyPress);
 }
 
 function removeEvents() {
+	if(canvas===undefined) return;
+
     canvas.unbind('mousemove');
     canvas.unbind('mouseup');
     canvas.unbind('mousedown');
