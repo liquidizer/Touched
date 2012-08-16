@@ -50,3 +50,86 @@ commands.xml= {
     }
 }
 
+function getNum(code, output, callback) {
+	if (code.type == 'number')
+		callback(parseFloat(code.text));
+	else
+		setTimeout(function() { code.call(output, callback); }, 10);
+}
+
+function foldLR(code, output, callback){
+	getNum(code.arg('left'), output, function (result1) {
+		getNum(code.arg('right'),output, function(result2) {	
+			//output.append('p').text('res= ' + result1+","+result2);
+			callback(result1, result2);				    
+		});				
+	 });
+}
+
+commands.mathui = {
+		calculate : function(code, output){
+		code.arg('formula').call(output, function (result) {
+			output.append('p').text(result);
+		});
+	}
+}
+
+commands.math = {
+	number : {
+		plus : function(code, output, callback) {
+			foldLR(code, output, function(a,b) { callback(a+b); });
+		},
+		times : function(code, output, callback) {
+	        foldLR(code, output, function(a,b) { callback(a*b); });
+		},
+		minus : function(code, output, callback) {
+            foldLR(code, output, function(a,b) { callback(a-b); });
+		},
+		divide : function(code, output, callback) {
+            foldLR(code, output, function(a,b) { callback(a/b); });
+		},
+		min : function(code, output, callback){
+            foldLR(code, output, function(a,b) { callback(Math.min(a,b)); });
+		},
+	    max : function(code, output, callback){
+	    	foldLR(code, output, function(a,b) { callback(Math.max(a,b)); });
+		},
+		abs : function (code, output, callback){
+	        getNum(code.arg('argument'), output, function(result){
+	        	callback(Math.abs(result));
+	        });
+		},
+		exp : function(code, output, callback){
+	        getNum(code.arg('argument'), output, function(result){
+	        	callback(Math.exp(result));
+	        });
+		},
+		log : function(code, output, callback){
+	        getNum(code.arg('argument'), output, function(result){
+	        	callback(Math.log(result));
+	        });
+		},
+		sqrt : function(code, output, callback){
+	        getNum(code.arg('argument'), output, function(result){
+	        	callback(Math.sqrt(result));
+	        });
+		},
+		pow : function(code, output, callback){
+	        getNum(code.arg('basis'), output, function(result1){
+	        	getNum(code.arg('exponent'), output, function(result2){              
+	                callback(Math.pow(result1, result2));	        	
+	        });
+	        });
+		},
+		sin : function(code, output, callback){
+	        getNum(code.arg('argument'), output, function(result){	        	
+	        	callback(Math.sin(result));
+	        });
+		},
+		cos : function(code, output, callback){
+	        getNum(code.arg('argument'), output, function(result){	        	
+	        	callback(Math.cos(result));
+	        });
+		}
+	},
+}
