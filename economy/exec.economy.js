@@ -66,6 +66,7 @@ commands.economy= {
 }
 
 function plotEconomy(data, output, callback) {
+    output.selectAll('*').remove();
     for (key in data) {
 	output.append('h1').text('Booked amount: '+key);
 	plotAmount(data[key], output);
@@ -74,6 +75,7 @@ function plotEconomy(data, output, callback) {
 }
 
 function plotAmount(data, output) {
+    var color = d3.scale.category20();
     var x =  d3.scale.linear()
 	.domain([d3.min(d3.min(data), function(row) {return row[0];}), 
 		 d3.max(d3.max(data), function(row) {return row[0];})])
@@ -119,5 +121,7 @@ function plotAmount(data, output) {
 	.style('fill','none')
         .style('stroke', 'black')
 	.style('stroke-width', '1px')
-	.attr("d", line);
+	.attr("d", line)
+	.style("stroke",  function(d, i) {return color(i);}); 
+
 } 
