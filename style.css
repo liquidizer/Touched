@@ -139,7 +139,7 @@ body {
 }
 
 .box-text {
-    color: coral;
+    color: crimson;
     float: left;
     margin: 0px 2px 0px 2px;
 }
@@ -150,15 +150,22 @@ body {
 
 .comment.box-text {
     margin: 8px 0 2px 2px;
-    color: darkgreen;
+    font-style: italic;
+    color: black;
     float: none;
 }
 
 .collapsed .comment.box-text {
+    margin: 8px 0 8px 0;
     padding: 3px;
-    color: white;
-    background-color: darkgreen;
+    font-style: italic;
+    color: black;
+    background-color: lightskyblue;
     border-radius: 5px;
+}
+
+.collapsed :not(.comment) {
+    display: none;
 }
 
 .keyword.box-text {
@@ -169,10 +176,6 @@ body {
 .box-body > .arg {
     clear: both;
     margin: 1px 1px 0px 20px;
-}
-
-.collapsed :not(.comment) {
-    display: none;
 }
 
 .axis path, .axis line {
