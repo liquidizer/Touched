@@ -99,7 +99,7 @@ body {
     position: absolute;
 }
 .box.float:not(.selected), .box.sample {
-    background: moccasin;
+    background: oldlace;
 }
 
 .box.float.dragged {
