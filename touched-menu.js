@@ -35,6 +35,7 @@ function loadGrammarFile(url, callback) {
     initGrammar(url, function(menu) {
 	grammarMenu= menu;
 	updateMenu();
+	$('.arg[data-name=start]:first').attr('data-type',menu._root);
 	callback && callback();
     })
 }
@@ -50,13 +51,22 @@ function initGrammar(url, callback) {
     var commands= {
 	touched : {
 	    grammar : function(code, _, callback) {
-		var root= code.arg('root').text;
-		$('.arg[data-name=start]:first').attr('data-type',root);
-		code.fold('item', {}, callback);
+		code.fold('item', {}, function(menu) {
+		    menu._root= code.arg('root').text;
+		    callback(menu);
+		});
 	    },
 	    item : {
 		require : function(code, menu, callback) {
-		    initGrammar(code.arg('src').text, callback);
+		    var src= code.arg('src').text;
+		    if (!src.match(/^\/|\/\//)) {
+			src= url.replace(/[^\/]*$/,'')+src;
+		    }
+		    initGrammar(src, function(reqmenu) {
+			for (key in reqmenu)
+			    menu[key]= reqmenu[key];
+			callback(menu);
+		    });
 		},
 		menu : function(code, menu, callback) {
 		    var name= code.arg('name').text;
@@ -65,7 +75,9 @@ function initGrammar(url, callback) {
 		    code.fold('item', submenu, function(submenu) {
 			for (key in submenu) {
 			    var subtype= submenu[key]._type;
-			    submenu._type= type_unify(subtype, submenu._type || subtype);
+			    if (submenu._type===undefined) submenu._type=subtype;
+			    if (subtype)
+				submenu._type= type_unify(subtype, submenu._type);
 			}
 			callback(menu);
 		    });
@@ -73,6 +85,8 @@ function initGrammar(url, callback) {
 		element : function(code, menu, callback) {
 		    var name= code.arg('name').text;
 		    var type= code.arg('type').text;
+		    if (menu[name])
+			throw ("Duplicate element "+type);
 		    menu[name]={
     			_type: type,
 			expand: function() { 
@@ -171,6 +185,7 @@ function menuEntry(type, name, submenu) {
 	    else {
 		li.parent().find('ul').remove();
 		var ul= $('<ul class="popup"/>');
+		ul.css('z-index', 10);
 		li.append(ul);
 		fillMenu(type, submenu, ul);
 	    }

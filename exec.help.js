@@ -1,9 +1,6 @@
 commands.help = {
     page : function(code, output, callback) {
-	samples=output;
-	executeFile('/help.xml', output, function() {
-	    code.fold('content', output.select('#help'), function() {});
-	});
+	code.fold('content', output, function() {});
     },
     entry : {
 	element : function(code, output, callback) {
@@ -43,6 +40,12 @@ commands.touched = {
 	code.fold('item', output, callback);
     },
     item : {
+	require : function(code, output, callback) {
+	    output.append('a')
+	    .attr('href', code.arg('src').text+'?run')
+	    .text('Open required grammar');
+	    callback(output);
+	},
 	element : function(code, output, callback) {
 	    output.append('h1').text(code.arg('name').text);
 	    var elt= output.append('div').attr('class', 'box element sample');

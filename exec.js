@@ -1,18 +1,20 @@
 var commands={};
 var codestring = "";
 function execute(codeId, outputId) {
+    var code = toCode(document.getElementById(codeId), commands);
+    var output = d3.select(outputId ? '#'+outputId : document.documentElement);
+    var mustRecalc= code.toString() != codestring;
+    if(mustRecalc) {
 	setTimeout(function() {
-		var code = toCode(document.getElementById(codeId), commands);
-		var output = d3.select(outputId ? '#'+outputId : document.documentElement);
-		if(code.toString() != codestring) {
 			output.selectAll('*').remove();
 			//VizData.json(eval('(' + code.toString() + ')')).toDOM(output.append('div'));
 			code.args('start').forEach(function(cmd) {
 				cmd.call(output);
 			});
 			codestring = code.toString();
-		}
 	}, 250);
+    }
+    return mustRecalc;
 }
 
 function executeFile(filename, output, callback) {

@@ -2,7 +2,7 @@ var viewsplit= undefined;
 var codeleft= true;
 var split= 300;
 $(function() {
-    initTouched('canvas','menu',grammar, $('#code > div')[0], !!code);
+    initTouched('canvas','menu',grammar, $('#code > div'), !!code);
     $('#canvas').bind('update', function() { saveContent(); runContent(); });
     $('#autoupdate').bind('change', runContent);
     $('#codeleft').bind('change', switchView);
@@ -63,12 +63,13 @@ function saveContent() {
 }
 function runContent() {
     $('#execsetting').hide();
-    clearErrors();
     if ($('#autoupdate').attr('checked')) {     	        	    
         $('#dataview').show();
-	execute('canvas', 'dataview');
+	var recalc= execute('canvas', 'dataview');
+	if (recalc) clearErrors();
     } else {
 	$('#dataview').empty();
 	codestring = "";
+	clearErrors();
     }
 }
