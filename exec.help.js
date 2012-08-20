@@ -35,6 +35,13 @@ commands.help = {
     }
 }
 
+commands.prog = {
+    'function' : function(code, output, callback) {
+	output.append('p').text('Function '+code.arg('name').text);
+	callback && callback(output);
+    }
+}
+
 commands.touched = {
     grammar : function(code, output, callback) {
 	code.fold('item', output, callback);

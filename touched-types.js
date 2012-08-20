@@ -1,19 +1,37 @@
 function updateTypes(canvas) {
     inferChildren(canvas);
+    implementArguments($(canvas), false);
 }
 
 function inferChildren(obj, type) {
     obj.children().each(function(i, child) {
 	if ($(child).is('.arg'))
-	    inferArgTypes($(child));
+	    inferChildren($(child), $(child).attr('data-type'));
 	else
 	    inferTypes($(child), type); 
     });
 }
 
+// Test implementation for the programming domain
+function implementArguments(obj, argType) {
+    if (obj.is('.arg') && obj.attr('data-type')!="prog.withParam") {
+	obj.attr('data-type', obj.attr('data-type').replace(/\|prog.arg/,''));
+	if (argType)
+	    obj.attr('data-type',obj.attr('data-type')+'|prog.arg');
+    }
+    if (obj.attr('data-type')=='prog.arg') argType= false;
+    if (obj.attr('data-type')=='prog.function') {
+	obj.children().each(function(i,child) {
+	    implementArguments($(child), true);
+	});
+    } else {
+	obj.children().each(function(i,child) {
+	    implementArguments($(child), argType);
+	});
+    }
+}
+
 function inferArgTypes(obj) {
-    var type= obj.attr('data-type');
-    inferChildren(obj, type);
 }
 
 function inferTypes(obj, type, priority) {

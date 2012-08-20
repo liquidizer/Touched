@@ -462,7 +462,7 @@ function msMove(event) {
                     blockArea(arg);
                     insertBox(arg, hand);
 		    hand.removeClass('dragged');
-                    updateAll();
+		    updateAll();
                 }
             }
             if (hand.hasClass('dragged')) {
