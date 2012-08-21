@@ -304,6 +304,7 @@ function menu_comment() {
 	selection.children('.comment').remove();
 	if (value)
 	    selection.prepend(div);
+	select(selection);
     });
 }
 
