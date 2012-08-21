@@ -134,4 +134,18 @@ commands.math = {
 	        });
 		}
 	},
+	bool : {
+		gt : function(code, output, callback){
+			foldLR(code, output, function(a,b) { callback(a > b); });
+		},
+		lt : function(code, output, callback){
+			foldLR(code, output, function(a,b) { callback(a < b); });
+		},
+		eq : function(code, output, callback){
+			foldLR(code, output, function(a,b) { callback(a == b); });
+		},
+		neq : function(code, output, callback){
+			foldLR(code, output, function(a,b) { callback(a != b); });
+		},
+	}
 }
