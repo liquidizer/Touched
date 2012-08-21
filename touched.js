@@ -26,7 +26,7 @@ function initTouched(canvasId, menuId, grammar, curDocument, editable) {
 
     activateEvents();
 	
-    if (curDocument) {
+    if (curDocument && $(curDocument).length>0) {
 	canvas.append($(curDocument));
     } else {
 	if (canvas.children().length==0) {
