@@ -5,10 +5,9 @@ commands.prog = {
     'function' : function(code, output, callback) {
 	progFunctions.fun= code;
 
-	output.append('p').text('Function '+code.arg('name').text);
+	output.append('h1').text(code.arg('name').text);
 	var argSet= getArguments(code, {});
 	var table= output.append('form').append('table');
-	console.log(progValues);
 	for (key in argSet) {
 	    var row= table.append('row');
 	    row.append('td').text(key);
@@ -16,15 +15,14 @@ commands.prog = {
 		.append('input')
 		.attr('class','runvalue')
 		.attr('key',key)
-		.attr('value',progValues[key] || 100)
-		.on('submit', runCode);
+		.attr('value',progValues[key] || 100);
 	}
-	var runCode= function() {
+	var runCode= function(debug) {
+	    initDebug(debug);
 	    d3.selectAll('.runvalue')[0].forEach(function(input) { 
 		var key= input.getAttribute('key');
 		progValues[key]=input.value; 
 	    });
-	    console.log(progValues);
 	    runOutput.selectAll('*').remove();
 	    code.fold('body', runOutput, function() {
 		d3.selectAll('.runvalue')[0].forEach(function(input) { 
@@ -36,7 +34,11 @@ commands.prog = {
 	var runButton= output.append('input')
 	    .attr('type','button')
 	    .attr('value','run')
-	    .on('click',runCode);
+	    .on('click',function() { runCode(false); });
+	var runButton= output.append('input')
+	    .attr('type','button')
+	    .attr('value','debug')
+	    .on('click',function() { runCode(true); });
 	var runOutput= output.append('svg')
 	    .attr('width','100%')
 	    .attr('height','50%')

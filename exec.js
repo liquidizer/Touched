@@ -37,22 +37,32 @@ commands.xml= {
 	elt : function(code, output, callback) {
 	    if (code.arg('tag').text) {
 		var output= output.append(code.arg('tag').text);
-		code.args('child').forEach( function(child) {
-		    if (child.type=='prog.arg') {
-			child.call(output, function(result) {
-			    console.log('received result '+result);
-			    output.text(result);
-			});
+		var children= code.args('child');
+		var next= function() {
+		    var child= children.shift();
+		    if (child) {
+			if (child.type=='prog.arg') {
+			    child.call(output, function(result) {
+				console.log('received result '+result);
+				output.text(result);
+				next();
+			    });
+			}
+			else if (child.isText) {
+			    output.text(child.text);
+			    next();
+			} else
+			    child.call(output, next);
+		    } else {
+			callback && callback(output);
 		    }
-		    else if (child.isText)
-			output.text(child.text);
-		    else
-			child.call(output);
-		});
+		};
+		next();
+	    } else {
+		callback && callback(output);
 	    }
-	    callback && callback(output);
 	},
-	attr : function(code, output) {
+	attr : function(code, output, callback) {
 	    var name= code.arg('attrib').text;
 	    if (name) {
 		var value= code.arg('value');
@@ -63,6 +73,7 @@ commands.xml= {
 		else
 		    output.attr(name, value.text);
 	    }
+	    callback();
 	}
     }
 }
