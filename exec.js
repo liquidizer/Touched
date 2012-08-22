@@ -34,46 +34,61 @@ commands.xml= {
 	callback && callback();
     },
     node : {
-	elt : function(code, output) {
+	elt : function(code, output, callback) {
 	    if (code.arg('tag').text) {
 		var output= output.append(code.arg('tag').text);
 		code.args('child').forEach( function(child) {
-			if (child.isText)
-			    output.text(child.text);
-			else
-			    child.call(output);
-		    });
+		    if (child.type=='prog.arg') {
+			child.call(output, function(result) {
+			    console.log('received result '+result);
+			    output.text(result);
+			});
+		    }
+		    else if (child.isText)
+			output.text(child.text);
+		    else
+			child.call(output);
+		});
 	    }
+	    callback && callback(output);
 	},
 	attr : function(code, output) {
-	    if (code.arg('attrib').text && code.arg('value').text)
-		output.attr(code.arg('attrib').text, code.arg('value').text);
+	    var name= code.arg('attrib').text;
+	    if (name) {
+		var value= code.arg('value');
+		if (value.type=='prog.arg')
+		    code.arg('value').call(output, function(result) {
+			output.attr(name, result);
+		    });
+		else
+		    output.attr(name, value.text);
+	    }
 	}
     }
 }
 
 function getNum(code, output, callback) {
-	if (code.type == 'number')
-		callback(parseFloat(code.text));
-	else
-		setTimeout(function() { code.call(output, callback); }, 10);
+    if (code.type == 'number')
+	callback(parseFloat(code.text));
+    else
+	code.call(output, callback);
 }
 
 function foldLR(code, output, callback){
-	getNum(code.arg('left'), output, function (result1) {
-		getNum(code.arg('right'),output, function(result2) {	
-			//output.append('p').text('res= ' + result1+","+result2);
-			callback(result1, result2);				    
-		});				
-	 });
+    getNum(code.arg('left'), output, function (result1) {
+	getNum(code.arg('right'),output, function(result2) {	
+	    //output.append('p').text('res= ' + result1+","+result2);
+	    callback(result1, result2);				    
+	});				
+    });
 }
 
 commands.mathui = {
-		calculate : function(code, output){
-		code.arg('formula').call(output, function (result) {
-			output.append('p').text(result);
-		});
-	}
+    calculate : function(code, output){
+	code.arg('formula').call(output, function (result) {
+	    output.append('p').text(result);
+	});
+    }
 }
 
 commands.math = {

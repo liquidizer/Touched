@@ -1,6 +1,6 @@
 function updateTypes(canvas) {
-    inferChildren(canvas);
     implementArguments($(canvas), false);
+    inferChildren(canvas);
 }
 
 function inferChildren(obj, type) {
