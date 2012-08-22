@@ -54,10 +54,18 @@
       <div id="execution">
 	<div id="execControl">
 	  <span onclick="$('#execsetting').toggle()">Run</span>
+	  <span style="display:none" id="debugControl">
+	    <input type="button" onclick="debugNext(true)" value="Step next"/>
+	    <input type="button" onclick="debugNext(false)" value="Step over"/>
+	    <input type="button" onclick="debugContinue()" value="Continue"/>
+	  </span>
 	  <div id="execsetting" style="display:none">
 	    Options:
 	    <p>
-	      <input type='checkbox' id="autoupdate" checked="checked"/> Show execution
+	      <input type='checkbox' id="autoupdate" checked="checked"/> Run code
+	    </p>
+	    <p>
+	      <input type='checkbox' id="debugmode"/> Debug mode
 	    </p>
 	    <p>
 	      <input type='checkbox' id="codeleft" checked="checked"/> Place code left

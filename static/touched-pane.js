@@ -5,6 +5,7 @@ $(function() {
     initTouched('canvas','menu',grammar, $('#code > div'), !!code);
     $('#canvas').bind('update', function() { saveContent(); runContent(); });
     $('#autoupdate').bind('change', runContent);
+    $('#debugmode').bind('change', runContent);
     $('#codeleft').bind('change', switchView);
     $('#execControl').bind('mousedown', viewDown);
     $('#execControl').attr('ontouchstart', 'viewDown(event)');
@@ -61,10 +62,53 @@ function saveContent() {
         http.send(content);
     }
 }
+
+var debugQueue;
+var debugDisabled;
+
+function debugNext(stepInto) {
+    if (debugQueue.length==1)
+	$('#debugControl').hide();
+    var next= debugQueue.shift();
+    next[1]();
+    if (debugQueue.length>0)
+	select(debugQueue[0][0]);
+}
+
+function debugContinue() {
+    debugDisabled= true;
+    while (debugQueue[0]) {
+	debugQueue.shift()();
+    }
+    $('#debugControl').hide();
+}
+
+function initDebug(active) {
+    debugQueue= [];
+    debugDisabled= false;
+    $('#debugControl').hide();
+    if (active) {
+	commands._debug= function(elem, next) {
+	    if (debugDisabled)
+		f(context, data, callback);
+	    else {
+		$('#debugControl').show();
+		var elem= $('#'+context.id);
+		if (debugQueue.length==0)
+		    select(elem);
+		debugQueue.push([elem, next]);
+	    }
+	}
+    } else {
+	commands._debug= undefined;
+    }
+}
+
 function runContent() {
     $('#execsetting').hide();
-    if ($('#autoupdate').attr('checked')) {     	        	    
+    if ($('#autoupdate').attr('checked')) {
         $('#dataview').show();
+	initDebug($('#debugmode').attr('checked'));
 	var recalc= execute('canvas', 'dataview');
 	if (recalc) clearErrors();
     } else {

@@ -53,7 +53,12 @@ function toCode(node, commands) {
 		f=f && f[sec];
 	    });
 	    if (f) {
-		return f(this, data, callback);
+		var context= this;
+		var f2= function() { f(context, data, callback); };
+		if (commands._debug)
+		    commands._debug(context, f2);
+		else
+		    f2();
 	    } else {
 		this.error("Command is not defined: "+type);
 		callback && callback(data);
