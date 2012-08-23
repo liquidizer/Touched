@@ -70,11 +70,9 @@ function debugNext(stepInto) {
     if (debugQueue.length==1)
 	$('#debugControl').hide();
     var next= debugQueue.shift();
-    if (next) {
-	next[1]();
-	if (debugQueue.length>0)
-	    select(debugQueue[0][0]);
-    }
+    next[1]();
+    if (debugQueue.length>0)
+	select(debugQueue[0][0]);
 }
 
 function debugContinue() {
