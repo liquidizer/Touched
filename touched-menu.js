@@ -297,14 +297,22 @@ function menu_edit(type) {
 
 function menu_comment() {
     var selection= $('.selected');
-    var value=selection.children('.comment').text() || '';
+    var value=selection.children('.comment:not(.openaction)').text() || '';
     menu_showInput('text', value, function(value) {
 	var div= $('<div class="box-text comment"/>');
 	div.text(value);
 	selection.children('.comment').remove();
-	if (value)
+	if (value) {
 	    selection.prepend(div);
+	    var quickopen=$('<div class="comment openaction">+</div>');
+	    quickopen.click(function(event) {
+		$(event.target).parent().removeClass('collapsed').addClass('quickopen');
+		event.preventDefault();
+	    });
+	    selection.prepend(quickopen);
+	}
 	select(selection);
+	updateMenu();
     });
 }
 
@@ -326,9 +334,8 @@ function menu_showInput(type, value, callback) {
 
     // define set action
     set_button.click(function() { 
-	callback(input.val()); 
 	set_button.remove();
-	updateAll(); 
+	callback(input.val()); 
     });
     
     //insert input elements into menu bar
@@ -354,6 +361,7 @@ function menu_edit_setValue(selection, type, value) {
 	}
 	selection.text(value);
     }
+    updateAll(); 
 }
 
 function clear_clipboard() {

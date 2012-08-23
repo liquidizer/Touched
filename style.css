@@ -156,8 +156,9 @@ body {
     float: none;
 }
 
-.collapsed .comment.box-text {
-    margin: 8px 0 8px 0;
+.collapsed .comment {
+    float: left;
+    margin: 8px 5px 8px 0;
     padding: 3px;
     font-style: italic;
     color: black;
@@ -167,6 +168,13 @@ body {
 
 .collapsed :not(.comment) {
     display: none;
+}
+
+.openaction {
+    display: none;
+}
+.collapsed .openaction {
+    display: inline;
 }
 
 .keyword.box-text {

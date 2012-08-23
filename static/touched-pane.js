@@ -78,7 +78,7 @@ function debugNext(stepInto) {
 function debugContinue() {
     debugDisabled= true;
     while (debugQueue[0]) {
-	debugQueue.shift()();
+	debugQueue.shift()[1]();
     }
     $('#debugControl').hide();
 }

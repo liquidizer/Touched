@@ -168,6 +168,8 @@ function touched_undo(cmd) {
 function select(obj) {
     unselectAll();
     obj.addClass('selected');
+    obj.parents('.collapsed').removeClass('collapsed').addClass('quickopen');
+    updateMenu();
     // scroll selected object into visible area
     var top= obj.offset().top;
     var can= canvas.offset().top;
@@ -181,6 +183,7 @@ function select(obj) {
 function unselectAll() {
     typetext ='';
     $('.selected').removeClass('selected');
+    $('.quickopen').removeClass('quickopen').addClass('collapsed');
     window.getSelection().removeAllRanges()
 }
 
@@ -326,11 +329,13 @@ function keyPress(evt) {
             }
         }
         else if (evt.keyCode ==8) {
-        	evt.preventDefault();
-	        typetext= '';
+	    // BACKSPACE
+            evt.preventDefault();
+	    typetext= '';
             updateMenu();
         }
         else if (evt.keyCode == 46)
+	    // DELETE
             menu_delete();
         else if (evt.which==37) {        
             //KEY_LEFT
@@ -338,7 +343,6 @@ function keyPress(evt) {
             var selection= $('.selected');
             if (selection.size()>0)
                 selectNext(selection, 2);
-            updateMenu();
         }
         else if (evt.which ==39) {
             //KEY_RIGHT
@@ -346,29 +350,26 @@ function keyPress(evt) {
             var selection= $('.selected');
             if (selection.size()>0)
                 selectNext(selection, 3);
-            updateMenu();
         }
     }
+    var selection= $('.selected');
     if (evt.which==40) {
         //KEY_DOWN
         evt.preventDefault();
-        var selection= $('.selected');
         selectNext(selection,1);
-        updateMenu();
     }
     else if (evt.which==9 || evt.which ==13) {
+	if (selection.is('.collapsed')) {
+	    selection.removeClass('collapsed').addClass('quickopen');
+	}
         // TAB, Enter
         evt.preventDefault();
-        var selection= $('.selected');
         selectNext(selection, evt.shiftKey ? 5 : 4);
-        updateMenu();
     }
     else if (evt.which==38) {
         // KEY_UP
         evt.preventDefault();
-        var selection= $('.selected');
         selectNext(selection, 0);
-        updateMenu();
     }
 }
 
@@ -391,7 +392,6 @@ function msDown (event) {
         }
         if (!grabbed.hasClass('selected')) {
             select(grabbed);
-            updateMenu();
         }
         if (!readonly) hand= grabbed;
 
