@@ -78,6 +78,7 @@ function debugNext(stepInto) {
 function debugContinue() {
     debugDisabled= true;
     while (debugQueue[0]) {
+	if (!debugDisabled) return;
 	debugQueue.shift()[1]();
     }
     $('#debugControl').hide();
@@ -88,12 +89,16 @@ function initDebug(active) {
     debugDisabled= false;
     $('#debugControl').hide();
     if (active) {
-	commands._debug= function(elem, next) {
-	    if (debugDisabled)
+	commands._debug= function(code, next) {
+	    var elem= $('#'+code.id);
+	    if (debugDisabled && elem.is('.selected')) {
+		debugContinue();
+		debugDisabled= false;
+	    }
+	    if (debugDisabled) {
 		next();
-	    else {
+	    } else {
 		$('#debugControl').show();
-		var elem= $('#'+elem.id);
 		if (debugQueue.length==0)
 		    select(elem);
 		debugQueue.push([elem, next]);
