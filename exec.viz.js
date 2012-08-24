@@ -94,7 +94,7 @@ commands.viz = {
 				}
 				callback(data);
 			},
-			selrows : function(code, data, callback){
+			selrows : function(code, data, callback) {
 				var range = getRange(code.arg('rows'));
 				if(range) {
 					data.matrix = data.matrix.filter(function(ele, i) {
@@ -116,32 +116,44 @@ commands.viz = {
 				}
 				callback(data);
 			},
-			lineplot : function(code, data, callback){
+			removecolumnbyvalue : function(code, data, callback) {
+				var rownumber = parseFloat(code.arg('rownumber').text);
+				var range = getRange(code.arg('value'));
+				if(range && rownumber) {
+					data.matrix = transpose(data.matrix);
+					data.matrix = data.matrix.filter(function(ele, index) {
+						return !range.contains(ele[rownumber - 1]);
+					});
+					data.matrix = transpose(data.matrix);
+				}
+				callback(data);
+			},
+			lineplot : function(code, data, callback) {
 				data = VizData.lineplot(data.matrix);
 				code.fold('option', data, callback);
 			}
 		},
-		json : { 
+		json : {
 			subfield : function(code, data, callback) {
 				var fieldname = code.arg('fieldname').text;
-				if (fieldname)
+				if(fieldname)
 					data.json = data.json[fieldname];
 				callback(data);
 			},
 			elt : function(code, data, callback) {
 				var index = code.arg('index').text;
 				if(index)
-				   data.json = data.json[index];
+					data.json = data.json[index];
 				callback(data);
 			},
-			tomatrix : function(code, data, callback){
+			tomatrix : function(code, data, callback) {
 				data = VizData.matrix(data.json);
 				code.fold('filter', data, callback);
 			}
 		}
 	},
-	plotoption : { 
-		size : function (code, data, callback) {	
+	plotoption : {
+		size : function(code, data, callback) {
 			var width = parseFloat(code.arg('width').text);
 			if(width)
 				data.options.size[0] = width;
@@ -150,12 +162,29 @@ commands.viz = {
 				data.options.size[1] = height;
 			callback(data);
 		},
-		xaxis : function (code, data, callback){
+		xaxis : function(code, data, callback) {
 			var colnum = code.arg('column').text;
-			if(colnum){
-				data.options.xaxis = data.matrix[colnum-1];
-				data.matrix.splice(colnum-1 ,1);
-			}		
+			if(colnum) {
+				data.options.xaxis = data.matrix[colnum - 1];
+				data.matrix.splice(colnum - 1, 1);
+			}
+			callback(data);
+		},
+		timexaxis : function(code, data, callback) {
+			if(!data.options.xaxis) {
+				code.error('no xaxis defined')
+			} else {
+				var format = code.arg('format').text;
+				if(format) {
+					data.options.timexaxis = format;
+				}
+			}
+			callback(data);
+		},
+		circle : function(code, data, callback) {
+			var circlesize = code.arg('circlesize').text;
+			if(circlesize)
+			   data.options.circlesize = circlesize;
 			callback(data);
 		}
 	}
@@ -194,11 +223,13 @@ var VizData = {
 		return {
 			matrix : matrix,
 			options : {
-				size: [300,200],
-				xaxis : undefined
-			}, 
+				size : [300, 200],
+				xaxis : undefined,
+				timexaxis : undefined,
+			    circlesize : 3.5
+			},
 			toDOM : function(output) {
-				plot(output, getData(this.matrix,this.options.xaxis), this.options.size);
+				plot(output, getData(this.matrix, this.options.xaxis, this.options.timexaxis), this.options.size, this.options.timexaxis, this.options.circlesize);
 			}
 		}
 	}

@@ -152,7 +152,7 @@ body {
 .comment.box-text {
     margin: 8px 0 2px 2px;
     font-style: italic;
-    color: black;
+    color: skyblue;
     float: none;
 }
 
@@ -168,6 +168,11 @@ body {
 
 .collapsed :not(.comment) {
     display: none;
+}
+
+.quickopen {
+    background-color: azure;
+    opacity: 0.8;
 }
 
 .openaction {

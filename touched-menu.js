@@ -304,11 +304,7 @@ function menu_comment() {
 	selection.children('.comment').remove();
 	if (value) {
 	    selection.prepend(div);
-	    var quickopen=$('<div class="comment openaction">+</div>');
-	    quickopen.click(function(event) {
-		$(event.target).parent().removeClass('collapsed').addClass('quickopen');
-		event.preventDefault();
-	    });
+	    var quickopen=$('<div class="comment openaction">&#x2295;</div>');
 	    selection.prepend(quickopen);
 	}
 	select(selection);
