@@ -57,7 +57,7 @@ commands.l= {
 	color : function(code, tracker, callback) {
 	    var c = code.arg('color').text || 'black';
 	    tracker.strokeColor = c;
-	    tracker.newPath(c);
+	    tracker.newPath();
 	    callback(tracker);
 	},
 	scale : function(code, tracker, callback) {
@@ -77,6 +77,9 @@ commands.l= {
 	    tracker.matrix = tracker.matrix.translate(len, 0);
 	    var segment = " L" + tracker.matrix.e + " " + tracker.matrix.f;
 	    tracker.path.attr('d', tracker.path.attr('d') + segment);
+		if (tracker.segmentCount++ > 25) { // Note: 25 is near the performance sweetspot between number of path elements and segments per path
+			tracker.newPath();
+		}
 	    lsys_move_count++;
 	    lsys_move_length += (+len); // Note: unary + is the fastest way to coerce len to Number type
 	    callback(tracker);
@@ -179,6 +182,7 @@ function Plotter(svg) {
 function Tracker(matrix, strokeColor) {
 	this.matrix = matrix;
 	this.strokeColor = strokeColor;
+	this.segmentCount = 0;
 	// clone method needed to fork group transforms
 	this.clone = function() {
 	    var clone = new Tracker(this.matrix, this.strokeColor);
@@ -186,16 +190,18 @@ function Tracker(matrix, strokeColor) {
 	    clone.newPath(clone.strokeColor);
 	    return clone;
 	}
-	// start a new SVG path element with the specified color
-	this.newPath = function(strokeColor) {
+	// start a new SVG path element with the current color
+	this.newPath = function() {
+		//console.log("starting new path; last path segment count="+this.segmentCount);
 		var d = "M" + this.matrix.e + " " + this.matrix.f;
 		var p = plotter.root.append('path')
 			.attr('d', d)
-			.style('stroke', strokeColor)
+			.style('stroke', this.strokeColor)
 			.style('fill', 'none');
 		this.path = p;
+		this.segmentCount = 0;
 	}
-	this.newPath(strokeColor); // initialize tracker with empty path
+	this.newPath(); // initialize tracker with empty path
 }
 
 // custom iterator; needed for callback implementation of plot/expand recursion
