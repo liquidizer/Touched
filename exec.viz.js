@@ -180,6 +180,12 @@ commands.viz = {
 				}
 			}
 			callback(data);
+		},
+		circle : function(code, data, callback) {
+			var circlesize = code.arg('circlesize').text;
+			if(circlesize)
+			   data.options.circlesize = circlesize;
+			callback(data);
 		}
 	}
 };
@@ -219,10 +225,11 @@ var VizData = {
 			options : {
 				size : [300, 200],
 				xaxis : undefined,
-				timexaxis : undefined
+				timexaxis : undefined,
+			    circlesize : 3.5
 			},
 			toDOM : function(output) {
-				plot(output, getData(this.matrix, this.options.xaxis, this.options.timexaxis), this.options.size, this.options.timexaxis);
+				plot(output, getData(this.matrix, this.options.xaxis, this.options.timexaxis), this.options.size, this.options.timexaxis, this.options.circlesize);
 			}
 		}
 	}
