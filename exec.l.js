@@ -41,10 +41,12 @@ commands.l= {
 	tracker.current_plot_id= lsys_plot_id;
 	tracker.it = new Iterator([code.arg('axiom')], iterations);
 	
+	var startTime = new Date().getTime();
 	plotLSys(tracker,
-		 function() { // callback for final fitting of plot into svg viewBox
-		     plotter.decorate();
-		 });
+		function() { // callback for final fitting of plot into svg viewBox
+			plotter.decorate();
+			console.log("rendering finished in " + (new Date().getTime()-startTime) + " ms");
+		});
     },
     op : {
 	rotate : function(code, tracker, callback) {
@@ -55,6 +57,7 @@ commands.l= {
 	color : function(code, tracker, callback) {
 	    var c = code.arg('color').text || 'black';
 	    tracker.strokeColor = c;
+	    tracker.newPath(c);
 	    callback(tracker);
 	},
 	scale : function(code, tracker, callback) {
@@ -71,12 +74,9 @@ commands.l= {
 	move : function(code, tracker, callback) {
 	    // actual drawing happens here
 	    var len = getNumber(code.arg('length')) || 1.0;
-	    var m= tracker.matrix;
-	    var line = plotter.root.append('line')
-		.attr('x2', len)
-		.attr('transform', "matrix("+m.a+","+m.b+","+m.c+","+m.d+","+m.e+","+m.f+")")
-	        .style('stroke', tracker.strokeColor);
 	    tracker.matrix = tracker.matrix.translate(len, 0);
+	    var segment = " L" + tracker.matrix.e + " " + tracker.matrix.f;
+	    tracker.path.attr('d', tracker.path.attr('d') + segment);
 	    lsys_move_count++;
 	    lsys_move_length += (+len); // Note: unary + is the fastest way to coerce len to Number type
 	    callback(tracker);
@@ -183,8 +183,19 @@ function Tracker(matrix, strokeColor) {
 	this.clone = function() {
 	    var clone = new Tracker(this.matrix, this.strokeColor);
 	    clone.current_plot_id= this.current_plot_id;
+	    clone.newPath(clone.strokeColor);
 	    return clone;
 	}
+	// start a new SVG path element with the specified color
+	this.newPath = function(strokeColor) {
+		var d = "M" + this.matrix.e + " " + this.matrix.f;
+		var p = plotter.root.append('path')
+			.attr('d', d)
+			.style('stroke', strokeColor)
+			.style('fill', 'none');
+		this.path = p;
+	}
+	this.newPath(strokeColor); // initialize tracker with empty path
 }
 
 // custom iterator; needed for callback implementation of plot/expand recursion
