@@ -4,6 +4,7 @@ var rules;
 lsys_move_count = 0;
 lsys_move_length = 0;
 lsys_call_depth = 0;
+lsys_path_segment_limit = 32;
 
 lsys_plot_id = 0;
 lsys_last_fit = 0;
@@ -25,6 +26,8 @@ commands.l= {
 	    code.arg('iterations').error("iterations must be positive");
 	    return;
 	}
+	var nearestPower2 = Math.pow(2, Math.round(Math.log(iterations*iterations) / Math.LN2));
+	lsys_path_segment_limit = Math.min(Math.max(16, nearestPower2), 256);
 	
 	output.selectAll('*').remove();
 	
@@ -77,7 +80,10 @@ commands.l= {
 	    tracker.matrix = tracker.matrix.translate(len, 0);
 	    var segment = " L" + tracker.matrix.e + " " + tracker.matrix.f;
 	    tracker.path.attr('d', tracker.path.attr('d') + segment);
-		if (tracker.segmentCount++ > 25) { // Note: 25 is near the performance sweetspot between number of path elements and segments per path
+		if (++tracker.segmentCount >= lsys_path_segment_limit) {
+			// Note: there is a performance sweetspot between number of path elements and segments per path
+			// which moves depending on l-system type and iterations
+			// for l-systems with long paths a higher segment limit seems reasonable for high iterations
 			tracker.newPath();
 		}
 	    lsys_move_count++;
