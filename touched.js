@@ -263,8 +263,13 @@ function selectNext(obj, axis) {
 
 //keyboard control
 function keyPress(evt) {
+    var selection= $('.selected');
     //console.log(evt.which);
     if (!$(document.activeElement).is('INPUT')) {
+	// quick open
+	if ((evt.which==13 || evt.which==39) && selection.is('.collapsed')) {
+	    selection.removeClass('collapsed').addClass('quickopen');
+	}
         if (evt.ctrlKey) {
             if (evt.which == 67)
                 //run code for CTRL+C 
@@ -340,28 +345,22 @@ function keyPress(evt) {
         else if (evt.which==37) {        
             //KEY_LEFT
             evt.preventDefault();
-            var selection= $('.selected');
             if (selection.size()>0)
                 selectNext(selection, 2);
         }
         else if (evt.which ==39) {
             //KEY_RIGHT
             evt.preventDefault();
-            var selection= $('.selected');
             if (selection.size()>0)
                 selectNext(selection, 3);
         }
     }
-    var selection= $('.selected');
     if (evt.which==40) {
         //KEY_DOWN
         evt.preventDefault();
         selectNext(selection,1);
     }
     else if (evt.which==9 || evt.which ==13) {
-	if (selection.is('.collapsed')) {
-	    selection.removeClass('collapsed').addClass('quickopen');
-	}
         // TAB, Enter
         evt.preventDefault();
         selectNext(selection, evt.shiftKey ? 5 : 4);
@@ -381,6 +380,10 @@ function msDown (event) {
         var active= false;
         var grabbed= $(evt.target);
         while(grabbed.length>0) {
+	    if (grabbed.hasClass('openaction')) {
+		grabbed.parent().removeClass('collapsed').addClass('quickopen');
+		return;
+	    }
             if (grabbed.is(canvas)) { 
 		unselectAll(); 
 		updateMenu();
