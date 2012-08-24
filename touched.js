@@ -168,6 +168,8 @@ function touched_undo(cmd) {
 function select(obj) {
     unselectAll();
     obj.addClass('selected');
+    obj.parents('.collapsed').removeClass('collapsed').addClass('quickopen');
+    updateMenu();
     // scroll selected object into visible area
     var top= obj.offset().top;
     var can= canvas.offset().top;
@@ -181,6 +183,7 @@ function select(obj) {
 function unselectAll() {
     typetext ='';
     $('.selected').removeClass('selected');
+    $('.quickopen').removeClass('quickopen').addClass('collapsed');
     window.getSelection().removeAllRanges()
 }
 
@@ -260,8 +263,13 @@ function selectNext(obj, axis) {
 
 //keyboard control
 function keyPress(evt) {
+    var selection= $('.selected');
     //console.log(evt.which);
     if (!$(document.activeElement).is('INPUT')) {
+	// quick open
+	if ((evt.which==13 || evt.which==39) && selection.is('.collapsed')) {
+	    selection.removeClass('collapsed').addClass('quickopen');
+	}
         if (evt.ctrlKey) {
             if (evt.which == 67)
                 //run code for CTRL+C 
@@ -326,49 +334,41 @@ function keyPress(evt) {
             }
         }
         else if (evt.keyCode ==8) {
-        	evt.preventDefault();
-	        typetext= '';
+	    // BACKSPACE
+            evt.preventDefault();
+	    typetext= '';
             updateMenu();
         }
         else if (evt.keyCode == 46)
+	    // DELETE
             menu_delete();
         else if (evt.which==37) {        
             //KEY_LEFT
             evt.preventDefault();
-            var selection= $('.selected');
             if (selection.size()>0)
                 selectNext(selection, 2);
-            updateMenu();
         }
         else if (evt.which ==39) {
             //KEY_RIGHT
             evt.preventDefault();
-            var selection= $('.selected');
             if (selection.size()>0)
                 selectNext(selection, 3);
-            updateMenu();
         }
     }
     if (evt.which==40) {
         //KEY_DOWN
         evt.preventDefault();
-        var selection= $('.selected');
         selectNext(selection,1);
-        updateMenu();
     }
     else if (evt.which==9 || evt.which ==13) {
         // TAB, Enter
         evt.preventDefault();
-        var selection= $('.selected');
         selectNext(selection, evt.shiftKey ? 5 : 4);
-        updateMenu();
     }
     else if (evt.which==38) {
         // KEY_UP
         evt.preventDefault();
-        var selection= $('.selected');
         selectNext(selection, 0);
-        updateMenu();
     }
 }
 
@@ -380,6 +380,10 @@ function msDown (event) {
         var active= false;
         var grabbed= $(evt.target);
         while(grabbed.length>0) {
+	    if (grabbed.hasClass('openaction')) {
+		grabbed.parent().removeClass('collapsed').addClass('quickopen');
+		return;
+	    }
             if (grabbed.is(canvas)) { 
 		unselectAll(); 
 		updateMenu();
@@ -391,7 +395,6 @@ function msDown (event) {
         }
         if (!grabbed.hasClass('selected')) {
             select(grabbed);
-            updateMenu();
         }
         if (!readonly) hand= grabbed;
 
