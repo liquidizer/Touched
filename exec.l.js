@@ -4,6 +4,7 @@ var rules;
 lsys_move_count = 0;
 lsys_move_length = 0;
 lsys_call_depth = 0;
+lsys_path_segment_limit = 32;
 
 lsys_plot_id = 0;
 lsys_last_fit = 0;
@@ -25,6 +26,8 @@ commands.l= {
 	    code.arg('iterations').error("iterations must be positive");
 	    return;
 	}
+	var nearestPower2 = Math.pow(2, Math.round(Math.log(iterations*iterations) / Math.LN2));
+	lsys_path_segment_limit = Math.min(Math.max(16, nearestPower2), 256);
 	
 	output.selectAll('*').remove();
 	
@@ -41,10 +44,12 @@ commands.l= {
 	tracker.current_plot_id= lsys_plot_id;
 	tracker.it = new Iterator([code.arg('axiom')], iterations);
 	
+	var startTime = new Date().getTime();
 	plotLSys(tracker,
-		 function() { // callback for final fitting of plot into svg viewBox
-		     plotter.decorate();
-		 });
+		function() { // callback for final fitting of plot into svg viewBox
+			plotter.decorate();
+			console.log("rendering finished in " + (new Date().getTime()-startTime) + " ms");
+		});
     },
     op : {
 	rotate : function(code, tracker, callback) {
@@ -55,6 +60,7 @@ commands.l= {
 	color : function(code, tracker, callback) {
 	    var c = code.arg('color').text || 'black';
 	    tracker.strokeColor = c;
+	    tracker.newPath();
 	    callback(tracker);
 	},
 	scale : function(code, tracker, callback) {
@@ -71,12 +77,15 @@ commands.l= {
 	move : function(code, tracker, callback) {
 	    // actual drawing happens here
 	    var len = getNumber(code.arg('length')) || 1.0;
-	    var m= tracker.matrix;
-	    var line = plotter.root.append('line')
-		.attr('x2', len)
-		.attr('transform', "matrix("+m.a+","+m.b+","+m.c+","+m.d+","+m.e+","+m.f+")")
-	        .style('stroke', tracker.strokeColor);
 	    tracker.matrix = tracker.matrix.translate(len, 0);
+	    var segment = " L" + tracker.matrix.e + " " + tracker.matrix.f;
+	    tracker.path.attr('d', tracker.path.attr('d') + segment);
+		if (++tracker.segmentCount >= lsys_path_segment_limit) {
+			// Note: there is a performance sweetspot between number of path elements and segments per path
+			// which moves depending on l-system type and iterations
+			// for l-systems with long paths a higher segment limit seems reasonable for high iterations
+			tracker.newPath();
+		}
 	    lsys_move_count++;
 	    lsys_move_length += (+len); // Note: unary + is the fastest way to coerce len to Number type
 	    callback(tracker);
@@ -179,12 +188,26 @@ function Plotter(svg) {
 function Tracker(matrix, strokeColor) {
 	this.matrix = matrix;
 	this.strokeColor = strokeColor;
+	this.segmentCount = 0;
 	// clone method needed to fork group transforms
 	this.clone = function() {
 	    var clone = new Tracker(this.matrix, this.strokeColor);
 	    clone.current_plot_id= this.current_plot_id;
+	    clone.newPath(clone.strokeColor);
 	    return clone;
 	}
+	// start a new SVG path element with the current color
+	this.newPath = function() {
+		//console.log("starting new path; last path segment count="+this.segmentCount);
+		var d = "M" + this.matrix.e + " " + this.matrix.f;
+		var p = plotter.root.append('path')
+			.attr('d', d)
+			.style('stroke', this.strokeColor)
+			.style('fill', 'none');
+		this.path = p;
+		this.segmentCount = 0;
+	}
+	this.newPath(); // initialize tracker with empty path
 }
 
 // custom iterator; needed for callback implementation of plot/expand recursion
