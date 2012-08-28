@@ -42,6 +42,28 @@ commands.filter= {
 	    output.append('feFlood')
 		.attr('flood-color',code.arg('color').text);
 	},
+	gamma : function(code, output) {
+	    var fe= output.append('feComponentTransfer');
+	    var ampl= code.arg('amplitude').text || 1;
+	    var exp= code.arg('exponent').text || 1;
+	    var off= code.arg('offset').text || 0;
+	    // error checks
+	    if (off <-1 || off>1)
+		code.arg('offset').error('Offset must be between -1 and 1');
+	    if (ampl <0)
+		code.arg('amplitude').error('Amplitude must be positive');
+	    if (exp <0)
+		code.arg('exponent').error('Exponent must be positive');
+	    // create elements
+	    var channels=['R','G','B'];
+	    channels.forEach(function(channel) {
+		fe.append('feFunc'+channel)
+		    .attr('type','gamma')
+		    .attr('amplitude',ampl)
+		    .attr('exponent',exp)
+		    .attr('offset',off)
+	    });
+	},
 	huerotate : function(code, output) {
 	    output.append('feColorMatrix')
 		.attr('type','hueRotate')
