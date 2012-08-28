@@ -32,7 +32,11 @@ commands.viz = {
 				var regex = code.arg('regex').text;
 				var value = code.arg('to').text || '?';
 				if(regex) {
-					data.text = data.text.replace(new RegExp(regex, "g"), value);
+					var reg = new RegExp(regex, "g");
+					data.text = data.text.split('\n').map(function(x){
+						return x.replace(reg, value);
+					}).join('\n');					
+					//data.text = data.text.replace(new RegExp(regex, "g"), value);
 				}
 				callback(data);
 			},
