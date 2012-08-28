@@ -37,7 +37,9 @@ function viewDown(evt) {
 
 function setViewSplit(x) {
     split= x;
-    var targets= codeleft ? ['#canvas','#execution'] : ['#execution','#canvas'];
+    var targets= ['#execution','#canvas .arg:first']
+    if (codeleft)
+	targets= [targets[1], targets[0]];
     $(targets[0]).offset({ left : 5 });
     $(targets[0]).width(x - 5);
     $(targets[1]).offset({ left : x+5 });
