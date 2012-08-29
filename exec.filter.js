@@ -6,20 +6,21 @@ commands.filter= {
 
 	var filter= svg.append('defs')
 	    .append('filter').attr('id','tfilter')
-	var creator= FilterCreator(filter, 'img', 'SourceGraphic');
-	code.args('filter').reverse().forEach(function(cmd) {
-	    cmd.call(creator);
-	});
 
 	var img= svg.append('g')
 	    .append('image')
 	    .attr('xlink:href', code.arg('src').text)
 	    .attr('width','200')
 	    .attr('height','200');
+	img.attr('filter', 'url(#tfilter)')
 
-	if (!filter.select('*').empty()) {
-	    img.attr('filter', 'url(#tfilter)')
-	}
+	var creator= FilterCreator(filter, 'img', 'SourceGraphic');
+	var filterCode= code.args('filter');
+	filterCode.reverse().forEach(function(cmd) {
+	    cmd.call(creator);
+	});
+	if (filterCode.length==0)
+	    img.attr('filter', '')
     },
     fe : {
 	merge : {
