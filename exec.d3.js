@@ -75,11 +75,19 @@ function getData(value, xAxis, timexaxis) {
 						x : format.parse(xAxis[i]),
 						y : parseFloat(value[i])
 					};
-				} else
-					return {
-						x : parseFloat(xAxis[i]),
-						y : parseFloat(value[i])
-					};
+				} else {
+					if(!isNaN(xAxis[i]))
+						return {
+							x : parseFloat(xAxis[i]),
+							y : parseFloat(value[i])
+						};
+					else
+						return {
+							x : i,
+							y : parseFloat(value[i]),
+							label : xAxis[i]
+						};
+				}
 			}
 		}
 	});
@@ -131,13 +139,19 @@ function plot(root, data, size, timexaxis, circlesize) {
 
 	var x;
 	if(timexaxis)
-	    x = d3.time.scale().domain([xMin, xMax]).range([0, width]);	
+		x = d3.time.scale().domain([xMin, xMax]).range([0, width]);
 	else
 		x = d3.scale.linear().domain([xMin, xMax]).range([0, width]);
 
 	var y = d3.scale.linear().domain([yMin, yMax]).range([height, 0]);
 
-	var xAxis = d3.svg.axis().scale(x).orient("bottom");
+	var xAxis;
+	if(data[0][0].label)
+		xAxis = d3.svg.axis().scale(x).orient("bottom").tickFormat(function(d, i) {
+			return data[0][i].label;
+		});
+	else
+		xAxis = d3.svg.axis().scale(x).orient("bottom");
 
 	var yAxis = d3.svg.axis().scale(y).orient("left");
 
