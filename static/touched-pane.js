@@ -3,9 +3,10 @@ var codeleft= true;
 var split= 300;
 $(function() {
     initTouched('canvas','menu',grammar, $('#code > div'), !!code);
-    $('#canvas').bind('update', function() { saveContent(); runContent(); });
-    $('#autoupdate').bind('change', runContent);
-    $('#debugmode').bind('change', runContent);
+    $('#canvas').bind('update', updateContent);
+    $('#autoupdate').bind('change', switchAutoUpdate);
+    $('#debug').bind('click', debugContent);
+    $('#rerun').bind('click', runContent);
     $('#codeleft').bind('change', switchView);
     $('#execControl').bind('mousedown', viewDown);
     $('#execControl').attr('ontouchstart', 'viewDown(event)');
@@ -37,7 +38,9 @@ function viewDown(evt) {
 
 function setViewSplit(x) {
     split= x;
-    var targets= codeleft ? ['#canvas','#execution'] : ['#execution','#canvas'];
+    var targets= ['#execution','#canvas .arg:first']
+    if (codeleft)
+	targets= [targets[1], targets[0]];
     $(targets[0]).offset({ left : 5 });
     $(targets[0]).width(x - 5);
     $(targets[1]).offset({ left : x+5 });
@@ -109,16 +112,35 @@ function initDebug(active) {
     }
 }
 
-function runContent() {
+function debugContent() {
+    codestring = "";
+    $('#execsetting').hide();
+    initDebug(true);
+    var recalc= execute('canvas', 'dataview');
+    if (recalc) clearErrors();
+}
+
+function runContent(optional) {
+    if (optional!==true) codestring = "";
+    $('#execsetting').hide();
+    initDebug($('#debugmode').attr('checked'));
+    var recalc= execute('canvas', 'dataview');
+    if (recalc) clearErrors();
+}
+
+function updateContent() {
+    saveContent(); 
     $('#execsetting').hide();
     if ($('#autoupdate').attr('checked')) {
-        $('#dataview').show();
-	initDebug($('#debugmode').attr('checked'));
-	var recalc= execute('canvas', 'dataview');
-	if (recalc) clearErrors();
+	runContent(true);
+    }
+}
+
+function switchAutoUpdate() {
+    if ($('#autoupdate').attr('checked')) {
+	runContent();
     } else {
 	$('#dataview').empty();
-	codestring = "";
 	clearErrors();
     }
 }

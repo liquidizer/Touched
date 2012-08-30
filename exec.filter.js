@@ -6,20 +6,21 @@ commands.filter= {
 
 	var filter= svg.append('defs')
 	    .append('filter').attr('id','tfilter')
-	var creator= FilterCreator(filter, 'img', 'SourceGraphic');
-	code.args('filter').reverse().forEach(function(cmd) {
-	    cmd.call(creator);
-	});
 
 	var img= svg.append('g')
 	    .append('image')
 	    .attr('xlink:href', code.arg('src').text)
 	    .attr('width','200')
 	    .attr('height','200');
+	img.attr('filter', 'url(#tfilter)')
 
-	if (!filter.select('*').empty()) {
-	    img.attr('filter', 'url(#tfilter)')
-	}
+	var creator= FilterCreator(filter, 'img', 'SourceGraphic');
+	var filterCode= code.args('filter');
+	filterCode.reverse().forEach(function(cmd) {
+	    cmd.call(creator);
+	});
+	if (filterCode.length==0)
+	    img.attr('filter', '')
     },
     fe : {
 	merge : {
@@ -41,6 +42,28 @@ commands.filter= {
 	flood : function(code, output) {
 	    output.append('feFlood')
 		.attr('flood-color',code.arg('color').text);
+	},
+	gamma : function(code, output) {
+	    var fe= output.append('feComponentTransfer');
+	    var ampl= code.arg('amplitude').text || 1;
+	    var exp= code.arg('exponent').text || 1;
+	    var off= code.arg('offset').text || 0;
+	    // error checks
+	    if (off <-1 || off>1)
+		code.arg('offset').error('Offset must be between -1 and 1');
+	    if (ampl <0)
+		code.arg('amplitude').error('Amplitude must be positive');
+	    if (exp <0)
+		code.arg('exponent').error('Exponent must be positive');
+	    // create elements
+	    var channels=['R','G','B'];
+	    channels.forEach(function(channel) {
+		fe.append('feFunc'+channel)
+		    .attr('type','gamma')
+		    .attr('amplitude',ampl)
+		    .attr('exponent',exp)
+		    .attr('offset',off)
+	    });
 	},
 	huerotate : function(code, output) {
 	    output.append('feColorMatrix')

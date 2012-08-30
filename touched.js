@@ -170,13 +170,17 @@ function select(obj) {
     obj.addClass('selected');
     obj.parents('.collapsed').removeClass('collapsed').addClass('quickopen');
     updateMenu();
+    
     // scroll selected object into visible area
     var top= obj.offset().top;
     var can= canvas.offset().top;
+    var winh= window.innerHeight;
     if (top - $(window).scrollTop() < can) {
+	// scroll down
 	$(window).scrollTop(top - can);
-    } else if (top+30 > $(window).scrollTop()+$(window).height()) {
-	$(window).scrollTop(top - $(window).height() + 30);
+    } else if (top+50 > $(window).scrollTop()+winh) {
+	// scroll up
+	$(window).scrollTop(top - winh + 50);
     }
 }
 
