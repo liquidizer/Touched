@@ -16,7 +16,8 @@ var mimes= {
     css: 'text/css',
     jpg: 'image/jpeg',
     png: 'image/png',
-    ico: 'image/ico'
+    ico: 'image/ico',
+    svg: 'image/svg+xml'
 }
 
 // Generate validation code
