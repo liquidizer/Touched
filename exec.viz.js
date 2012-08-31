@@ -33,9 +33,9 @@ commands.viz = {
 				var value = code.arg('to').text || '?';
 				if(regex) {
 					var reg = new RegExp(regex, "g");
-					data.text = data.text.split('\n').map(function(x){
+					data.text = data.text.split('\n').map(function(x) {
 						return x.replace(reg, value);
-					}).join('\n');					
+					}).join('\n');
 					//data.text = data.text.replace(new RegExp(regex, "g"), value);
 				}
 				callback(data);
@@ -49,6 +49,22 @@ commands.viz = {
 				var parsedjson = eval('(' + data.text + ')');
 				data = VizData.json(parsedjson);
 				code.fold('filter', data, callback);
+			},
+			match : function(code, data, callback) {
+				var lines = getRange(code.arg('lines'));
+				if(lines) {
+					var lineArray = data.text.split('\n');
+					data.text = lineArray.filter(function(d, i) {
+						if(lines.contains(i + 1)) {
+							var subData = new VizData.text(lineArray[i]);
+							code.fold('filter', subData, function(d) {
+								lineArray[i] = d.text;
+							});
+						}
+					});
+					data.text=lineArray.join('\n');
+					callback(data);
+				}
 			}
 		},
 		matrix : {
@@ -188,7 +204,7 @@ commands.viz = {
 		circle : function(code, data, callback) {
 			var circlesize = code.arg('circlesize').text;
 			if(circlesize)
-			   data.options.circlesize = circlesize;
+				data.options.circlesize = circlesize;
 			callback(data);
 		}
 	}
@@ -230,7 +246,7 @@ var VizData = {
 				size : [300, 200],
 				xaxis : undefined,
 				timexaxis : undefined,
-			    circlesize : 3.5
+				circlesize : 3.5
 			},
 			toDOM : function(output) {
 				plot(output, getData(this.matrix, this.options.xaxis, this.options.timexaxis), this.options.size, this.options.timexaxis, this.options.circlesize);
